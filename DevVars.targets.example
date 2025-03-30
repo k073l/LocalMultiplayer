@@ -1,0 +1,11 @@
+<Project>
+	<ItemGroup>
+        <PluginFolder Include="C:\Steam\steamapps\Schedule I\BepInEx\plugins\RealRadio" />
+		<!-- Add more if necessary -->
+	</ItemGroup>
+
+	<ItemGroup>
+		<!-- This folder is created in the BepInEx folder after launching the game with bepinex il2cpp installed -->
+		<InteropFolder Include="C:\Steam\steamapps\Schedule I\BepInEx\interop" />
+	</ItemGroup>
+</Project>

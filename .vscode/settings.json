@@ -1,0 +1,8 @@
+{
+  "files.associations": {
+    "*.csproj": "xml"
+  },
+  "[xml]": {
+    "editor.formatOnSave": false // csproj xml breaks when formatted due to whitespace changes
+  }
+}
