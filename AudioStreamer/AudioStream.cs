@@ -9,6 +9,12 @@ public abstract class AudioStream : IDisposable
 {
     public abstract bool Started { get; }
 
+    public abstract int NumChannels { get; }
+
+    public abstract int SampleRate { get; }
+
+    public abstract int BitsPerSample { get; }
+
     public bool IsDisposed { get; private set; }
 
     private readonly List<AudioStreamReader> readers = new List<AudioStreamReader>();
