@@ -30,6 +30,9 @@ public class RadioAudioSource : MonoBehaviour, IDisposable
                     disposable.Dispose();
                 monoResampler = null;
             }
+
+            if (audioSource != null && AudioReader != null)
+                UpdateAudioClip();
         }
     }
 
@@ -37,7 +40,6 @@ public class RadioAudioSource : MonoBehaviour, IDisposable
 
     private AudioSource? audioSource;
     private ISampleProvider? monoResampler;
-    private AudioClip? audioClip;
     private bool convertToMono;
     private WaveBuffer? waveBuffer;
 
@@ -46,13 +48,28 @@ public class RadioAudioSource : MonoBehaviour, IDisposable
         if (AudioReader == null)
             throw new InvalidOperationException("AudioReader is not set");
 
-        audioClip = AudioClip.Create("StreamedAudio", 4096, ConvertToMono ? 1 : 2, AudioReader.WaveFormat.SampleRate, stream: true, PCMReaderCallback);
-
         audioSource = GetComponent<AudioSource>() ?? gameObject.AddComponent<AudioSource>();
-        audioSource.clip = audioClip;
         audioSource.loop = true;
         audioSource.volume = 0.05f;
         audioSource.playOnAwake = true;
+        UpdateAudioClip();
+    }
+
+    private void UpdateAudioClip()
+    {
+        if (AudioReader == null)
+        {
+            throw new InvalidOperationException("AudioReader is not set");
+        }
+
+        if (audioSource == null)
+        {
+            throw new InvalidOperationException("AudioSource is not set");
+        }
+
+        var audioClip = AudioClip.Create("StreamedAudio", 4096, ConvertToMono ? 1 : 2, AudioReader.WaveFormat.SampleRate, stream: true, PCMReaderCallback);
+        audioSource.clip = audioClip;
+        audioSource.Play();
     }
 
     private void PCMReaderCallback(float[] floatData)
