@@ -1,9 +1,10 @@
 using System;
 using System.IO;
+using NAudio.Wave;
 
 namespace AudioStreamer;
 
-public class AudioStreamReader : Stream
+public class AudioStreamReader : Stream, IWaveProvider, ISampleProvider
 {
     public readonly AudioStream AudioStream;
 
@@ -29,6 +30,8 @@ public class AudioStreamReader : Stream
         get => throw new NotSupportedException();
         set => throw new NotSupportedException();
     }
+
+    public WaveFormat WaveFormat => AudioStream.WaveFormat;
 
     public override void Flush()
     {
@@ -56,5 +59,36 @@ public class AudioStreamReader : Stream
             throw new ObjectDisposedException(nameof(AudioStream));
 
         return AudioStream.Read(this, buffer.AsSpan(offset, count));
+    }
+
+    public int Read(float[] buffer, int offset, int count)
+    {
+        if (AudioStream.IsDisposed)
+            throw new ObjectDisposedException(nameof(AudioStream));
+
+        if (buffer.Length < offset + count)
+            throw new ArgumentOutOfRangeException(nameof(count));
+
+        if (AudioStream.WaveFormat.Encoding == WaveFormatEncoding.IeeeFloat)
+        {
+            unsafe
+            {
+                fixed (float* bufferPtr = buffer)
+                {
+                    Span<byte> byteBuffer = new(bufferPtr + (offset * sizeof(float)), count * sizeof(float));
+                    return AudioStream.Read(this, byteBuffer) / sizeof(float);
+                }
+            }
+        }
+        else
+        {
+            throw new NotImplementedException("Only IEEE float streams are supported");
+        }
+    }
+
+    public void ResetToEnd()
+    {
+        ParentBufferPosition = AudioStream.Position;
+        ParentBufferIteration = AudioStream.Iteration;
     }
 }

@@ -1,4 +1,5 @@
 using System;
+using NAudio.Wave;
 
 namespace AudioStreamer.CliTest;
 
@@ -6,11 +7,7 @@ public class TestStream(uint bufferSize) : AudioStream(bufferSize)
 {
     public override bool Started => true;
 
-    public override int NumChannels => 1;
-
-    public override int SampleRate => 44100;
-
-    public override int BitsPerSample => 8;
+    public override WaveFormat WaveFormat => new WaveFormat();
 
     private byte count = 0;
 
@@ -22,16 +19,16 @@ public class TestStream(uint bufferSize) : AudioStream(bufferSize)
     {
     }
 
-    protected override int ReadInternal(Span<byte> buffer)
+    protected override int ReadInternal(byte[] bufferArray, int arrayOffset, int arrayCount)
     {
-        for (int i = 0; i < buffer.Length; i++)
+        for (int i = 0; i < arrayCount; i++)
         {
             if (count == byte.MaxValue)
                 count = 0;
 
-            buffer[i] = count++;
+            bufferArray[i + arrayOffset] = count++;
         }
 
-        return buffer.Length;
+        return arrayCount;
     }
 }

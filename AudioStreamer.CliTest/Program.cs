@@ -10,7 +10,10 @@ using NAudio.Wave;
 LogMemoryUsage();
 
 //var testStream = new TestStream(8);
-var testStream = new MediaFoundationAudioStream("https://stream.simulatorradio.com", resetReaderAtEof: true);
+var testStream = new MediaFoundationAudioStream("https://stream.simulatorradio.com", resetReaderAtEof: true)
+{
+    ResampleFormat = WaveFormat.CreateIeeeFloatWaveFormat(sampleRate: 44100, channels: 1),
+};
 //var testStream = new MediaFoundationAudioStream("https://onlinetestcase.com/wp-content/uploads/2023/06/2-MB-MP3.mp3", resetReaderAtEof: false);
 testStream.Start();
 AudioStreamReader[] readers =

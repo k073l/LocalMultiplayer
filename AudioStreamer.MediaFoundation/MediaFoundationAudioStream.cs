@@ -19,22 +19,19 @@ namespace AudioStreamer.MediaFoundation;
 /// </summary>
 public class MediaFoundationAudioStream(string url, bool resetReaderAtEof) : AudioStream(bufferSize: 512000)
 {
+    public WaveFormat? ResampleFormat { get; set; }
+
     public override bool Started => reader != null;
 
     private readonly string url = url;
     private readonly bool resetReaderAtEof = resetReaderAtEof;
     private MediaFoundationReader? reader;
+    private MediaFoundationResampler? resampler;
 
     /// <summary>
     /// The audio format of the audio stream.
     /// </summary>
-    public WaveFormat WaveFormat => reader?.WaveFormat ?? throw new InvalidOperationException("The stream has not been started.");
-
-    public override int NumChannels => WaveFormat.Channels;
-
-    public override int SampleRate => WaveFormat.SampleRate;
-
-    public override int BitsPerSample => WaveFormat.BitsPerSample;
+    public override WaveFormat WaveFormat => resampler?.WaveFormat ?? reader?.WaveFormat ?? throw new InvalidOperationException("The stream has not been started.");
 
     private MediaFoundationReader CreateMFReader()
     {
@@ -44,7 +41,18 @@ public class MediaFoundationAudioStream(string url, bool resetReaderAtEof) : Aud
         });
     }
 
-    protected override int ReadInternal(Span<byte> outBuffer)
+    private MediaFoundationResampler CreateMFResampler()
+    {
+        if (reader == null)
+            throw new InvalidOperationException("The stream has not been started.");
+
+        if (ResampleFormat == null)
+            throw new InvalidOperationException("The resample format has not been set.");
+
+        return new MediaFoundationResampler(reader, ResampleFormat);
+    }
+
+    protected override int ReadInternal(byte[] outBuffer, int offset, int count)
     {
         if (reader == null)
             throw new InvalidOperationException("The stream has not been started.");
@@ -53,7 +61,14 @@ public class MediaFoundationAudioStream(string url, bool resetReaderAtEof) : Aud
 
         while (true)
         {
-            numBytes = reader.Read(outBuffer);
+            if (resampler != null)
+            {
+                numBytes = resampler.Read(outBuffer, offset, count);
+            }
+            else
+            {
+                numBytes = reader.Read(outBuffer, offset, count);
+            }
 
             if (numBytes == 0 && resetReaderAtEof)
             {
@@ -86,6 +101,12 @@ public class MediaFoundationAudioStream(string url, bool resetReaderAtEof) : Aud
             return;
 
         reader = CreateMFReader();
+
+        if (ResampleFormat != null)
+        {
+            resampler = CreateMFResampler();
+        }
+
         ResizeBuffer(WaveFormat.AverageBytesPerSecond * 2);
     }
 
@@ -95,6 +116,8 @@ public class MediaFoundationAudioStream(string url, bool resetReaderAtEof) : Aud
             return;
 
         reader.Dispose();
+        resampler?.Dispose();
         reader = null;
+        resampler = null;
     }
 }

@@ -2,20 +2,22 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using NAudio.Wave;
 
 namespace AudioStreamer;
 
-public abstract class AudioStream : IDisposable
+public abstract class AudioStream : IDisposable, IWaveProvider
 {
     public abstract bool Started { get; }
 
-    public abstract int NumChannels { get; }
+    public abstract WaveFormat WaveFormat { get; }
 
-    public abstract int SampleRate { get; }
+    internal int Position => position;
+    internal uint Iteration => iteration;
 
-    public abstract int BitsPerSample { get; }
+    public bool IsDisposed
+    { get; private set; }
 
-    public bool IsDisposed { get; private set; }
 
     private readonly List<AudioStreamReader> readers = new List<AudioStreamReader>();
 
@@ -23,6 +25,11 @@ public abstract class AudioStream : IDisposable
     /// Main buffer that readers read from
     /// </summary>
     private Memory<byte> mainBuffer;
+
+    /// <summary>
+    /// Backing array for main buffer
+    /// </summary>
+    private byte[] mainBufferArray;
 
     /// <summary>
     /// End position of the last written data in main buffer
@@ -38,7 +45,8 @@ public abstract class AudioStream : IDisposable
 
     public AudioStream(uint bufferSize)
     {
-        mainBuffer = new Memory<byte>(new byte[bufferSize]);
+        mainBufferArray = new byte[bufferSize];
+        mainBuffer = new Memory<byte>();
     }
 
     public abstract void Start();
@@ -56,7 +64,7 @@ public abstract class AudioStream : IDisposable
         return reader;
     }
 
-    protected abstract int ReadInternal(Span<byte> buffer);
+    protected abstract int ReadInternal(byte[] buffer, int offset, int count);
 
     internal int Read(AudioStreamReader reader, Span<byte> buffer)
     {
@@ -95,7 +103,7 @@ public abstract class AudioStream : IDisposable
             }
 
             if (iteration - reader.ParentBufferIteration > 1)
-                throw new ArgumentException("Reader is too far behind the main buffer.");
+                throw new ArgumentException($"Reader is too far behind the main buffer. (Reader iteration/pos: {reader.ParentBufferIteration}/{reader.ParentBufferPosition}, Main buffer iteration/pos: {iteration}/{position})");
 
             if (buffer.Length == 0)
                 return 0;
@@ -156,7 +164,8 @@ public abstract class AudioStream : IDisposable
 
         while (numBytes > 0)
         {
-            int numBytesRead = ReadInternal(mainBuffer.Span.Slice(position, Math.Min(numBytes, mainBuffer.Length - position)));
+            //int numBytesRead = ReadInternal(mainBuffer.Span.Slice(position, Math.Min(numBytes, mainBuffer.Length - position)));
+            int numBytesRead = ReadInternal(mainBufferArray, position, Math.Min(numBytes, mainBuffer.Length - position));
 
             if (numBytesRead == 0)
                 break;
@@ -186,8 +195,10 @@ public abstract class AudioStream : IDisposable
         if (size == mainBuffer.Length)
             return;
 
-        var newBuffer = new Memory<byte>(new byte[size]);
+        var newBufferArray = new byte[size];
+        var newBuffer = new Memory<byte>(newBufferArray);
         mainBuffer.Span.Slice(0, Math.Min(position, size)).CopyTo(newBuffer.Span);
+        mainBufferArray = newBufferArray;
         mainBuffer = newBuffer;
 
         foreach (var reader in readers)
@@ -219,5 +230,10 @@ public abstract class AudioStream : IDisposable
 
         mainBuffer = null;
         IsDisposed = true;
+    }
+
+    public int Read(byte[] buffer, int offset, int count)
+    {
+        throw new NotSupportedException("Use AudioStreamReader instead.");
     }
 }

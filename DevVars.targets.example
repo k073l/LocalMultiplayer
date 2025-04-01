@@ -5,7 +5,6 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<!-- This folder is created in the BepInEx folder after launching the game with bepinex il2cpp installed -->
-		<InteropFolder Include="C:\Steam\steamapps\Schedule I\BepInEx\interop" />
+		<ManagedFolder Include="C:\Steam\steamapps\Schedule I_Data\Managed" />
 	</ItemGroup>
 </Project>
