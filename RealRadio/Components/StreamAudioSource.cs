@@ -185,9 +185,6 @@ public class StreamAudioSource : MonoBehaviour
         if (startStreamTask == null)
             return;
 
-        if (startStreamCts?.IsCancellationRequested == true)
-            return;
-
         if (!startStreamTask.IsCompleted)
             return;
 
@@ -201,7 +198,7 @@ public class StreamAudioSource : MonoBehaviour
         startStreamCts?.Dispose();
         startStreamCts = null;
 
-        if (AudioStream != null)
+        if (AudioStream != null && AudioStream.Started)
             OnAudioStreamStarted();
     }
 
