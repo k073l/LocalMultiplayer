@@ -48,7 +48,6 @@ public class StreamAudioSource : MonoBehaviour
     private AudioSource? audioSource;
     private ISampleProvider? sampler;
     private AudioStreamReader? audioReader;
-    private WaveBuffer? waveBuffer;
     private bool convertToMonoDirty;
     private bool convertToMono;
     private Task? startStreamTask;
@@ -193,13 +192,17 @@ public class StreamAudioSource : MonoBehaviour
             return;
 
         if (startStreamTask.Exception != null)
-            throw startStreamTask.Exception;
+        {
+            Plugin.Logger.LogError("Error starting audio stream");
+            Plugin.Logger.LogError(startStreamTask.Exception);
+        }
 
         startStreamTask = null;
         startStreamCts?.Dispose();
         startStreamCts = null;
 
-        OnAudioStreamStarted();
+        if (AudioStream != null)
+            OnAudioStreamStarted();
     }
 
     private void OnAudioStreamStarted()
