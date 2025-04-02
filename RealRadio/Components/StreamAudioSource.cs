@@ -64,7 +64,7 @@ public class StreamAudioSource : MonoBehaviour
         var go = new GameObject("StreamAudioClip");
 
         if (parent != null)
-            go.transform.SetParent(parent);
+            go.transform.SetParent(parent, false);
 
         if (localPosition != null)
             go.transform.localPosition = localPosition ?? Vector3.zero;
