@@ -243,7 +243,10 @@ public class StreamAudioSource : MonoBehaviour
     private void PCMReaderCallback(float[] floatData)
     {
         if (AudioStream == null || !AudioStream.Started || sampler == null)
+        {
+            Array.Fill(floatData, 0);
             return;
+        }
 
         sampler.Read(floatData, 0, floatData.Length);
     }
