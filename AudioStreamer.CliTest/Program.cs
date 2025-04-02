@@ -3,7 +3,6 @@ using System.Diagnostics;
 using System.IO;
 using System.Text;
 using AudioStreamer;
-using AudioStreamer.CliTest;
 using AudioStreamer.MediaFoundation;
 using NAudio.Wave;
 
