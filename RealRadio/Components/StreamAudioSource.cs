@@ -164,7 +164,6 @@ public class StreamAudioSource : MonoBehaviour
             disposable.Dispose();
 
         audioReader?.Dispose();
-        AudioStream?.Dispose();
     }
 
     private void StartAudioStream()
