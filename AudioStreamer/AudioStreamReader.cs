@@ -86,9 +86,13 @@ public class AudioStreamReader : Stream, IWaveProvider, ISampleProvider
         }
     }
 
-    public void ResetToEnd()
+    protected override void Dispose(bool disposing)
     {
-        ParentBufferPosition = AudioStream.Position;
-        ParentBufferIteration = AudioStream.Iteration;
+        base.Dispose(disposing);
+
+        if (disposing)
+        {
+            AudioStream.RemoveReader(this);
+        }
     }
 }

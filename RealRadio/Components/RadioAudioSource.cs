@@ -20,44 +20,41 @@ public class RadioAudioSource : MonoBehaviour, IDisposable
 
             convertToMono = value;
 
-            if (value)
+            if (audioReader == null)
             {
-                monoResampler = new StereoToMonoSampleProvider(AudioReader);
-            }
-            else
-            {
-                if (monoResampler is IDisposable disposable)
-                    disposable.Dispose();
-                monoResampler = null;
+                convertToMonoDirty = true;
+                return;
             }
 
-            if (audioSource != null && AudioReader != null)
-                UpdateAudioClip();
+            UpdateMonoChange(value);
         }
     }
 
-    public AudioStreamReader? AudioReader { get; set; }
+    public AudioStream? AudioStream { get; set; }
+
+    private AudioStreamReader? audioReader;
 
     private AudioSource? audioSource;
     private ISampleProvider? monoResampler;
     private bool convertToMono;
+    private bool convertToMonoDirty;
     private WaveBuffer? waveBuffer;
 
-    private void Start()
+    private void Awake()
     {
-        if (AudioReader == null)
-            throw new InvalidOperationException("AudioReader is not set");
-
         audioSource = GetComponent<AudioSource>() ?? gameObject.AddComponent<AudioSource>();
         audioSource.loop = true;
         audioSource.volume = 0.05f;
-        audioSource.playOnAwake = true;
-        UpdateAudioClip();
+    }
+
+    private void Start()
+    {
+        OnEnable();
     }
 
     private void UpdateAudioClip()
     {
-        if (AudioReader == null)
+        if (audioReader == null)
         {
             throw new InvalidOperationException("AudioReader is not set");
         }
@@ -67,14 +64,17 @@ public class RadioAudioSource : MonoBehaviour, IDisposable
             throw new InvalidOperationException("AudioSource is not set");
         }
 
-        var audioClip = AudioClip.Create("StreamedAudio", 4096, ConvertToMono ? 1 : 2, AudioReader.WaveFormat.SampleRate, stream: true, PCMReaderCallback);
+        var audioClip = AudioClip.Create("StreamedAudio", 4096, ConvertToMono ? 1 : 2, audioReader.WaveFormat.SampleRate, stream: true, PCMReaderCallback);
         audioSource.clip = audioClip;
         audioSource.Play();
     }
 
     private void PCMReaderCallback(float[] floatData)
     {
-        if (AudioReader == null)
+        if (AudioStream == null || !AudioStream.Started)
+            return;
+
+        if (audioReader == null)
             return;
 
         if (waveBuffer == null || waveBuffer.MaxSize < floatData.Length * sizeof(float))
@@ -90,7 +90,7 @@ public class RadioAudioSource : MonoBehaviour, IDisposable
         }
         else
         {
-            bytesRead = AudioReader.Read(waveBuffer.ByteBuffer, 0, floatData.Length * sizeof(float));
+            bytesRead = audioReader.Read(waveBuffer.ByteBuffer, 0, floatData.Length * sizeof(float));
         }
 
         Buffer.BlockCopy(waveBuffer.ByteBuffer, 0, floatData, 0, bytesRead);
@@ -98,13 +98,33 @@ public class RadioAudioSource : MonoBehaviour, IDisposable
 
     private void OnEnable()
     {
-        AudioReader?.ResetToEnd();
+        if (AudioStream == null)
+            return;
+
+        if (!AudioStream.Started)
+            AudioStream.Start();
+
+        audioReader = AudioStream.CreateReader();
+
+        convertToMonoDirty = true;
+        UpdateMonoChange(ConvertToMono);
+
         audioSource?.Play();
     }
 
     private void OnDisable()
     {
         audioSource?.Stop();
+        audioReader?.Dispose();
+        audioReader = null;
+
+        convertToMonoDirty = true;
+        UpdateMonoChange(false);
+
+        if (AudioStream != null && AudioStream.NumReaders == 0)
+        {
+            AudioStream.Stop();
+        }
     }
 
     private void OnDestroy()
@@ -112,11 +132,43 @@ public class RadioAudioSource : MonoBehaviour, IDisposable
         Dispose();
     }
 
+    private bool UpdateMonoChange(bool value)
+    {
+        if (!convertToMonoDirty)
+            return false;
+
+        convertToMonoDirty = false;
+
+        if (value)
+        {
+            // Dispose old resampler if it exists
+            if (monoResampler is IDisposable disposable)
+            {
+                Plugin.Logger.LogInfo("Disposing of old mono resampler");
+                disposable.Dispose();
+            }
+
+            Plugin.Logger.LogInfo("Enabling mono resampler");
+            monoResampler = new StereoToMonoSampleProvider(audioReader);
+        }
+        else
+        {
+            if (monoResampler is IDisposable disposable)
+                disposable.Dispose();
+            monoResampler = null;
+        }
+
+        if (audioSource != null && audioReader != null)
+            UpdateAudioClip();
+
+        return true;
+    }
+
     public void Dispose()
     {
         if (monoResampler is IDisposable disposable)
             disposable.Dispose();
 
-        AudioReader?.Dispose();
+        audioReader?.Dispose();
     }
 }

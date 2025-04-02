@@ -15,11 +15,12 @@ public abstract class AudioStream : IDisposable, IWaveProvider
     internal int Position => position;
     internal uint Iteration => iteration;
 
-    public bool IsDisposed
-    { get; private set; }
+    public bool IsDisposed { get; private set; }
+
+    public int NumReaders => readers.Count;
 
 
-    private readonly List<AudioStreamReader> readers = new List<AudioStreamReader>();
+    private readonly List<AudioStreamReader> readers = [];
 
     /// <summary>
     /// Main buffer that readers read from
@@ -62,6 +63,17 @@ public abstract class AudioStream : IDisposable, IWaveProvider
         readers.Add(reader);
 
         return reader;
+    }
+
+    public bool RemoveReader(AudioStreamReader reader)
+    {
+        if (IsDisposed)
+            throw new ObjectDisposedException(nameof(AudioStream));
+
+        if (reader.AudioStream != this)
+            throw new ArgumentException("Reader does not belong to this stream");
+
+        return readers.Remove(reader);
     }
 
     protected abstract int ReadInternal(byte[] buffer, int offset, int count);
