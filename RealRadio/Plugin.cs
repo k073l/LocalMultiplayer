@@ -23,14 +23,10 @@ public class Plugin : BaseUnityPlugin
 
         SceneManager.activeSceneChanged += (oldScene, newScene) =>
         {
-            if (newScene.name == "Menu")
+            if (newScene.name == "Main")
             {
-                Logger.LogInfo("Creating test audio object");
-
-                var streamAudioSource = StreamAudioSource.CreateGameObject(new MediaFoundationAudioStream("https://stream.simulatorradio.com", resetReaderAtEof: true)
-                {
-                    ResampleFormat = WaveFormat.CreateIeeeFloatWaveFormat(sampleRate: AudioSettings.GetSampleRate(), channels: 2),
-                });
+                var go = new GameObject("RadioSpawner");
+                go.AddComponent<Components.Debug.RadioSpawner>();
             }
         };
     }
