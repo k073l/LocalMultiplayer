@@ -43,7 +43,7 @@ public class RadioSpawner : MonoBehaviour
 
             var audioGo = StreamAudioSource.CreateGameObject(audioStream, false, go.transform).gameObject;
             var audioSource = audioGo.GetComponent<AudioSource>();
-            audioSource.volume = 0.05f;
+            audioSource.volume = 0.2f;
             audioSource.spatialBlend = 1f;
 
             Plugin.Logger.LogInfo($"Spawned radio at {go.transform.position} (hit {hit.transform.gameObject.name}, layer {hit.collider.gameObject.layer})");
