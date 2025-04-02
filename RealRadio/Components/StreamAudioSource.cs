@@ -87,7 +87,6 @@ public class StreamAudioSource : MonoBehaviour
         {
             audioSource.clip = clip;
             audioSource.Play();
-            Plugin.Logger.LogInfo($"Playing audio clip");
         };
     }
 
@@ -238,17 +237,13 @@ public class StreamAudioSource : MonoBehaviour
             sampler = audioReader;
         }
 
-        Plugin.Logger.LogInfo("Creating audio clip");
         AudioClip = AudioClip.Create("StreamedAudio", 4096, sampler.WaveFormat.Channels, sampler.WaveFormat.SampleRate, stream: true, PCMReaderCallback);
-        Plugin.Logger.LogInfo("Audio clip created");
     }
 
     private void PCMReaderCallback(float[] floatData)
     {
         if (AudioStream == null || !AudioStream.Started || sampler == null)
             return;
-
-        Plugin.Logger.LogInfo("Reading audio data");
 
         sampler.Read(floatData, 0, floatData.Length);
     }
