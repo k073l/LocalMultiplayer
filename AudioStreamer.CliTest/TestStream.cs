@@ -31,4 +31,8 @@ public class TestStream(uint bufferSize) : AudioStream(bufferSize)
 
         return arrayCount;
     }
+
+    public override void PrepareForReading()
+    {
+    }
 }

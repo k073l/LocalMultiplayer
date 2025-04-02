@@ -52,6 +52,15 @@ public class MediaFoundationAudioStream(string url, bool resetReaderAtEof) : Aud
         return new MediaFoundationResampler(reader, ResampleFormat);
     }
 
+    public override void PrepareForReading()
+    {
+        if (reader == null)
+            throw new InvalidOperationException("The stream has not been started.");
+
+        Span<byte> buffer = new byte[WaveFormat.BitsPerSample / 8 * WaveFormat.Channels];
+        reader.Read(buffer);
+    }
+
     protected override int ReadInternal(byte[] outBuffer, int offset, int count)
     {
         if (reader == null)

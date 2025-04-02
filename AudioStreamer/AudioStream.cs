@@ -76,6 +76,8 @@ public abstract class AudioStream : IDisposable, IWaveProvider
         return readers.Remove(reader);
     }
 
+    public abstract void PrepareForReading();
+
     protected abstract int ReadInternal(byte[] buffer, int offset, int count);
 
     internal int Read(AudioStreamReader reader, Span<byte> buffer)
@@ -176,7 +178,6 @@ public abstract class AudioStream : IDisposable, IWaveProvider
 
         while (numBytes > 0)
         {
-            //int numBytesRead = ReadInternal(mainBuffer.Span.Slice(position, Math.Min(numBytes, mainBuffer.Length - position)));
             int numBytesRead = ReadInternal(mainBufferArray, position, Math.Min(numBytes, mainBuffer.Length - position));
 
             if (numBytesRead == 0)
