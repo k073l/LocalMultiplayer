@@ -53,7 +53,7 @@ public class StreamAudioSource : MonoBehaviour
     private Task? startStreamTask;
     private CancellationTokenSource? startStreamCts;
 
-    public static StreamAudioSource CreateGameObject(AudioStream audioStream, bool convertToMono = false, Transform? parent = null, Vector3? position = null)
+    public static StreamAudioSource CreateGameObject(AudioStream audioStream, bool convertToMono = false, Transform? parent = null, Vector3? localPosition = null)
     {
         if (audioStream == null)
             throw new ArgumentNullException(nameof(audioStream));
@@ -66,8 +66,8 @@ public class StreamAudioSource : MonoBehaviour
         if (parent != null)
             go.transform.SetParent(parent);
 
-        if (position != null)
-            go.transform.localPosition = position.Value;
+        if (localPosition != null)
+            go.transform.localPosition = localPosition ?? Vector3.zero;
 
         var audioClip = go.AddComponent<StreamAudioSource>();
         audioClip.AudioStream = audioStream;
