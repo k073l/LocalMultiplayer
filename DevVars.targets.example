@@ -5,6 +5,6 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<ManagedFolder Include="C:\Steam\steamapps\Schedule I_Data\Managed" />
+		<ManagedFolder Include="C:\Steam\steamapps\Schedule I\Schedule I_Data\Managed" />
 	</ItemGroup>
 </Project>
