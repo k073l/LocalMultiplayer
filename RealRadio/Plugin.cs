@@ -14,8 +14,6 @@ public class Plugin : BaseUnityPlugin
 {
     public static new ManualLogSource Logger = null!;
 
-    private AudioStream? audioStream;
-
     private void Awake()
     {
         Logger = base.Logger;
@@ -29,15 +27,10 @@ public class Plugin : BaseUnityPlugin
             {
                 Logger.LogInfo("Creating test audio object");
 
-                audioStream = new MediaFoundationAudioStream("https://stream.simulatorradio.com", resetReaderAtEof: true)
+                var streamAudioSource = StreamAudioSource.CreateGameObject(new MediaFoundationAudioStream("https://stream.simulatorradio.com", resetReaderAtEof: true)
                 {
                     ResampleFormat = WaveFormat.CreateIeeeFloatWaveFormat(sampleRate: AudioSettings.GetSampleRate(), channels: 2),
-                };
-                audioStream.Start();
-
-                var audioSource = new GameObject("RadioAudioSource").AddComponent<RadioAudioSource>();
-                audioSource.AudioReader = audioStream.CreateReader();
-                audioSource.ConvertToMono = true;
+                });
             }
         };
     }
