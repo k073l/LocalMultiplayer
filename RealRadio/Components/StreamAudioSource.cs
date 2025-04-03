@@ -133,6 +133,11 @@ public class StreamAudioSource : MonoBehaviour
             audioReader = null;
         }
 
+        if (sampler is IDisposable disposable)
+            disposable.Dispose();
+
+        sampler = null;
+
         if (startStreamCts != null)
         {
             startStreamCts.Cancel();
@@ -158,11 +163,6 @@ public class StreamAudioSource : MonoBehaviour
     private void OnDestroy()
     {
         Destroy(audioClip);
-
-        if (sampler is IDisposable disposable)
-            disposable.Dispose();
-
-        audioReader?.Dispose();
     }
 
     private void StartAudioStream()
