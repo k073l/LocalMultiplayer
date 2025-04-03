@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using NAudio.Wave;
 
 namespace AudioStreamer;
@@ -60,6 +61,8 @@ public abstract class AudioStream : IDisposable, IWaveProvider
         var reader = new AudioStreamReader(this);
         readers.Add(reader);
 
+        Console.WriteLine($"Added reader, new total readers: {readers.Count}");
+
         return reader;
     }
 
@@ -71,7 +74,13 @@ public abstract class AudioStream : IDisposable, IWaveProvider
         if (reader.AudioStream != this)
             throw new ArgumentException("Reader does not belong to this stream");
 
-        return readers.Remove(reader);
+        if (readers.Remove(reader))
+        {
+            Console.WriteLine($"Removed reader, new total readers: {readers.Count}");
+            return true;
+        }
+
+        return false;
     }
 
     public abstract void PrepareForReading();
@@ -92,26 +101,42 @@ public abstract class AudioStream : IDisposable, IWaveProvider
             {
                 reader.IsFirstRead = false;
 
-                // Set the initial position and iteration for the reader
-                if (buffer.Length < position)
+                var otherReader = readers.Count > 1 ? GetMostProgressedReader() : null;
+
+                if (otherReader != null)
                 {
-                    // Desired bytes is less than available bytes in the current iteration
-                    reader.ParentBufferIteration = iteration;
-                    reader.ParentBufferPosition = position - buffer.Length;
+                    reader.ParentBufferIteration = otherReader.ParentBufferIteration;
+                    reader.ParentBufferPosition = otherReader.ParentBufferPosition;
+                    Console.WriteLine("Copying position from other reader");
                 }
                 else
                 {
-                    if (iteration > 0)
+                    // Set the initial position and iteration for the reader
+                    if (buffer.Length < position)
                     {
-                        reader.ParentBufferIteration = iteration - 1;
-                        reader.ParentBufferPosition = mainBuffer.Length - buffer.Length + position;
+                        // Desired bytes is less than available bytes in the current iteration
+                        reader.ParentBufferIteration = iteration;
+                        reader.ParentBufferPosition = position - buffer.Length;
+                        Console.WriteLine("Setting position to end of current iteration minus desired bytes");
                     }
                     else
                     {
-                        reader.ParentBufferIteration = 0;
-                        reader.ParentBufferPosition = 0;
+                        if (iteration > 0)
+                        {
+                            reader.ParentBufferIteration = iteration - 1;
+                            reader.ParentBufferPosition = mainBuffer.Length - buffer.Length + position;
+                            Console.WriteLine("Setting position to end of previous iteration plus desired bytes");
+                        }
+                        else
+                        {
+                            reader.ParentBufferIteration = 0;
+                            reader.ParentBufferPosition = 0;
+                            Console.WriteLine("Setting position to start of main buffer");
+                        }
                     }
                 }
+
+                Console.WriteLine($"New reader started at iteration/pos {reader.ParentBufferIteration}/{reader.ParentBufferPosition}");
             }
 
             if (iteration - reader.ParentBufferIteration > 1)
@@ -165,6 +190,14 @@ public abstract class AudioStream : IDisposable, IWaveProvider
 
             return readBytes;
         }
+    }
+
+    private AudioStreamReader? GetMostProgressedReader()
+    {
+        if (readers.Count == 0)
+            return null;
+
+        return readers.OrderByDescending(x => x.ParentBufferIteration).ThenByDescending(x => x.ParentBufferPosition).FirstOrDefault();
     }
 
     private int ReadIntoBuffer(int numBytes)
