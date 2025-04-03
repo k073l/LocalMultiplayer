@@ -1,6 +1,8 @@
+using System;
 using AudioStreamer;
 using AudioStreamer.MediaFoundation;
 using NAudio.Wave;
+using ScheduleOne.NPCs;
 using UnityEngine;
 
 namespace RealRadio.Components.Debug;
@@ -15,6 +17,11 @@ public class RadioSpawner : MonoBehaviour
         {
             Plugin.Logger.LogInfo("Try spawn radio");
             TrySpawnRadio();
+        }
+
+        if (Input.GetKeyDown(KeyCode.F3))
+        {
+            SpawnRadioOnAllNpcs();
         }
     }
 
@@ -33,15 +40,8 @@ public class RadioSpawner : MonoBehaviour
             go.transform.position = hit.point;
             go.transform.rotation.SetLookRotation(lookDirection);
 
-            if (audioStream == null)
-            {
-                audioStream = new MediaFoundationAudioStream("https://stream.simulatorradio.com", resetReaderAtEof: true)
-                {
-                    ResampleFormat = WaveFormat.CreateIeeeFloatWaveFormat(sampleRate: 44100, channels: 2),
-                };
-            }
-
-            var audioGo = StreamAudioSource.CreateGameObject(audioStream, false, go.transform).gameObject;
+            CreateAudioStreamIfNeeded();
+            var audioGo = StreamAudioSource.CreateGameObject(audioStream!, false, go.transform).gameObject;
             var audioSource = audioGo.GetComponent<AudioSource>();
             audioSource.volume = 0.2f;
             audioSource.spatialBlend = 1f;
@@ -50,5 +50,39 @@ public class RadioSpawner : MonoBehaviour
         }
 
         return null;
+    }
+
+    private void CreateAudioStreamIfNeeded()
+    {
+        if (audioStream == null)
+        {
+            audioStream = new MediaFoundationAudioStream("https://stream.simulatorradio.com", resetReaderAtEof: true)
+            {
+                ResampleFormat = WaveFormat.CreateIeeeFloatWaveFormat(sampleRate: 44100, channels: 2),
+            };
+        }
+    }
+
+    private void SpawnRadioOnAllNpcs()
+    {
+        var npcs = FindObjectsOfType<NPC>();
+
+        foreach (var npc in npcs)
+        {
+            if (npc.gameObject.GetComponentInChildren<StreamAudioSource>())
+                continue;
+
+            CreateAudioStreamIfNeeded();
+
+            /*var audioStream = new MediaFoundationAudioStream("https://stream.simulatorradio.com", resetReaderAtEof: true)
+            {
+                ResampleFormat = WaveFormat.CreateIeeeFloatWaveFormat(sampleRate: 44100, channels: 2),
+            };*/
+
+            var audioGo = StreamAudioSource.CreateGameObject(audioStream!, false, npc.transform).gameObject;
+            var audioSource = audioGo.GetComponent<AudioSource>();
+            audioSource.volume = 0.2f;
+            audioSource.spatialBlend = 1f;
+        }
     }
 }
