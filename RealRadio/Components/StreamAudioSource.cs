@@ -177,7 +177,7 @@ public class StreamAudioSource : MonoBehaviour
                 throw new InvalidOperationException("AudioStream is not set");
 
             AudioStream.Start();
-            AudioStream.PrepareForReading();
+            AudioStream.WarmupReader();
         }, startStreamCts.Token);
     }
 

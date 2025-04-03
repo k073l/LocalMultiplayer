@@ -83,7 +83,7 @@ public abstract class AudioStream : IDisposable, IWaveProvider
         return false;
     }
 
-    public abstract void PrepareForReading();
+    public abstract void WarmupReader();
 
     protected abstract int ReadInternal(byte[] buffer, int offset, int count);
 

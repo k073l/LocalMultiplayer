@@ -46,7 +46,7 @@ public class MediaFoundationAudioStream(string url, bool resetReaderAtEof) : Aud
         return new MediaFoundationResampler(reader, ResampleFormat);
     }
 
-    public override void PrepareForReading()
+    public override void WarmupReader()
     {
         if (reader == null)
             throw new InvalidOperationException("The stream has not been started.");
