@@ -8,13 +8,18 @@ public class AudioStreamReader : Stream, IWaveProvider, ISampleProvider
 {
     public readonly AudioStream AudioStream;
 
-    internal int ParentBufferPosition;
-    internal uint ParentBufferIteration;
     internal bool IsFirstRead = true;
 
-    internal AudioStreamReader(AudioStream stream)
+    private byte[] bufferArray;
+    private Memory<byte> buffer;
+    private int position;
+    private int numBuffered;
+
+    internal AudioStreamReader(AudioStream stream, int bufferSize)
     {
         AudioStream = stream;
+        bufferArray = new byte[bufferSize];
+        buffer = bufferArray.AsMemory();
     }
 
     public override bool CanRead => true;
@@ -58,25 +63,28 @@ public class AudioStreamReader : Stream, IWaveProvider, ISampleProvider
         if (AudioStream.IsDisposed)
             throw new ObjectDisposedException(nameof(AudioStream));
 
-        return AudioStream.Read(this, buffer.AsSpan(offset, count));
+        return ReadFromBufferAndAdvance(buffer.AsSpan(offset, count));
     }
 
-    public int Read(float[] buffer, int offset, int count)
+    public int Read(float[] outBuffer, int offset, int count)
     {
         if (AudioStream.IsDisposed)
             throw new ObjectDisposedException(nameof(AudioStream));
 
+        if (outBuffer.Length < offset + count)
+            throw new ArgumentOutOfRangeException(nameof(count), "Count must be less than or equal to the target array");
+
         if (buffer.Length < offset + count)
-            throw new ArgumentOutOfRangeException(nameof(count));
+            throw new ArgumentOutOfRangeException(nameof(count), "Count must be less than or equal to the reader's buffer size");
 
         if (AudioStream.WaveFormat.Encoding == WaveFormatEncoding.IeeeFloat)
         {
             unsafe
             {
-                fixed (float* bufferPtr = buffer)
+                fixed (float* bufferPtr = outBuffer)
                 {
                     Span<byte> byteBuffer = new(bufferPtr + (offset * sizeof(float)), count * sizeof(float));
-                    return AudioStream.Read(this, byteBuffer) / sizeof(float);
+                    return ReadFromBufferAndAdvance(byteBuffer) / sizeof(float);
                 }
             }
         }
@@ -86,13 +94,80 @@ public class AudioStreamReader : Stream, IWaveProvider, ISampleProvider
         }
     }
 
-    protected override void Dispose(bool disposing)
+    internal void ResizeBuffer(int size)
     {
-        base.Dispose(disposing);
+        if (size <= buffer.Length)
+            throw new ArgumentOutOfRangeException(nameof(size), "Size must be greater than the current buffer size");
 
-        if (disposing)
+        // todo: implement reducing the size if needed. becomes a bit complicated due to circular buffer array
+
+        Array.Resize(ref bufferArray, size);
+        buffer = bufferArray.AsMemory();
+    }
+
+    internal void CopyToBuffer(Span<byte> bytes)
+    {
+        if (bytes.Length > buffer.Length)
+            throw new ArgumentOutOfRangeException(nameof(bytes), "Bytes must be less than or equal to the reader's buffer size");
+
+        int numCopied = 0;
+        int writePosition = position + numBuffered;
+        writePosition %= buffer.Length;
+
+        while (numCopied < bytes.Length)
         {
-            AudioStream.RemoveReader(this);
+            int bytesRemainingInBuffer = buffer.Length - position;
+            int bytesToCopy = Math.Min(bytesRemainingInBuffer, bytes.Length - numCopied);
+
+            bytes.Slice(numCopied, bytesToCopy).CopyTo(buffer.Span.Slice(writePosition, bytesToCopy));
+
+            numCopied += bytesToCopy;
+            numBuffered += bytesToCopy;
+            writePosition += bytesToCopy;
+
+            if (writePosition == buffer.Length)
+                writePosition = 0;
         }
+    }
+
+    private void BufferIfNeeded(int count)
+    {
+        lock (AudioStream.ReaderBufferLock)
+        {
+            if (numBuffered >= count)
+                return;
+
+            int bytesNeeded = count - numBuffered;
+            AudioStream.ReadFromSource(bytesNeeded);
+        }
+    }
+
+    private int ReadFromBufferAndAdvance(Span<byte> outBuffer)
+    {
+        BufferIfNeeded(outBuffer.Length);
+
+        if (numBuffered == 0)
+            return 0;
+
+        int totalRead = 0;
+
+        while (totalRead < outBuffer.Length)
+        {
+            int bytesRemainingInBuffer = buffer.Length - position;
+            int bytesToCopy = Math.Min(numBuffered, Math.Min(bytesRemainingInBuffer, outBuffer.Length - totalRead));
+
+            buffer.Span.Slice(position, bytesToCopy).CopyTo(outBuffer.Slice(totalRead, bytesToCopy));
+            totalRead += bytesToCopy;
+            position += bytesToCopy;
+            numBuffered -= bytesToCopy;
+
+            if (position == buffer.Length)
+                position = 0;
+
+            if (numBuffered == 0)
+                break;
+        }
+
+        return totalRead;
     }
 }

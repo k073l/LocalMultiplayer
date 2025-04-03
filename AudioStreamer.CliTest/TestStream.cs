@@ -2,7 +2,7 @@ using NAudio.Wave;
 
 namespace AudioStreamer.CliTest;
 
-public class TestStream(uint bufferSize) : AudioStream(bufferSize)
+public class TestStream(int bufferSize) : AudioStream(bufferSize)
 {
     public override bool Started => true;
 

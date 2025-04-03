@@ -5,14 +5,11 @@ using NAudio.Wave;
 
 namespace AudioStreamer;
 
-public abstract class AudioStream : IDisposable, IWaveProvider
+public abstract class AudioStream : IDisposable
 {
     public abstract bool Started { get; }
 
     public abstract WaveFormat WaveFormat { get; }
-
-    internal int Position => position;
-    internal uint Iteration => iteration;
 
     public bool IsDisposed { get; private set; }
 
@@ -21,32 +18,19 @@ public abstract class AudioStream : IDisposable, IWaveProvider
 
     private readonly List<AudioStreamReader> readers = [];
 
-    /// <summary>
-    /// Main buffer that readers read from
-    /// </summary>
-    private Memory<byte> mainBuffer;
+    internal readonly object ReaderBufferLock = new object();
+    private int bufferSize;
+    private Memory<byte> readBuffer;
+    private byte[] readBufferArray;
 
-    /// <summary>
-    /// Backing array for main buffer
-    /// </summary>
-    private byte[] mainBufferArray;
-
-    /// <summary>
-    /// End position of the last written data in main buffer
-    /// </summary>
-    private int position;
-
-    /// <summary>
-    /// Iteration counter, aka how many times the position in the main buffer has restarted from 0.
-    /// </summary>
-    private uint iteration;
-
-    private readonly object readLock = new object();
-
-    public AudioStream(uint bufferSize)
+    public AudioStream(int bufferSize)
     {
-        mainBufferArray = new byte[bufferSize];
-        mainBuffer = new Memory<byte>();
+        if (bufferSize <= 0)
+            throw new ArgumentOutOfRangeException(nameof(bufferSize));
+
+        this.bufferSize = bufferSize;
+        readBufferArray = new byte[bufferSize];
+        readBuffer = readBufferArray.AsMemory();
     }
 
     public abstract void Start();
@@ -58,7 +42,7 @@ public abstract class AudioStream : IDisposable, IWaveProvider
         if (IsDisposed)
             throw new ObjectDisposedException(nameof(AudioStream));
 
-        var reader = new AudioStreamReader(this);
+        var reader = new AudioStreamReader(this, bufferSize);
         readers.Add(reader);
 
         Console.WriteLine($"Added reader, new total readers: {readers.Count}");
@@ -87,167 +71,37 @@ public abstract class AudioStream : IDisposable, IWaveProvider
 
     protected abstract int ReadInternal(byte[] buffer, int offset, int count);
 
-    internal int Read(AudioStreamReader reader, Span<byte> buffer)
+    internal int ReadFromSource(int count)
     {
-        if (reader.AudioStream != this)
-            throw new ArgumentException("Reader does not belong to this stream");
-
         if (IsDisposed)
             throw new ObjectDisposedException(nameof(AudioStream));
 
-        lock (readLock)
+        if (count > bufferSize)
+            throw new ArgumentOutOfRangeException(nameof(count), "Count must be less than or equal to the buffer size");
+
+        int bytesRead = ReadInternal(readBufferArray, 0, count);
+
+        if (bytesRead == 0)
+            return 0;
+
+        foreach (var reader in readers)
         {
-            if (reader.IsFirstRead)
-            {
-                reader.IsFirstRead = false;
-
-                var otherReader = readers.Count > 1 ? GetMostProgressedReader() : null;
-
-                if (otherReader != null)
-                {
-                    reader.ParentBufferIteration = otherReader.ParentBufferIteration;
-                    reader.ParentBufferPosition = otherReader.ParentBufferPosition;
-                    Console.WriteLine("Copying position from other reader");
-                }
-                else
-                {
-                    // Set the initial position and iteration for the reader
-                    if (buffer.Length < position)
-                    {
-                        // Desired bytes is less than available bytes in the current iteration
-                        reader.ParentBufferIteration = iteration;
-                        reader.ParentBufferPosition = position - buffer.Length;
-                        Console.WriteLine("Setting position to end of current iteration minus desired bytes");
-                    }
-                    else
-                    {
-                        if (iteration > 0)
-                        {
-                            reader.ParentBufferIteration = iteration - 1;
-                            reader.ParentBufferPosition = mainBuffer.Length - buffer.Length + position;
-                            Console.WriteLine("Setting position to end of previous iteration plus desired bytes");
-                        }
-                        else
-                        {
-                            reader.ParentBufferIteration = 0;
-                            reader.ParentBufferPosition = 0;
-                            Console.WriteLine("Setting position to start of main buffer");
-                        }
-                    }
-                }
-
-                Console.WriteLine($"New reader started at iteration/pos {reader.ParentBufferIteration}/{reader.ParentBufferPosition}");
-            }
-
-            if (iteration - reader.ParentBufferIteration > 1)
-                throw new ArgumentException($"Reader is too far behind the main buffer. (Reader iteration/pos: {reader.ParentBufferIteration}/{reader.ParentBufferPosition}, Main buffer iteration/pos: {iteration}/{position})");
-
-            if (buffer.Length == 0)
-                return 0;
-
-            int readBytes = 0;
-
-            while (readBytes < buffer.Length)
-            {
-                if (iteration - reader.ParentBufferIteration == 1)
-                {
-                    // Reader is 1 iteration behind, read from the end of the buffer
-                    int numToCopy = Math.Min(buffer.Length, mainBuffer.Length - reader.ParentBufferPosition);
-                    mainBuffer.Slice(reader.ParentBufferPosition, numToCopy).Span.CopyTo(buffer.Slice(readBytes, numToCopy));
-
-                    readBytes += numToCopy;
-                    reader.ParentBufferPosition += numToCopy;
-                }
-                else
-                {
-                    // Reader is on current iteration, read from the start of the buffer
-                    if (reader.ParentBufferPosition < position)
-                    {
-                        int numToCopy = Math.Min(position - reader.ParentBufferPosition, buffer.Length - readBytes);
-                        mainBuffer.Slice(reader.ParentBufferPosition, numToCopy).Span.CopyTo(buffer.Slice(readBytes, numToCopy));
-
-                        readBytes += numToCopy;
-                        reader.ParentBufferPosition += numToCopy;
-                    }
-                    else
-                    {
-                        // Reader is at the end of available data, read more data into buffer
-                        int numBytesReadIntoBuffer = ReadIntoBuffer(buffer.Length - readBytes);
-
-                        if (numBytesReadIntoBuffer == 0)
-                            break;
-
-                        continue;
-                    }
-                }
-
-                if (reader.ParentBufferPosition == mainBuffer.Length)
-                {
-                    reader.ParentBufferIteration += 1;
-                    reader.ParentBufferPosition = 0;
-                }
-            }
-
-            return readBytes;
-        }
-    }
-
-    private AudioStreamReader? GetMostProgressedReader()
-    {
-        if (readers.Count == 0)
-            return null;
-
-        return readers.OrderByDescending(x => x.ParentBufferIteration).ThenByDescending(x => x.ParentBufferPosition).FirstOrDefault();
-    }
-
-    private int ReadIntoBuffer(int numBytes)
-    {
-        if (numBytes >= mainBuffer.Length)
-            throw new ArgumentOutOfRangeException(nameof(numBytes), "Can't read more than buffer size.");
-
-        int totalRead = 0;
-
-        while (numBytes > 0)
-        {
-            int numBytesRead = ReadInternal(mainBufferArray, position, Math.Min(numBytes, mainBuffer.Length - position));
-
-            if (numBytesRead == 0)
-                break;
-
-            totalRead += numBytesRead;
-            numBytes -= numBytesRead;
-
-            if (position + numBytesRead == mainBuffer.Length)
-            {
-                iteration += 1;
-                position = 0;
-            }
-            else
-            {
-                position += numBytesRead;
-            }
+            reader.CopyToBuffer(readBuffer.Slice(0, bytesRead).Span);
         }
 
-        return totalRead;
+        return bytesRead;
     }
 
-    protected void ResizeBuffer(int size)
+    protected void ResizeBuffers(int size)
     {
         if (size <= 0)
             throw new ArgumentOutOfRangeException(nameof(size));
 
-        if (size == mainBuffer.Length)
-            return;
-
-        var newBufferArray = new byte[size];
-        var newBuffer = new Memory<byte>(newBufferArray);
-        mainBuffer.Span.Slice(0, Math.Min(position, size)).CopyTo(newBuffer.Span);
-        mainBufferArray = newBufferArray;
-        mainBuffer = newBuffer;
+        bufferSize = size;
 
         foreach (var reader in readers)
         {
-            reader.ParentBufferPosition = Math.Min(reader.ParentBufferPosition, position);
+            reader.ResizeBuffer(size);
         }
     }
 
@@ -272,7 +126,6 @@ public abstract class AudioStream : IDisposable, IWaveProvider
             readers.Clear();
         }
 
-        mainBuffer = null;
         IsDisposed = true;
     }
 

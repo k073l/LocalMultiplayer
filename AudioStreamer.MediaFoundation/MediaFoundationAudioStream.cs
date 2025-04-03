@@ -110,7 +110,7 @@ public class MediaFoundationAudioStream(string url, bool resetReaderAtEof) : Aud
             resampler = CreateMFResampler();
         }
 
-        ResizeBuffer(WaveFormat.AverageBytesPerSecond * 2);
+        ResizeBuffers(WaveFormat.AverageBytesPerSecond * 2);
     }
 
     public override void Stop()
