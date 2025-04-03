@@ -40,8 +40,12 @@ public class RadioSpawner : MonoBehaviour
             go.transform.position = hit.point;
             go.transform.rotation.SetLookRotation(lookDirection);
 
-            CreateAudioStreamIfNeeded();
-            var audioGo = StreamAudioSource.CreateGameObject(audioStream!, false, go.transform).gameObject;
+            //CreateAudioStreamIfNeeded();
+            var audioStream = new MediaFoundationAudioStream("https://stream.simulatorradio.com", resetReaderAtEof: true)
+            {
+                ResampleFormat = WaveFormat.CreateIeeeFloatWaveFormat(sampleRate: 44100, channels: 2),
+            };
+            var audioGo = StreamAudioSource.CreateGameObject(audioStream, false, go.transform).gameObject;
             var audioSource = audioGo.GetComponent<AudioSource>();
             audioSource.volume = 0.2f;
             audioSource.spatialBlend = 1f;
@@ -72,12 +76,12 @@ public class RadioSpawner : MonoBehaviour
             if (npc.gameObject.GetComponentInChildren<StreamAudioSource>())
                 continue;
 
-            CreateAudioStreamIfNeeded();
+            //CreateAudioStreamIfNeeded();
 
-            /*var audioStream = new MediaFoundationAudioStream("https://stream.simulatorradio.com", resetReaderAtEof: true)
+            var audioStream = new MediaFoundationAudioStream("https://stream.simulatorradio.com", resetReaderAtEof: true)
             {
-                ResampleFormat = WaveFormat.CreateIeeeFloatWaveFormat(sampleRate: 44100, channels: 2),
-            };*/
+                ResampleFormat = WaveFormat.CreateIeeeFloatWaveFormat(sampleRate: AudioSettings.GetSampleRate(), channels: 2),
+            };
 
             var audioGo = StreamAudioSource.CreateGameObject(audioStream!, false, npc.transform).gameObject;
             var audioSource = audioGo.GetComponent<AudioSource>();
