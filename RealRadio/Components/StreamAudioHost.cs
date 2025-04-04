@@ -1,15 +1,17 @@
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using AudioStreamer;
 using NAudio.Wave;
 using NAudio.Wave.SampleProviders;
+using ScheduleOne.NPCs.CharacterClasses;
 using UnityEngine;
 
 namespace RealRadio.Components;
 
 [RequireComponent(typeof(AudioSource))]
-public class StreamAudioSource : MonoBehaviour
+public class StreamAudioHost : MonoBehaviour
 {
     public Action<AudioClip>? OnAudioClipChanged;
 
@@ -44,6 +46,11 @@ public class StreamAudioSource : MonoBehaviour
         }
     }
 
+    public float[]? AudioData { get; private set; }
+    public int AudioDataLength { get; private set; }
+    private int audioDataPosition;
+    private DateTime lastCallbackTime = DateTime.MinValue;
+
     private AudioClip? audioClip;
     private AudioSource? audioSource;
     private ISampleProvider? sampler;
@@ -52,34 +59,64 @@ public class StreamAudioSource : MonoBehaviour
     private bool convertToMono;
     private Task? startStreamTask;
     private CancellationTokenSource? startStreamCts;
+    private List<StreamAudioClient> spawnedClients = [];
+    private int clientIdCounter;
 
-    public static StreamAudioSource CreateGameObject(AudioStream audioStream, bool convertToMono = false, Transform? parent = null, Vector3? localPosition = null)
+    public StreamAudioClient CreateClient(Transform? parent = null, Vector3? localPosition = null)
     {
-        if (audioStream == null)
-            throw new ArgumentNullException(nameof(audioStream));
-
-        if (audioStream.IsDisposed)
-            throw new ArgumentException("AudioStream is disposed", nameof(audioStream));
-
-        var go = new GameObject("StreamAudioClip");
+        var go = new GameObject("StreamAudioClient");
 
         if (parent != null)
-            go.transform.SetParent(parent, false);
+            go.transform.SetParent(parent ?? transform, false);
 
         if (localPosition != null)
             go.transform.localPosition = localPosition ?? Vector3.zero;
 
-        var audioClip = go.AddComponent<StreamAudioSource>();
-        audioClip.AudioStream = audioStream;
-        audioClip.ConvertToMono = convertToMono;
-        return audioClip;
+        var client = go.AddComponent<StreamAudioClient>();
+        client.Host = this;
+        client.Id = clientIdCounter++;
+        var audioSource = client.GetComponent<AudioSource>();
+        audioSource.spatialBlend = 1f;
+        audioSource.playOnAwake = false;
+        audioSource.loop = true;
+        audioSource.priority = 0;
+        audioSource.volume = 0;
+
+        if (transform != null || localPosition != null)
+        {
+            StartCoroutine(FixAudioStutter(audioSource));
+        }
+
+        spawnedClients.Add(client);
+
+        return client;
+    }
+
+    private IEnumerator<YieldInstruction?> FixAudioStutter(AudioSource audioSource)
+    {
+        yield return null;
+        audioSource.spatialBlend = 1f;
+        yield return null;
+        audioSource.spatialBlend = 0f;
+        yield return null;
+        audioSource.spatialBlend = 1f;
+        yield return null;
+        audioSource.volume = 0.2f;
+    }
+
+    public void DestroyClient(StreamAudioClient client)
+    {
+        if (spawnedClients.Remove(client))
+        {
+            Destroy(client);
+        }
     }
 
     private void Awake()
     {
         audioSource = GetComponent<AudioSource>() ?? throw new InvalidOperationException("No AudioSource component found on game object");
         audioSource.loop = true;
-        audioSource.volume = 0.05f;
+        audioSource.volume = 0;
         audioSource.playOnAwake = false;
 
         OnAudioClipChanged += clip =>
@@ -104,6 +141,9 @@ public class StreamAudioSource : MonoBehaviour
         }
 
         CheckStartStreamTask();
+
+        if (audioSource != null)
+            audioSource.volume = 0;
     }
 
     private void OnEnable()
@@ -163,6 +203,9 @@ public class StreamAudioSource : MonoBehaviour
     private void OnDestroy()
     {
         Destroy(audioClip);
+
+        foreach (var client in spawnedClients)
+            Destroy(client.gameObject);
     }
 
     private void StartAudioStream()
@@ -237,17 +280,52 @@ public class StreamAudioSource : MonoBehaviour
             sampler = audioReader;
         }
 
-        AudioClip = AudioClip.Create("StreamedAudio", 4096, sampler.WaveFormat.Channels, sampler.WaveFormat.SampleRate, stream: true, PCMReaderCallback);
+        AudioClip = AudioClip.Create("StreamedAudioHost", 8192, sampler.WaveFormat.Channels, sampler.WaveFormat.SampleRate, stream: true, PCMReaderCallback);
     }
 
     private void PCMReaderCallback(float[] floatData)
     {
+        if ((DateTime.UtcNow - lastCallbackTime) > TimeSpan.FromMilliseconds(50))
+        {
+            audioDataPosition = 0;
+            AudioDataLength = 0;
+        }
+
+        lastCallbackTime = DateTime.UtcNow;
+
         if (AudioStream == null || !AudioStream.Started || sampler == null)
         {
             Array.Fill(floatData, 0);
             return;
         }
 
-        sampler.Read(floatData, 0, floatData.Length);
+        var numFloatsRead = sampler.Read(floatData, 0, floatData.Length);
+        int newDataSize = audioDataPosition + numFloatsRead;
+        if (AudioData == null || AudioData.Length < newDataSize)
+        {
+            Plugin.Logger.LogInfo($"host: Increasing audio data buffer size to {newDataSize} bytes");
+            var newData = new float[newDataSize];
+
+            if (AudioData != null)
+            {
+                // Copy old data
+                Array.Copy(AudioData, newData, length: audioDataPosition);
+            }
+
+            AudioData = newData;
+        }
+
+        //Plugin.Logger.LogInfo($"host: Copying {numFloatsRead} from index {audioDataPosition} into buffer of size {AudioData.Length}");
+
+        Array.Copy(
+            sourceArray: floatData,
+            sourceIndex: 0,
+            destinationArray: AudioData,
+            destinationIndex: audioDataPosition,
+            length: numFloatsRead
+        );
+
+        AudioDataLength += numFloatsRead;
+        audioDataPosition += numFloatsRead;
     }
 }

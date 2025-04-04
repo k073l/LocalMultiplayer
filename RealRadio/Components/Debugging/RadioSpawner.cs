@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using AudioStreamer;
 using AudioStreamer.MediaFoundation;
 using NAudio.Wave;
@@ -9,7 +10,7 @@ namespace RealRadio.Components.Debug;
 
 public class RadioSpawner : MonoBehaviour
 {
-    private AudioStream? audioStream;
+    private StreamAudioHost? audioHost;
 
     private void Update()
     {
@@ -25,7 +26,7 @@ public class RadioSpawner : MonoBehaviour
         }
     }
 
-    private StreamAudioSource? TrySpawnRadio()
+    private void TrySpawnRadio()
     {
         var cameraTransform = Camera.main.transform;
         var lookDirection = cameraTransform.forward;
@@ -33,39 +34,41 @@ public class RadioSpawner : MonoBehaviour
         var layerMask = Layers.All;
         layerMask &= ~Layers.Player;
 
-        if (Physics.Raycast(ray, out var hit, 3f, layerMask.ToLayerMask()))
+        if (Physics.Raycast(ray, out var hit, 10f, layerMask.ToLayerMask()))
         {
             var go = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            go.transform.SetParent(hit.transform, worldPositionStays: true);
             go.transform.localScale = Vector3.one * 0.2f;
             go.transform.position = hit.point;
             go.transform.rotation.SetLookRotation(lookDirection);
 
-            //CreateAudioStreamIfNeeded();
-            var audioStream = new MediaFoundationAudioStream("https://stream.simulatorradio.com", resetReaderAtEof: true)
-            {
-                ResampleFormat = WaveFormat.CreateIeeeFloatWaveFormat(sampleRate: 44100, channels: 2),
-            };
-            var audioGo = StreamAudioSource.CreateGameObject(audioStream, false, go.transform).gameObject;
-            var audioSource = audioGo.GetComponent<AudioSource>();
-            audioSource.volume = 0.2f;
-            audioSource.spatialBlend = 1f;
+            var audioHost = GetOrCreateAudioHost();
+            var audioClient = audioHost.CreateClient(parent: go.transform);
 
             Plugin.Logger.LogInfo($"Spawned radio at {go.transform.position} (hit {hit.transform.gameObject.name}, layer {hit.collider.gameObject.layer})");
         }
-
-        return null;
     }
 
-    private void CreateAudioStreamIfNeeded()
+    private StreamAudioHost GetOrCreateAudioHost()
     {
-        if (audioStream == null)
+        if (audioHost == null)
         {
-            audioStream = new MediaFoundationAudioStream("https://stream.simulatorradio.com", resetReaderAtEof: true)
+            audioHost = AudioStreamManager.Instance.GetOrCreateHost("https://stream.simulatorradio.com");
+        }
+
+        return audioHost;
+    }
+
+    /*private void CreateAudioStreamIfNeeded()
+    {
+        if (audioHost == null)
+        {
+            audioHost = new MediaFoundationAudioStream("https://stream.simulatorradio.com", resetReaderAtEof: true)
             {
                 ResampleFormat = WaveFormat.CreateIeeeFloatWaveFormat(sampleRate: 44100, channels: 2),
             };
         }
-    }
+    }*/
 
     private void SpawnRadioOnAllNpcs()
     {
@@ -73,20 +76,20 @@ public class RadioSpawner : MonoBehaviour
 
         foreach (var npc in npcs)
         {
-            if (npc.gameObject.GetComponentInChildren<StreamAudioSource>())
+            if (npc.gameObject.GetComponentInChildren<StreamAudioHost>())
                 continue;
 
             //CreateAudioStreamIfNeeded();
 
-            var audioStream = new MediaFoundationAudioStream("https://stream.simulatorradio.com", resetReaderAtEof: true)
+            /*var audioStream = new MediaFoundationAudioStream("https://stream.simulatorradio.com", resetReaderAtEof: true)
             {
                 ResampleFormat = WaveFormat.CreateIeeeFloatWaveFormat(sampleRate: AudioSettings.GetSampleRate(), channels: 2),
             };
 
-            var audioGo = StreamAudioSource.CreateGameObject(audioStream!, false, npc.transform).gameObject;
+            var audioGo = StreamAudioHost.CreateGameObject(audioStream!, false, npc.transform).gameObject;
             var audioSource = audioGo.GetComponent<AudioSource>();
             audioSource.volume = 0.2f;
-            audioSource.spatialBlend = 1f;
+            audioSource.spatialBlend = 1f;*/
         }
     }
 }
