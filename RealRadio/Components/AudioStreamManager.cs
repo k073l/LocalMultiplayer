@@ -51,4 +51,10 @@ public class AudioStreamManager : MonoBehaviour
 
         return host;
     }
+
+    private void OnDestroy()
+    {
+        foreach (var host in hosts.Values)
+            Destroy(host.gameObject);
+    }
 }
