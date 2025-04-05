@@ -11,16 +11,19 @@ namespace AudioStreamer.MediaFoundation;
 /// A full list of supported file formats can be found here:
 /// https://learn.microsoft.com/en-us/windows/win32/medfound/supported-media-formats-in-media-foundation
 /// </summary>
-public class MediaFoundationAudioStream(string url, bool resetReaderAtEof) : AudioStream(bufferSize: 512000)
+public class MediaFoundationAudioStream(string url, bool resetReaderAtEof) : AudioStream
 {
     public WaveFormat? ResampleFormat { get; set; }
 
     public override bool Started => reader != null;
 
+    public override bool StreamAvailable => hasReadOnce;
+
     private readonly string url = url;
     private readonly bool resetReaderAtEof = resetReaderAtEof;
     private MediaFoundationReader? reader;
     private MediaFoundationResampler? resampler;
+    private bool hasReadOnce;
 
     /// <summary>
     /// The audio format of the audio stream.
@@ -53,12 +56,15 @@ public class MediaFoundationAudioStream(string url, bool resetReaderAtEof) : Aud
 
         Span<byte> buffer = new byte[WaveFormat.BitsPerSample / 8 * WaveFormat.Channels];
         reader.Read(buffer);
+        hasReadOnce = true;
     }
 
     protected override int ReadInternal(byte[] outBuffer, int offset, int count)
     {
         if (reader == null)
             throw new InvalidOperationException("The stream has not been started.");
+
+        hasReadOnce = true;
 
         int numBytes;
 
@@ -109,8 +115,6 @@ public class MediaFoundationAudioStream(string url, bool resetReaderAtEof) : Aud
         {
             resampler = CreateMFResampler();
         }
-
-        ResizeBuffers(WaveFormat.AverageBytesPerSecond * 1);
     }
 
     public override void Stop()
@@ -122,5 +126,6 @@ public class MediaFoundationAudioStream(string url, bool resetReaderAtEof) : Aud
         resampler?.Dispose();
         reader = null;
         resampler = null;
+        hasReadOnce = false;
     }
 }

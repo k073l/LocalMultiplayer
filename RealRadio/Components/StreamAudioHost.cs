@@ -19,8 +19,6 @@ public class StreamAudioHost : MonoBehaviour
     public int AudioDataLength { get; private set; }
 
     private AudioSource audioSource = null!;
-    private ISampleProvider? sampler;
-    private AudioStreamReader? audioReader;
     private Task? startStreamTask;
     private CancellationTokenSource? startStreamCts;
     private List<StreamAudioClient> spawnedClients = [];
@@ -68,7 +66,7 @@ public class StreamAudioHost : MonoBehaviour
 
     private void Start()
     {
-        if (audioReader == null && startStreamTask == null)
+        if (AudioStream?.Started == false && startStreamTask == null)
             OnEnable();
     }
 
@@ -87,27 +85,12 @@ public class StreamAudioHost : MonoBehaviour
 
         if (!AudioStream.Started)
             StartAudioStream();
-        else
-        {
-            OnAudioStreamStarted();
-        }
     }
 
     private void OnDisable()
     {
         audioSource?.Stop();
-
-        if (AudioStream != null && audioReader != null)
-        {
-            AudioStream.RemoveReader(audioReader);
-            audioReader.Dispose();
-            audioReader = null;
-        }
-
-        if (sampler is IDisposable disposable)
-            disposable.Dispose();
-
-        sampler = null;
+        AudioStream?.Stop();
 
         if (startStreamCts != null)
         {
@@ -126,9 +109,6 @@ public class StreamAudioHost : MonoBehaviour
             startStreamCts.Dispose();
             startStreamCts = null;
         }
-
-        if (AudioStream != null && AudioStream.NumReaders == 0)
-            AudioStream.Stop();
     }
 
     private void OnDestroy()
@@ -170,40 +150,20 @@ public class StreamAudioHost : MonoBehaviour
         startStreamTask = null;
         startStreamCts?.Dispose();
         startStreamCts = null;
-
-        if (AudioStream != null && AudioStream.Started)
-            OnAudioStreamStarted();
-    }
-
-    private void OnAudioStreamStarted()
-    {
-        if (AudioStream == null || !AudioStream.Started)
-            throw new InvalidOperationException("AudioStream is not started");
-
-        if (audioReader == null)
-        {
-            audioReader = AudioStream.CreateReader();
-            sampler = audioReader;
-        }
-
-        audioSource.Play();
     }
 
     private void OnAudioFilterRead(float[] data, int channels)
     {
-        if (audioReader == null)
-            return;
-
-        if (audioReader.WaveFormat.Channels != channels)
+        if (AudioStream == null || !AudioStream.StreamAvailable)
         {
-            // bepinex logger doesn't work here (doesn't work on audio thread i guess?), so use unity logger
-            UnityEngine.Debug.LogError($"Channels mismatch: audio stream has {audioReader.WaveFormat.Channels} channels but unity wants {channels}");
+            Array.Fill(data, 0);
             return;
         }
 
-        if (AudioStream == null || !AudioStream.Started || sampler == null)
+        if (AudioStream.WaveFormat.Channels != channels)
         {
-            Array.Fill(data, 0);
+            // bepinex logger doesn't work here (doesn't work on audio thread i guess?), so use unity logger
+            UnityEngine.Debug.LogError($"Channels mismatch: audio stream has {AudioStream.WaveFormat.Channels} channels but unity wants {channels}");
             return;
         }
 
@@ -212,7 +172,7 @@ public class StreamAudioHost : MonoBehaviour
             AudioData = new float[data.Length];
         }
 
-        var numFloatsRead = sampler.Read(AudioData, 0, data.Length);
+        var numFloatsRead = AudioStream.Read(AudioData, 0, data.Length);
         AudioDataLength = numFloatsRead;
     }
 }
