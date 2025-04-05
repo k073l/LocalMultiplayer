@@ -105,7 +105,7 @@ namespace RealRadio.Components
 
         private void OnAudioFilterRead(float[] data, int channels)
         {
-            if (host == null || host.AudioData == null || !host.enabled || host.AudioStream?.Started != true)
+            if (host == null || host.AudioData == null || !host.enabled || host.AudioStream?.StreamAvailable != true)
             {
                 Array.Fill(data, 0);
                 return;
