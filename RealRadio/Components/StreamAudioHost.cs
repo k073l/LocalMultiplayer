@@ -13,50 +13,14 @@ namespace RealRadio.Components;
 [RequireComponent(typeof(AudioSource))]
 public class StreamAudioHost : MonoBehaviour
 {
-    public Action<AudioClip>? OnAudioClipChanged;
-
     public AudioStream? AudioStream;
-
-    public AudioClip? AudioClip
-    {
-        get => audioClip;
-        private set
-        {
-            if (value == null)
-                throw new ArgumentNullException(nameof(value), "A value must be provided");
-
-            if (audioClip == value)
-                return;
-
-            audioClip = value;
-            OnAudioClipChanged?.Invoke(audioClip);
-        }
-    }
-
-    public bool ConvertToMono
-    {
-        get => convertToMono;
-        set
-        {
-            if (value == convertToMono)
-                return;
-
-            convertToMono = value;
-            convertToMonoDirty = true;
-        }
-    }
 
     public float[]? AudioData { get; private set; }
     public int AudioDataLength { get; private set; }
-    private int audioDataPosition;
-    private DateTime lastCallbackTime = DateTime.MinValue;
 
-    private AudioClip? audioClip;
-    private AudioSource? audioSource;
+    private AudioSource audioSource = null!;
     private ISampleProvider? sampler;
     private AudioStreamReader? audioReader;
-    private bool convertToMonoDirty;
-    private bool convertToMono;
     private Task? startStreamTask;
     private CancellationTokenSource? startStreamCts;
     private List<StreamAudioClient> spawnedClients = [];
@@ -76,32 +40,17 @@ public class StreamAudioHost : MonoBehaviour
         client.Host = this;
         client.Id = clientIdCounter++;
         var audioSource = client.GetComponent<AudioSource>();
-        audioSource.spatialBlend = 1f;
         audioSource.playOnAwake = false;
-        audioSource.loop = true;
-        audioSource.priority = 0;
-        audioSource.volume = 0;
+        audioSource.volume = 0.2f;
 
         if (transform != null || localPosition != null)
         {
-            StartCoroutine(FixAudioStutter(audioSource));
+            audioSource.spatialBlend = 1;
         }
 
         spawnedClients.Add(client);
 
         return client;
-    }
-
-    private IEnumerator<YieldInstruction?> FixAudioStutter(AudioSource audioSource)
-    {
-        yield return null;
-        audioSource.spatialBlend = 1f;
-        yield return null;
-        audioSource.spatialBlend = 0f;
-        yield return null;
-        audioSource.spatialBlend = 1f;
-        yield return null;
-        audioSource.volume = 0.2f;
     }
 
     public void DestroyClient(StreamAudioClient client)
@@ -115,15 +64,6 @@ public class StreamAudioHost : MonoBehaviour
     private void Awake()
     {
         audioSource = GetComponent<AudioSource>() ?? throw new InvalidOperationException("No AudioSource component found on game object");
-        audioSource.loop = true;
-        audioSource.volume = 0;
-        audioSource.playOnAwake = false;
-
-        OnAudioClipChanged += clip =>
-        {
-            audioSource.clip = clip;
-            audioSource.Play();
-        };
     }
 
     private void Start()
@@ -134,16 +74,7 @@ public class StreamAudioHost : MonoBehaviour
 
     private void Update()
     {
-        if (convertToMonoDirty)
-        {
-            convertToMonoDirty = false;
-            UpdateAudioClip();
-        }
-
         CheckStartStreamTask();
-
-        if (audioSource != null)
-            audioSource.volume = 0;
     }
 
     private void OnEnable()
@@ -202,8 +133,6 @@ public class StreamAudioHost : MonoBehaviour
 
     private void OnDestroy()
     {
-        Destroy(audioClip);
-
         foreach (var client in spawnedClients)
             Destroy(client.gameObject);
     }
@@ -251,81 +180,39 @@ public class StreamAudioHost : MonoBehaviour
         if (AudioStream == null || !AudioStream.Started)
             throw new InvalidOperationException("AudioStream is not started");
 
-        if (audioReader != null)
-            return;
-
-        audioReader = AudioStream.CreateReader();
-        UpdateAudioClip();
-    }
-
-    private void UpdateAudioClip()
-    {
         if (audioReader == null)
-            throw new InvalidOperationException("Audio reader is not set");
-
-        if (audioClip)
         {
-            Destroy(audioClip);
-        }
-
-        if (sampler is IDisposable disposable && sampler != audioReader)
-            disposable.Dispose();
-
-        if (ConvertToMono)
-        {
-            sampler = new StereoToMonoSampleProvider(audioReader);
-        }
-        else
-        {
+            audioReader = AudioStream.CreateReader();
             sampler = audioReader;
         }
 
-        AudioClip = AudioClip.Create("StreamedAudioHost", 8192, sampler.WaveFormat.Channels, sampler.WaveFormat.SampleRate, stream: true, PCMReaderCallback);
+        audioSource.Play();
     }
 
-    private void PCMReaderCallback(float[] floatData)
+    private void OnAudioFilterRead(float[] data, int channels)
     {
-        if ((DateTime.UtcNow - lastCallbackTime) > TimeSpan.FromMilliseconds(50))
-        {
-            audioDataPosition = 0;
-            AudioDataLength = 0;
-        }
+        if (audioReader == null)
+            return;
 
-        lastCallbackTime = DateTime.UtcNow;
-
-        if (AudioStream == null || !AudioStream.Started || sampler == null)
+        if (audioReader.WaveFormat.Channels != channels)
         {
-            Array.Fill(floatData, 0);
+            // bepinex logger doesn't work here (doesn't work on audio thread i guess?), so use unity logger
+            UnityEngine.Debug.LogError($"Channels mismatch: audio stream has {audioReader.WaveFormat.Channels} channels but unity wants {channels}");
             return;
         }
 
-        var numFloatsRead = sampler.Read(floatData, 0, floatData.Length);
-        int newDataSize = audioDataPosition + numFloatsRead;
-        if (AudioData == null || AudioData.Length < newDataSize)
+        if (AudioStream == null || !AudioStream.Started || sampler == null)
         {
-            Plugin.Logger.LogInfo($"host: Increasing audio data buffer size to {newDataSize} bytes");
-            var newData = new float[newDataSize];
-
-            if (AudioData != null)
-            {
-                // Copy old data
-                Array.Copy(AudioData, newData, length: audioDataPosition);
-            }
-
-            AudioData = newData;
+            Array.Fill(data, 0);
+            return;
         }
 
-        //Plugin.Logger.LogInfo($"host: Copying {numFloatsRead} from index {audioDataPosition} into buffer of size {AudioData.Length}");
+        if (AudioData == null || AudioData.Length < data.Length)
+        {
+            AudioData = new float[data.Length];
+        }
 
-        Array.Copy(
-            sourceArray: floatData,
-            sourceIndex: 0,
-            destinationArray: AudioData,
-            destinationIndex: audioDataPosition,
-            length: numFloatsRead
-        );
-
-        AudioDataLength += numFloatsRead;
-        audioDataPosition += numFloatsRead;
+        var numFloatsRead = sampler.Read(AudioData, 0, data.Length);
+        AudioDataLength = numFloatsRead;
     }
 }

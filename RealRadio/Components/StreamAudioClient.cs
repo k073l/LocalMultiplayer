@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+using UnityEngine.Audio;
 using UnityEngine.Experimental.Audio;
 
 namespace RealRadio.Components
@@ -7,6 +8,8 @@ namespace RealRadio.Components
     [RequireComponent(typeof(AudioSource))]
     public class StreamAudioClient : MonoBehaviour
     {
+        public bool ConvertToMono { get; set; }
+
         public StreamAudioHost? Host
         {
             get => host;
@@ -19,7 +22,6 @@ namespace RealRadio.Components
                     throw new InvalidOperationException("Host is already set");
 
                 host = value;
-                host.OnAudioClipChanged += OnHostAudioClipChanged;
             }
         }
 
@@ -27,16 +29,45 @@ namespace RealRadio.Components
 
         private StreamAudioHost? host;
         private bool initialized;
-        private AudioClip? audioClip;
         private AudioSource audioSource = null!;
-        private int audioDataPosition;
-        private DateTime lastCallbackTime;
-        private bool isFirstPcmCallback = true;
 
         private void Awake()
         {
             audioSource = GetComponent<AudioSource>() ?? throw new InvalidOperationException("No AudioSource component found on game object");
             audioSource.priority = 1;
+
+            int numChannels = 2;
+            audioSource.clip = AudioClip.Create("Dummy", 2048, numChannels, AudioSettings.GetSampleRate(), false);
+            audioSource.loop = true;
+            float[] audioData = new float[2048 * numChannels];
+            Array.Fill(audioData, 1);
+            audioSource.clip.SetData(audioData, 0);
+
+            // Set some sane defaults on the audio source
+            audioSource.volume = 0.1f;
+            audioSource.spatialBlend = 1f;
+            audioSource.rolloffMode = AudioRolloffMode.Custom;
+            audioSource.SetCustomCurve(AudioSourceCurveType.CustomRolloff, CreateLogarithmicRolloffCurve(maxDistance: 30f));
+            audioSource.maxDistance = 30f;
+            audioSource.dopplerLevel = 0.25f;
+        }
+
+        private AnimationCurve CreateLogarithmicRolloffCurve(float maxDistance)
+        {
+            var keyFrames = new Keyframe[(int)Math.Floor(maxDistance) * 2 + 1];
+
+            float distancePerKeyframe = maxDistance / (keyFrames.Length - 1);
+
+            for (int i = 0; i < keyFrames.Length; ++i)
+            {
+                float distance = i * distancePerKeyframe;
+                //float value = 1f / distance;
+                float value = 1f - Mathf.Log10(distance) / Mathf.Log10(maxDistance);
+                value = Math.Clamp(value, 0f, 1f); // save my ears from potential ruin
+                keyFrames[i] = new Keyframe(distance, value);
+            }
+
+            return new AnimationCurve(keyFrames);
         }
 
         private void Start()
@@ -56,14 +87,7 @@ namespace RealRadio.Components
             if (host == null)
                 throw new InvalidOperationException("Host is not set");
 
-            if (host.AudioClip != null)
-                OnHostAudioClipChanged(host.AudioClip);
-
-            if (audioClip != null)
-            {
-                audioSource.clip = audioClip;
-                audioSource.Play();
-            }
+            audioSource.Play();
         }
 
         private void OnDisable()
@@ -77,60 +101,41 @@ namespace RealRadio.Components
         private void OnDestroy()
         {
             Host?.DestroyClient(this);
-
-            audioSource.clip = null;
-            Destroy(audioClip);
         }
 
-        private void OnHostAudioClipChanged(AudioClip clip)
+        private void OnAudioFilterRead(float[] data, int channels)
         {
-            Destroy(audioClip);
-
-            Plugin.Logger.LogInfo("Test");
-            audioClip = AudioClip.Create($"StreamedAudioClient{Id}", clip.samples, clip.channels, clip.frequency, stream: true, PCMReaderCallback);
-            Plugin.Logger.LogInfo("Test2");
-            isFirstPcmCallback = false;
-
-            audioSource.clip = audioClip;
-
-            if (enabled)
-                audioSource.Play();
-        }
-
-        private void PCMReaderCallback(float[] data)
-        {
-            if ((DateTime.UtcNow - lastCallbackTime) > TimeSpan.FromMilliseconds(50))
+            if (host == null || host.AudioData == null || !host.enabled || host.AudioStream?.Started != true)
             {
-                audioDataPosition = 0;
-            }
-
-            lastCallbackTime = DateTime.UtcNow;
-
-            if (host == null || host.AudioData == null || !host.enabled || isFirstPcmCallback)
-            {
-                Plugin.Logger.LogInfo($"client {Id}: Skipping callback");
                 Array.Fill(data, 0);
                 return;
             }
 
-            int length = Math.Min(data.Length, host.AudioDataLength - audioDataPosition);
-
-            //Plugin.Logger.LogInfo($"client {Id}: Copying {length} bytes from index {audioDataPosition}");
-
-            host.AudioData.AsSpan(audioDataPosition, length).CopyTo(data.AsSpan(0, length));
-            audioDataPosition += length;
-
-            //Plugin.Logger.LogInfo($"client {Id}: Audio data position: {audioDataPosition} / {host.AudioDataLength}");
-
-            if (length < data.Length)
+            if (!ConvertToMono)
             {
-                Plugin.Logger.LogWarning($"Audio data is too short, audio will cut off (host len: {length}, data len: {data.Length})");
-                Array.Fill(
-                    array: data,
-                    value: 0,
-                    startIndex: length,
-                    count: data.Length - length
-                );
+                for (int i = 0; i < data.Length; ++i)
+                {
+                    data[i] *= host.AudioData[i];
+                }
+            }
+            else
+            {
+                for (int i = 0; i < data.Length / channels; ++i)
+                {
+                    float average = 0;
+
+                    for (int j = 0; j < channels; ++j)
+                    {
+                        average += host.AudioData[i * channels + j];
+                    }
+
+                    average /= channels;
+
+                    for (int j = 0; j < channels; ++j)
+                    {
+                        data[i * channels + j] *= average;
+                    }
+                }
             }
         }
     }
