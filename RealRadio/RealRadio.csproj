@@ -69,6 +69,10 @@
     <CopyToPluginFolder Include="$(TargetDir)\NAudio*.dll" />
   </ItemGroup>
 
+  <ItemGroup>
+    <!-- <AssetFile Include="..." /> -->
+  </ItemGroup>
+
   <ItemGroup Condition="'$(Configuration)' == 'Debug'">
     <CopyToPluginFolder Include="$(TargetDir)\RealRadio.pdb" />
     <CopyToPluginFolder Include="$(TargetDir)\AudioStreamer.pdb" />
@@ -79,7 +83,15 @@
     <PropertyGroup>
       <Destination>%(PluginFolder.Identity)</Destination>
     </PropertyGroup>
-    <Message Importance="high" Text="Copying files to the plugin folders: @(PluginFolder)" />
+    <Message Importance="high" Text="Copying files to plugin folder: $(Destination)" />
     <Copy SourceFiles="@(CopyToPluginFolder)" DestinationFiles="@(CopyToPluginFolder->'$(Destination)\%(RecursiveDir)%(Filename)%(Extension)')" />
+  </Target>
+
+  <Target Name="CopyAssetsToPluginFolder" AfterTargets="CopyToPluginFolder" Condition="'$(CI)' == ''" Outputs="%(PluginFolder.Identity)">
+    <PropertyGroup>
+      <Destination>%(PluginFolder.Identity)</Destination>
+    </PropertyGroup>
+    <Message Importance="high" Text="Copying asset files to plugin folder: $(Destination)" />
+    <Copy SourceFiles="@(AssetFiles)" DestinationFiles="@(AssetFiles->'$(Destination)\Assets\%(RecursiveDir)%(Filename)%(Extension)')" />
   </Target>
 </Project>
