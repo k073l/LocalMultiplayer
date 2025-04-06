@@ -15,10 +15,10 @@ public class ItemDefinitions
     public ItemDefinitions(Registry registry)
     {
         this.registry = registry;
-        RadioTier1 = CreateRadioDefinition("radio_t1", "Scuffed Radio", "A radio with low quality audio.", AssetRegistry.RadioPrefabs.RadioTier1);
+        RadioTier1 = CreateRadioDefinition("radio_t1", "Scuffed Radio", "A radio with low quality audio.", price: 200f, AssetRegistry.RadioPrefabs.RadioTier1);
     }
 
-    private BuildableItemDefinition CreateRadioDefinition(string id, string name, string description, BuildableItem buildableItem)
+    private BuildableItemDefinition CreateRadioDefinition(string id, string name, string description, float price, BuildableItem buildableItem)
     {
         id = $"com.skipcast.realradio_{id}";
 
@@ -32,7 +32,7 @@ public class ItemDefinitions
         radio.StackLimit = 10;
         radio.BuildSoundType = BuildableItemDefinition.EBuildSoundType.Metal;
         radio.BuiltItem = buildableItem;
-        radio.BasePurchasePrice = 200f;
+        radio.BasePurchasePrice = price;
         radio.ShopCategories = [new ShopListing.CategoryInstance { Category = EShopCategory.Furniture }];
 
         registry.ItemRegistry.Add(
