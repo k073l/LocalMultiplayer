@@ -1,5 +1,6 @@
 ﻿using BepInEx;
 using BepInEx.Logging;
+using HarmonyLib;
 using RealRadio.Assets;
 using ScheduleOne.NPCs.CharacterClasses;
 using UnityEngine;
@@ -12,17 +13,20 @@ public class Plugin : BaseUnityPlugin
 {
     public static new ManualLogSource Logger { get; private set; } = null!;
 
+    private Harmony? harmony;
+
     private void Awake()
     {
         Logger = base.Logger;
+
+        harmony = new Harmony("com.skipcast.realradio");
+        harmony.PatchAll();
 
         // Plugin startup logic
         Logger.LogInfo($"Plugin {MyPluginInfo.PLUGIN_GUID} is loaded!");
 
         SceneManager.activeSceneChanged += (oldScene, newScene) =>
         {
-            AssetRegistry.Initialize();
-
             if (newScene.name == "Main")
             {
                 var go = new GameObject("RadioSpawner");

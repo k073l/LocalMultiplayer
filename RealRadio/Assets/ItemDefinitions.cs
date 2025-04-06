@@ -10,13 +10,18 @@ public class ItemDefinitions
 {
     public BuildableItemDefinition RadioTier1;
 
-    public ItemDefinitions()
+    private readonly Registry registry;
+
+    public ItemDefinitions(Registry registry)
     {
+        this.registry = registry;
         RadioTier1 = CreateRadioDefinition("radio_t1", "Scuffed Radio", "A radio with low quality audio.", AssetRegistry.RadioPrefabs.RadioTier1);
     }
 
     private BuildableItemDefinition CreateRadioDefinition(string id, string name, string description, BuildableItem buildableItem)
     {
+        id = $"com.skipcast.realradio_{id}";
+
         var radio = ScriptableObject.CreateInstance<BuildableItemDefinition>();
         radio.ID = id;
         radio.name = name;
@@ -30,7 +35,14 @@ public class ItemDefinitions
         radio.BasePurchasePrice = 200f;
         radio.ShopCategories = [new ShopListing.CategoryInstance { Category = EShopCategory.Furniture }];
 
-        Registry.instance.AddToRegistry(radio);
+        registry.ItemRegistry.Add(
+            new Registry.ItemRegister
+            {
+                ID = id,
+                AssetPath = string.Empty,
+                Definition = radio
+            }
+        );
         return radio;
     }
 }

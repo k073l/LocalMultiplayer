@@ -1,4 +1,5 @@
 using FishNet.Component.Ownership;
+using ScheduleOne;
 using ScheduleOne.EntityFramework;
 using UnityEngine;
 
@@ -8,9 +9,12 @@ public class RadioPrefabs
 {
     public BuildableItem RadioTier1 { get; private set; }
 
-    public RadioPrefabs()
+    private readonly Registry registry;
+
+    public RadioPrefabs(Registry registry)
     {
         RadioTier1 = CreateRadioPrefab();
+        this.registry = registry;
     }
 
     private BuildableItem CreateRadioPrefab()

@@ -1,5 +1,6 @@
 using System;
 using RealRadio.Assets.Prefabs;
+using ScheduleOne;
 
 namespace RealRadio.Assets;
 
@@ -11,7 +12,7 @@ public static class AssetRegistry
 
     private static bool initialized;
 
-    public static void Initialize()
+    public static void Initialize(Registry registry)
     {
         if (initialized)
             return;
@@ -19,8 +20,8 @@ public static class AssetRegistry
         initialized = true;
 
         // IMPORTANT: Some of these may depend on each other, so the order that these are created in matters.
-        RadioPrefabs = new RadioPrefabs();
-        ItemDefinitions = new ItemDefinitions();
+        RadioPrefabs = new RadioPrefabs(registry);
+        ItemDefinitions = new ItemDefinitions(registry);
         ShopListings = new ShopListings();
     }
 }
