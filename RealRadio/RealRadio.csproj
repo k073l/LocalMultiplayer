@@ -71,8 +71,11 @@
     <CopyToPluginFolder Include="$(TargetDir)\AudioStreamer.MediaFoundation.pdb" />
   </ItemGroup>
 
-  <Target Name="CopyToPluginFolder" AfterTargets="PostBuildEvent" Condition="'$(CI)' == ''">
+  <Target Name="CopyToPluginFolder" AfterTargets="PostBuildEvent" Condition="'$(CI)' == ''" Outputs="%(PluginFolder.Identity)">
+    <PropertyGroup>
+      <Destination>%(PluginFolder.Identity)</Destination>
+    </PropertyGroup>
     <Message Importance="high" Text="Copying files to the plugin folders: @(PluginFolder)" />
-    <Copy SourceFiles="@(CopyToPluginFolder)" DestinationFolder="@(PluginFolder)" />
+    <Copy SourceFiles="@(CopyToPluginFolder)" DestinationFiles="@(CopyToPluginFolder->'$(Destination)\%(RecursiveDir)%(Filename)%(Extension)')" />
   </Target>
 </Project>
