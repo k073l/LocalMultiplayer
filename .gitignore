@@ -485,6 +485,3 @@ $RECYCLE.BIN/
 
 # User specific variables
 /DevVars.targets
-
-# Ignore plugin dlls in unity project
-RealRadioUnityProject/Assets/Plugins
