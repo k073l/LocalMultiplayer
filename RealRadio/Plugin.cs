@@ -1,6 +1,7 @@
 ﻿using BepInEx;
 using BepInEx.Logging;
 using RealRadio.Assets;
+using ScheduleOne.NPCs.CharacterClasses;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -9,7 +10,7 @@ namespace RealRadio;
 [BepInPlugin(MyPluginInfo.PLUGIN_GUID, MyPluginInfo.PLUGIN_NAME, MyPluginInfo.PLUGIN_VERSION)]
 public class Plugin : BaseUnityPlugin
 {
-    public static new ManualLogSource Logger = null!;
+    public static new ManualLogSource Logger { get; private set; } = null!;
 
     private void Awake()
     {
