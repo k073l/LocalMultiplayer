@@ -26,6 +26,9 @@ public class Plugin : BaseUnityPlugin
             {
                 var go = new GameObject("RadioSpawner");
                 go.AddComponent<Components.Debug.RadioSpawner>();
+
+                var shopNpc = FindObjectOfType<Dan>();
+                shopNpc.ShopInterface.CreateListingUI(AssetRegistry.ShopListings.RadioTier1);
             }
         };
     }
