@@ -1,5 +1,6 @@
 ﻿using BepInEx;
 using BepInEx.Logging;
+using RealRadio.Assets;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -19,6 +20,8 @@ public class Plugin : BaseUnityPlugin
 
         SceneManager.activeSceneChanged += (oldScene, newScene) =>
         {
+            AssetRegistry.Initialize();
+
             if (newScene.name == "Main")
             {
                 var go = new GameObject("RadioSpawner");
