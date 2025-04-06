@@ -485,3 +485,7 @@ $RECYCLE.BIN/
 
 # User specific variables
 /DevVars.targets
+
+# Ignore bepinex and game dlls in unity project
+RealRadioUnityProject/Assets/Plugins/BepInEx/
+RealRadioUnityProject/Assets/Plugins/Schedule1/
