@@ -46,7 +46,7 @@
         <HintPath>@(ManagedFolder)\UnityEngine.AudioModule.dll</HintPath>
         <Private>false</Private>
     </Reference>
-    <Reference Include="FishNet.Runtime">
+    <Reference Include="FishNet.Runtime" Publicize="true">
         <HintPath>@(ManagedFolder)\FishNet.Runtime.dll</HintPath>
         <Private>false</Private>
     </Reference>
