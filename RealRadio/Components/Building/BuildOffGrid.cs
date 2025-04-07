@@ -145,6 +145,12 @@ public class BuildUpdateOffGrid : BuildUpdate_Base
             return;
         }
 
+        if (!TestForValidSurface(hit.collider))
+        {
+            positionIsValid = false;
+            return;
+        }
+
         positionIsValid = true;
         lastValidPosition = lastPosition;
         lastValidRotation = lastRotation;
@@ -245,6 +251,17 @@ public class BuildUpdateOffGrid : BuildUpdate_Base
         }
 
         return validAngle;
+    }
+
+    private bool TestForValidSurface(Collider surface)
+    {
+        // Check for interactables in gameobject or parents
+        var interactable = surface.GetComponent<InteractableObject>() ?? surface.GetComponentInParent<InteractableObject>();
+
+        if (interactable != null)
+            return false;
+
+        return true;
     }
 
     private void UpdateGhostTransform()
