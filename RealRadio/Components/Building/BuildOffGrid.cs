@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using FishNet;
 using RealRadio;
 using ScheduleOne;
 using ScheduleOne.Building;
@@ -405,6 +406,10 @@ public class BuildUpdateOffGrid : BuildUpdate_Base
         Quaternion rotation = lastValidRotation;
 
         // todo: spawn off grid item
+        var item = Instantiate(buildStart.ItemDefinition.BuiltItem);
+        item.transform.position = position;
+        item.transform.rotation = rotation;
+        InstanceFinder.ServerManager.Spawn(item.gameObject);
 
         //PlayerSingleton<PlayerInventory>.Instance.equippedSlot.ChangeQuantity(-1);
         Singleton<BuildManager>.Instance.PlayBuildSound(buildStart.ItemDefinition.BuildSoundType, position);
