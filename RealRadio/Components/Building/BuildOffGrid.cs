@@ -124,7 +124,14 @@ public class BuildUpdateOffGrid : BuildUpdate_Base
 
         UpdateDesiredRotationFromInput();
         UpdatePositions();
+
         sqrDistanceDiff = (lastPosition - lastValidPosition).sqrMagnitude;
+
+        if (sqrDistanceDiff > MaxSnapDistanceSqr)
+        {
+            lastValidPosition = Vector3.zero;
+        }
+
         UpdateGhostTransform();
         UpdateGhostMaterial();
     }
