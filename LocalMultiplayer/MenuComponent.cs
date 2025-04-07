@@ -187,6 +187,7 @@ public class MenuComponent : MonoBehaviour
                     if (args.ConnectionState == LocalConnectionState.Stopped)
                     {
                         Plugin.Logger.LogError($"Failed to connect client: {args.ConnectionState}");
+                        LoadingScreen.Instance.Close();
                         LoadManager.Instance.ExitToMenu();
                     }
                     else
@@ -225,6 +226,7 @@ public class MenuComponent : MonoBehaviour
                     {
                         Plugin.Logger.LogError($"Failed to start server: {args.ConnectionState}");
                         InstanceFinder.ServerManager.OnServerConnectionState -= ServerDone;
+                        LoadingScreen.Instance.Close();
                         LoadManager.Instance.ExitToMenu();
                     }
                     else
@@ -253,6 +255,7 @@ public class MenuComponent : MonoBehaviour
                         {
                             InstanceFinder.NetworkManager.ClientManager.OnClientConnectionState -= ClientDone;
                             Plugin.Logger.LogError($"Failed to connect client");
+                            LoadingScreen.Instance.Close();
                             LoadManager.Instance.ExitToMenu();
                         }
 
