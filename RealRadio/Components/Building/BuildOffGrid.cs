@@ -123,6 +123,7 @@ public class BuildUpdateOffGrid : BuildUpdate_Base
     private bool positionIsValid; // also implies rotation is valid
     private float sqrDistanceDiff;
     private Collider[] intersections = new Collider[8];
+    private Material? currentGhostMaterial;
 
     private const float MaxSnapDistanceSqr = 0.1f * 0.1f;
 
@@ -382,6 +383,10 @@ public class BuildUpdateOffGrid : BuildUpdate_Base
             material = buildManager.ghostMaterial_Red;
         }
 
+        if (currentGhostMaterial == material)
+            return;
+
+        currentGhostMaterial = material;
         buildManager.ApplyMaterial(GhostObject, material);
     }
 
