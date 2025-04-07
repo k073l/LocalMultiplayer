@@ -160,9 +160,6 @@ public class MenuComponent : MonoBehaviour
         LoadManager.Instance.onPreSceneChange?.Invoke();
         LoadManager.Instance.CleanUp();
 
-        //Multipass multipass = InstanceFinder.TransportManager.GetTransport<Multipass>() ?? throw new InvalidOperationException("Multipass transport not found");
-        //Tugboat tugboat = multipass.GetTransport<Tugboat>() ?? throw new InvalidOperationException("Tugboat transport not found");
-
         if (host)
         {
             LoadManager.Instance.StoredSaveInfo = null;
@@ -320,10 +317,6 @@ public class MenuComponent : MonoBehaviour
                 LoadManager.Instance.onLoadComplete?.Invoke();
                 Plugin.Logger.LogInfo("Save loaded");
             }
-        }
-        else
-        {
-            // ??
         }
 
         LoadManager.Instance.LoadStatus = LoadManager.ELoadStatus.None;
