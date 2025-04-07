@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AudioStreamer.CliTest", "Au
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RealRadio", "RealRadio\RealRadio.csproj", "{83E6B546-0F8E-CFF5-E1B4-A18343775765}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LocalMultiplayer", "LocalMultiplayer\LocalMultiplayer.csproj", "{89CA4CB2-C853-1B0A-7253-EA5013521499}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -69,6 +71,18 @@ Global
 		{83E6B546-0F8E-CFF5-E1B4-A18343775765}.Release|x64.Build.0 = Release|Any CPU
 		{83E6B546-0F8E-CFF5-E1B4-A18343775765}.Release|x86.ActiveCfg = Release|Any CPU
 		{83E6B546-0F8E-CFF5-E1B4-A18343775765}.Release|x86.Build.0 = Release|Any CPU
+		{89CA4CB2-C853-1B0A-7253-EA5013521499}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{89CA4CB2-C853-1B0A-7253-EA5013521499}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{89CA4CB2-C853-1B0A-7253-EA5013521499}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{89CA4CB2-C853-1B0A-7253-EA5013521499}.Debug|x64.Build.0 = Debug|Any CPU
+		{89CA4CB2-C853-1B0A-7253-EA5013521499}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{89CA4CB2-C853-1B0A-7253-EA5013521499}.Debug|x86.Build.0 = Debug|Any CPU
+		{89CA4CB2-C853-1B0A-7253-EA5013521499}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{89CA4CB2-C853-1B0A-7253-EA5013521499}.Release|Any CPU.Build.0 = Release|Any CPU
+		{89CA4CB2-C853-1B0A-7253-EA5013521499}.Release|x64.ActiveCfg = Release|Any CPU
+		{89CA4CB2-C853-1B0A-7253-EA5013521499}.Release|x64.Build.0 = Release|Any CPU
+		{89CA4CB2-C853-1B0A-7253-EA5013521499}.Release|x86.ActiveCfg = Release|Any CPU
+		{89CA4CB2-C853-1B0A-7253-EA5013521499}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
