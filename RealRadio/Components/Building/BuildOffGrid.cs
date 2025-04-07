@@ -4,9 +4,11 @@ using RealRadio;
 using ScheduleOne.Building;
 using ScheduleOne.DevUtilities;
 using ScheduleOne.EntityFramework;
+using ScheduleOne.Interaction;
 using ScheduleOne.ItemFramework;
 using ScheduleOne.PlayerScripts;
 using ScheduleOne.Tiles;
+using ScheduleOne.UI;
 using UnityEngine;
 
 public class BuildStartOffGrid : BuildStart_Base
@@ -38,6 +40,12 @@ public class BuildStartOffGrid : BuildStart_Base
 
         if (GhostObject != null)
             throw new InvalidOperationException("StartBuilding was called while a ghost object already exists");
+
+        HUD hud = Singleton<HUD>.Instance;
+        hud.SetCrosshairVisible(false);
+
+        InputPromptsCanvas inputPrompts = Singleton<InputPromptsCanvas>.Instance;
+        inputPrompts.LoadModule("building");
 
         GhostObject = CreateGhostModel(itemDef);
         BuildableItem = GhostObject.GetComponent<BuildableItem>() ?? throw new InvalidOperationException("BuildableItem component not found on BuiltItem prefab");
