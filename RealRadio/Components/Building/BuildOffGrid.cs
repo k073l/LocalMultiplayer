@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using RealRadio;
+using ScheduleOne;
 using ScheduleOne.Building;
 using ScheduleOne.DevUtilities;
 using ScheduleOne.EntityFramework;
@@ -24,6 +25,11 @@ public class BuildStartOffGrid : BuildStart_Base
     /// Max allowed rotation offset in degrees.
     /// </summary>
     public float AllowedRotationLenience = 15f;
+
+    /// <summary>
+    /// Rotation speed in increments per keypress
+    /// </summary>
+    public float RotationIncrement = 360f / 16f;
 
     public GameObject? GhostObject { get; private set; }
     public BuildableItem? BuildableItem { get; private set; }
@@ -93,6 +99,7 @@ public class BuildUpdateOffGrid : BuildUpdate_Base
     private Quaternion lastRotation;
     private Vector3 lastValidPosition;
     private Quaternion lastValidRotation;
+    private float desiredRotation;
     private bool positionIsValid; // also implies rotation is valid
     private float sqrDistanceDiff;
     private Collider[] intersections = new Collider[8];
@@ -115,10 +122,24 @@ public class BuildUpdateOffGrid : BuildUpdate_Base
         if (buildStart.GhostObject == null)
             return;
 
+        UpdateDesiredRotationFromInput();
         UpdatePositions();
         sqrDistanceDiff = (lastPosition - lastValidPosition).sqrMagnitude;
         UpdateGhostTransform();
         UpdateGhostMaterial();
+    }
+
+    private void UpdateDesiredRotationFromInput()
+    {
+        if (GameInput.GetButtonDown(GameInput.ButtonCode.RotateLeft))
+        {
+            desiredRotation -= buildStart.RotationIncrement;
+        }
+
+        if (GameInput.GetButtonDown(GameInput.ButtonCode.RotateRight))
+        {
+            desiredRotation += buildStart.RotationIncrement;
+        }
     }
 
     private void UpdatePositions()
@@ -138,7 +159,7 @@ public class BuildUpdateOffGrid : BuildUpdate_Base
             return;
         }
 
-        lastRotation = Quaternion.FromToRotation(Vector3.up, hit.normal);
+        lastRotation = Quaternion.FromToRotation(Vector3.up, hit.normal) * Quaternion.Euler(0, desiredRotation, 0);
         lastPosition = hit.point - buildStart.BuildableItem.BuildPoint.localPosition;
 
         if (TestForObstructions())
