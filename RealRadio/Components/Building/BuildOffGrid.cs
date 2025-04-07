@@ -33,10 +33,23 @@ public class BuildStartOffGrid : BuildStart_Base
 
     public GameObject? GhostObject { get; private set; }
     public BuildableItem? BuildableItem { get; private set; }
+    public ItemInstance? ItemInstance { get; private set; }
+    public BuildableItemDefinition? ItemDefinition
+    {
+        get
+        {
+            if (ItemInstance == null)
+                return null;
+
+            return ItemInstance.Definition as BuildableItemDefinition ?? throw new InvalidOperationException("ItemInstance.Definition is not BuildableItemDefinition");
+        }
+    }
 
     public override void StartBuilding(ItemInstance item)
     {
         Plugin.Logger.LogInfo($"BuildStartOffGrid.StartBuilding {item}");
+
+        ItemInstance = item;
 
         if (item.Definition is not BuildableItemDefinition itemDef)
         {
@@ -134,6 +147,7 @@ public class BuildUpdateOffGrid : BuildUpdate_Base
 
         UpdateGhostTransform();
         UpdateGhostMaterial();
+        SpawnItemIfValid();
     }
 
     private void UpdateDesiredRotationFromInput()
@@ -341,6 +355,26 @@ public class BuildUpdateOffGrid : BuildUpdate_Base
         }
 
         buildManager.ApplyMaterial(GhostObject, material);
+    }
+
+    private void SpawnItemIfValid()
+    {
+        if (buildStart.ItemDefinition == null || buildStart.ItemInstance == null)
+            return;
+
+        if (!positionIsValid && sqrDistanceDiff > MaxSnapDistanceSqr)
+            return;
+
+        if (!GameInput.GetButtonDown(GameInput.ButtonCode.PrimaryClick))
+            return;
+
+        Vector3 position = lastValidPosition;
+        Quaternion rotation = lastValidRotation;
+
+        // todo: spawn off grid item
+
+        //PlayerSingleton<PlayerInventory>.Instance.equippedSlot.ChangeQuantity(-1);
+        Singleton<BuildManager>.Instance.PlayBuildSound(buildStart.ItemDefinition.BuildSoundType, position);
     }
 }
 
