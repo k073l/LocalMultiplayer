@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using FishNet;
 using FishNet.Component.Ownership;
 using FishNet.Object;
 using ScheduleOne;
@@ -59,6 +60,7 @@ public class RadioPrefabs
         meshFilter.gameObject.AddComponent<MeshRenderer>();
         meshFilter.gameObject.AddComponent<MeshCollider>();
 
+        AssetCreationUtil.RegisterPrefabForNetwork(go);
         return buildItem;
     }
 
