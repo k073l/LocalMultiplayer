@@ -21,11 +21,11 @@ public class RadioPrefabs
 
     public RadioPrefabs(Registry registry)
     {
-        RadioTier1 = CreateRadioPrefab("radio_t1", Guid.Parse("b4718701-46ea-4da0-baa4-2537e5a663e4"), gridSizeX: 1, gridSizeY: 1, PrimitiveHelper.GetPrimitiveMesh(PrimitiveType.Cube));
+        RadioTier1 = CreateRadioPrefab("radio_t1", Guid.Parse("b4718701-46ea-4da0-baa4-2537e5a663e4"), PrimitiveHelper.GetPrimitiveMesh(PrimitiveType.Cube));
         this.registry = registry;
     }
 
-    private BuildableItem CreateRadioPrefab(string id, Guid guid, int gridSizeX, int gridSizeY, Mesh mesh)
+    private BuildableItem CreateRadioPrefab(string id, Guid guid, Mesh mesh)
     {
         var go = AssetCreationUtil.CreatePrefabObject("RadioTier1");
         go.AddComponent<PredictedSpawn>();
@@ -36,23 +36,25 @@ public class RadioPrefabs
 
         var buildPoint = new GameObject("BuildPoint");
         buildPoint.transform.SetParent(buildItem.transform);
+        buildPoint.transform.localPosition = Vector3.zero;
         buildItem.BuildPoint = buildPoint.transform;
 
         var MidAirCenterPoint = new GameObject("MidAirCenterPoint");
         MidAirCenterPoint.transform.SetParent(buildItem.transform);
-        MidAirCenterPoint.transform.localPosition = new Vector3(GRID_TILE_SIZE * gridSizeX / 2f, GRID_TILE_SIZE / 2f, GRID_TILE_SIZE * gridSizeY / 2f);
+        MidAirCenterPoint.transform.localPosition = new Vector3(0, GRID_TILE_SIZE / 2f, 0);
         buildItem.MidAirCenterPoint = MidAirCenterPoint.transform;
 
         var boundingCollider = new GameObject("BoundingCollider").AddComponent<BoxCollider>();
         boundingCollider.transform.SetParent(buildItem.transform);
         boundingCollider.isTrigger = true;
-        boundingCollider.size = new Vector3(GRID_TILE_SIZE * gridSizeX, GRID_TILE_SIZE, GRID_TILE_SIZE * gridSizeY);
-        boundingCollider.center = new Vector3(GRID_TILE_SIZE * gridSizeX / 2f, GRID_TILE_SIZE / 2f, GRID_TILE_SIZE * gridSizeY / 2f);
+        boundingCollider.size = new Vector3(GRID_TILE_SIZE, GRID_TILE_SIZE, GRID_TILE_SIZE);
+        boundingCollider.center = new Vector3(0, GRID_TILE_SIZE / 2f, 0);
         buildItem.BoundingCollider = boundingCollider;
 
         var meshFilter = new GameObject("Mesh").AddComponent<MeshFilter>();
         meshFilter.transform.SetParent(buildItem.transform);
         meshFilter.transform.localScale = Vector3.one * GRID_TILE_SIZE;
+        meshFilter.transform.localPosition = new Vector3(0, GRID_TILE_SIZE / 2f, 0);
         meshFilter.sharedMesh = mesh;
         meshFilter.gameObject.AddComponent<MeshRenderer>();
         meshFilter.gameObject.AddComponent<MeshCollider>();
