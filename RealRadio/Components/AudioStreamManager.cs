@@ -11,7 +11,14 @@ public class AudioStreamManager : MonoBehaviour
 {
     private Dictionary<string, StreamAudioHost> hosts = new();
 
-    public static AudioStreamManager Instance => FindObjectOfType<AudioStreamManager>() ?? new GameObject("AudioStreamManager").AddComponent<AudioStreamManager>();
+    public static AudioStreamManager Instance => GetOrInitInstance();
+    private static AudioStreamManager? cachedInstance;
+
+    private static AudioStreamManager GetOrInitInstance()
+    {
+        cachedInstance ??= FindObjectOfType<AudioStreamManager>() ?? new GameObject("AudioStreamManager").AddComponent<AudioStreamManager>();
+        return cachedInstance;
+    }
 
     public StreamAudioHost GetOrCreateHost(string url)
     {
@@ -26,7 +33,7 @@ public class AudioStreamManager : MonoBehaviour
     /// <summary>
     /// Removes a host from the manager.
     ///
-    /// Note: Don't call this. It's called automatically when a host component is removed or parent gameobject is destroyed.
+    /// Note: Don't call this. It's called automatically when an audio host component is removed.
     /// </summary>
     /// <param name="host"></param>
     public void RemoveHost(StreamAudioHost host)
@@ -52,8 +59,23 @@ public class AudioStreamManager : MonoBehaviour
         return host;
     }
 
+    private void Awake()
+    {
+        if (cachedInstance != null)
+        {
+            UnityEngine.Debug.LogWarning("An instance of AudioStreamManager already exists");
+            Destroy(this);
+            return;
+        }
+    }
+
     private void OnDestroy()
     {
+        if (cachedInstance == this)
+        {
+            cachedInstance = null;
+        }
+
         foreach (var host in hosts.Values)
             Destroy(host.gameObject);
     }
