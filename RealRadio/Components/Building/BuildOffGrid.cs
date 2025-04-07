@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using RealRadio;
 using ScheduleOne;
 using ScheduleOne.Building;
@@ -8,6 +9,7 @@ using ScheduleOne.EntityFramework;
 using ScheduleOne.Interaction;
 using ScheduleOne.ItemFramework;
 using ScheduleOne.PlayerScripts;
+using ScheduleOne.Property;
 using ScheduleOne.Tiles;
 using ScheduleOne.UI;
 using UnityEngine;
@@ -30,6 +32,11 @@ public class BuildStartOffGrid : BuildStart_Base
     /// Rotation speed in increments per keypress
     /// </summary>
     public float RotationIncrement = 360f / 16f;
+
+    /// <summary>
+    /// Whether or not to restrict placement to owned properties
+    /// </summary>
+    public bool RestrictToProperties = true;
 
     public GameObject? GhostObject { get; private set; }
     public BuildableItem? BuildableItem { get; private set; }
@@ -201,6 +208,12 @@ public class BuildUpdateOffGrid : BuildUpdate_Base
             return;
         }
 
+        if (!TestForValidLocation(hit))
+        {
+            positionIsValid = false;
+            return;
+        }
+
         positionIsValid = true;
         lastValidPosition = lastPosition;
         lastValidRotation = lastRotation;
@@ -310,6 +323,23 @@ public class BuildUpdateOffGrid : BuildUpdate_Base
 
         if (interactable != null)
             return false;
+
+        return true;
+    }
+
+    private bool TestForValidLocation(RaycastHit hit)
+    {
+        if (buildStart.RestrictToProperties)
+        {
+            var propertyManager = Singleton<PropertyManager>.Instance;
+
+            var property = Property.OwnedProperties.FirstOrDefault(property =>
+            {
+                return property.DoBoundsContainPoint(hit.point);
+            });
+
+            return property != null;
+        }
 
         return true;
     }
