@@ -32,7 +32,7 @@ public class RadioPrefabs
         var buildItem = go.AddComponent<BuildableItem>();
         buildItem.SetGUID(guid);
 
-        buildItem.buildHandler = CreateRadioBuildHandler(id).gameObject;
+        buildItem.buildHandler = CreateOffGridBuildHandler(id).gameObject;
 
         var buildPoint = new GameObject("BuildPoint");
         buildPoint.transform.SetParent(buildItem.transform);
@@ -60,9 +60,9 @@ public class RadioPrefabs
         return buildItem;
     }
 
-    private BuildStart_Base CreateRadioBuildHandler(string id)
+    private BuildStart_Base CreateOffGridBuildHandler(string id)
     {
-        var go = AssetCreationUtil.CreatePrefabObject($"RadioBuildHandler_{id}");
+        var go = AssetCreationUtil.CreatePrefabObject($"OffGridBuildHandler_{id}");
         var buildStart = go.AddComponent<BuildStartOffGrid>();
         go.AddComponent<BuildUpdateOffGrid>();
         go.AddComponent<BuildStopOffGrid>();
