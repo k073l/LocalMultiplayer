@@ -208,7 +208,7 @@ public class BuildUpdateOffGrid : BuildUpdate_Base
             return;
         }
 
-        if (!TestForValidLocation(hit))
+        if (!TestForValidLocation(lastPosition))
         {
             positionIsValid = false;
             return;
@@ -327,15 +327,13 @@ public class BuildUpdateOffGrid : BuildUpdate_Base
         return true;
     }
 
-    private bool TestForValidLocation(RaycastHit hit)
+    private bool TestForValidLocation(Vector3 position)
     {
         if (buildStart.RestrictToProperties)
         {
-            var propertyManager = Singleton<PropertyManager>.Instance;
-
             var property = Property.OwnedProperties.FirstOrDefault(property =>
             {
-                return property.DoBoundsContainPoint(hit.point);
+                return property.DoBoundsContainPoint(position);
             });
 
             return property != null;
