@@ -44,6 +44,7 @@ public class RadioSpawner : MonoBehaviour
 
             var audioHost = GetOrCreateAudioHost();
             var audioClient = audioHost.CreateClient(parent: go.transform);
+            audioClient.ConvertToMono = true;
 
             Plugin.Logger.LogInfo($"Spawned radio at {go.transform.position} (hit {hit.transform.gameObject.name}, layer {hit.collider.gameObject.layer})");
         }
