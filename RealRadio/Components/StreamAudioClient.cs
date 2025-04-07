@@ -30,6 +30,7 @@ namespace RealRadio.Components
         private StreamAudioHost? host;
         private bool initialized;
         private AudioSource audioSource = null!;
+        private bool hostEnabled;
 
         private void Awake()
         {
@@ -103,9 +104,14 @@ namespace RealRadio.Components
             Host?.DestroyClient(this);
         }
 
+        private void Update()
+        {
+            hostEnabled = host?.enabled ?? false;
+        }
+
         private void OnAudioFilterRead(float[] data, int channels)
         {
-            if (host == null || host.AudioData == null || !host.enabled || host.AudioStream?.StreamAvailable != true)
+            if (host == null || host.AudioData == null || !hostEnabled || host.AudioStream?.StreamAvailable != true)
             {
                 Array.Fill(data, 0);
                 return;
