@@ -2,7 +2,7 @@
 
 > A radio plugin for Schedule I using BepInEx
 
-**Note: Only works on demo version of the game until the game (hopefully) stops using il2cpp.**
+**Note: Requires alternate branch on Steam.**
 
 Currently in development. Will improve readme at some point.
 
