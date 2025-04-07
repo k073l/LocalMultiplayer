@@ -6,7 +6,7 @@ using NAudio.Wave;
 using ScheduleOne.NPCs;
 using UnityEngine;
 
-namespace RealRadio.Components.Debug;
+namespace RealRadio.Components.Debugging;
 
 public class RadioSpawner : MonoBehaviour
 {
