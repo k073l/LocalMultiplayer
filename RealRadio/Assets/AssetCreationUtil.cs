@@ -11,14 +11,13 @@ public static class AssetCreationUtil
         if (PrefabsContainer == null)
         {
             PrefabsContainer = new GameObject("RealRadioPrefabs");
+            PrefabsContainer.SetActive(false);
             Object.DontDestroyOnLoad(PrefabsContainer);
         }
 
         var go = new GameObject(name);
         go.transform.SetParent(PrefabsContainer.transform);
-        go.SetActive(false);
         go.hideFlags = HideFlags.HideAndDontSave;
-        Object.DontDestroyOnLoad(go);
         return go;
     }
 }
