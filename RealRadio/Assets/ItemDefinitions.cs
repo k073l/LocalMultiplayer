@@ -1,5 +1,6 @@
 using ScheduleOne;
 using ScheduleOne.EntityFramework;
+using ScheduleOne.Equipping;
 using ScheduleOne.ItemFramework;
 using ScheduleOne.UI.Shop;
 using UnityEngine;
@@ -11,10 +12,13 @@ public class ItemDefinitions
     public BuildableItemDefinition RadioTier1;
 
     private readonly Registry registry;
+    private readonly Equippable_BuildableItem radioEquippable;
 
     public ItemDefinitions(Registry registry)
     {
         this.registry = registry;
+
+        radioEquippable = CreateRadioEquippable();
         RadioTier1 = CreateRadioDefinition("radio_t1", "Scuffed Radio", "A radio with low quality audio.", price: 200f, AssetRegistry.RadioPrefabs.RadioTier1);
     }
 
@@ -34,6 +38,7 @@ public class ItemDefinitions
         radio.BuiltItem = buildableItem;
         radio.BasePurchasePrice = price;
         radio.ShopCategories = [new ShopListing.CategoryInstance { Category = EShopCategory.Furniture }];
+        radio.Equippable = radioEquippable;
 
         registry.ItemRegistry.Add(
             new Registry.ItemRegister
@@ -44,5 +49,12 @@ public class ItemDefinitions
             }
         );
         return radio;
+    }
+
+    private Equippable_BuildableItem CreateRadioEquippable()
+    {
+        var go = AssetCreationUtil.CreatePrefabObject("RadioEquippable");
+        var equippable = go.AddComponent<Equippable_BuildableItem>();
+        return equippable;
     }
 }
