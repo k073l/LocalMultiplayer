@@ -224,7 +224,7 @@ public class BuildUpdateOffGrid : BuildUpdate_Base
                     out float distance
                 );
 
-                if (hasCollided && distance > 0.005f)
+                if (hasCollided && distance > 0.001f)
                 {
                     hitObstruction = true;
                     break;
