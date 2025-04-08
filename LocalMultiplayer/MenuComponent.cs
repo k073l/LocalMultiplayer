@@ -27,6 +27,7 @@ public class MenuComponent : MonoBehaviour
 {
     private GameObject? instructionsUi;
     private TextMeshProUGUI? text;
+    private Coroutine? currentCoroutine;
 
     void Awake()
     {
@@ -101,6 +102,10 @@ public class MenuComponent : MonoBehaviour
         }
 
         StartCoroutine(HostOrJoinServer(save, host: true));
+        if (currentCoroutine != null)
+            StopCoroutine(currentCoroutine);
+
+        currentCoroutine = StartCoroutine(HostOrJoinServer(save, host: true));
     }
 
     private void ConnectToLocalhost()
@@ -108,7 +113,10 @@ public class MenuComponent : MonoBehaviour
         Plugin.Logger.LogInfo("Connecting to localhost...");
         PreChecks();
 
-        StartCoroutine(HostOrJoinServer(save: null, host: false));
+        if (currentCoroutine != null)
+            StopCoroutine(currentCoroutine);
+
+        currentCoroutine = StartCoroutine(HostOrJoinServer(save: null, host: false));
     }
 
     private void PreChecks()
