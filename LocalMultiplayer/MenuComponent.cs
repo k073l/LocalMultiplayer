@@ -40,10 +40,10 @@ public class MenuComponent : MonoBehaviour
 
         instructionsUi = new GameObject("LocalMultiplayerInstructions", typeof(RectTransform), typeof(CanvasRenderer), typeof(TextMeshProUGUI));
         instructionsUi.transform.SetParent(mainMenu.transform);
-        var transform = (RectTransform)instructionsUi.transform;
         text = instructionsUi.GetComponent<TextMeshProUGUI>();
         text.autoSizeTextContainer = true;
 
+        var transform = (RectTransform)instructionsUi.transform;
         transform.anchoredPosition = new Vector2(0, 0);
     }
 
