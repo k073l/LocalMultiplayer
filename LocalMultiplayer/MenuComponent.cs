@@ -29,6 +29,15 @@ public class MenuComponent : MonoBehaviour
     private TextMeshProUGUI? text;
     private Coroutine? currentCoroutine;
 
+    enum LaunchMode
+    {
+        None,
+        Server,
+        Client,
+    }
+
+    private LaunchMode launchMode;
+
     void Awake()
     {
         CreateMainMenuUi();
@@ -46,6 +55,45 @@ public class MenuComponent : MonoBehaviour
 
         var transform = (RectTransform)instructionsUi.transform;
         transform.anchoredPosition = new Vector2(0, 0);
+    }
+
+    private void Start()
+    {
+        if (Plugin.LaunchArguments?.Host == true)
+        {
+            launchMode = LaunchMode.Server;
+        }
+        else if (Plugin.LaunchArguments?.Join == true)
+        {
+            launchMode = LaunchMode.Client;
+        }
+        else
+        {
+            launchMode = LaunchMode.None;
+        }
+
+        ApplyLaunchMode();
+    }
+
+    private void ApplyLaunchMode()
+    {
+        switch (launchMode)
+        {
+            case LaunchMode.Server:
+                {
+                    if (!StartHosting())
+                    {
+                        // prevent infinite loop of trying to start server
+                        launchMode = LaunchMode.None;
+                    }
+                    break;
+                }
+            case LaunchMode.Client:
+                {
+                    ConnectToLocalhost();
+                    break;
+                }
+        }
     }
 
     private void Update()
@@ -88,7 +136,7 @@ public class MenuComponent : MonoBehaviour
         text.text = builder.ToString();
     }
 
-    private void StartHosting()
+    private bool StartHosting()
     {
         Plugin.Logger.LogInfo("Starting server...");
         PreChecks();
@@ -98,14 +146,14 @@ public class MenuComponent : MonoBehaviour
         if (save == null)
         {
             Plugin.Logger.LogError("No save game found (finish tutorial if it's not completed)");
-            return;
+            return false;
         }
 
-        StartCoroutine(HostOrJoinServer(save, host: true));
         if (currentCoroutine != null)
             StopCoroutine(currentCoroutine);
 
         currentCoroutine = StartCoroutine(HostOrJoinServer(save, host: true));
+        return true;
     }
 
     private void ConnectToLocalhost()
@@ -151,7 +199,6 @@ public class MenuComponent : MonoBehaviour
             LoadManager.Instance.TimeSinceGameLoaded = 0;
             LoadManager.Instance.LoadedGameFolderPath = save!.SavePath;
             LoadManager.Instance.LoadStatus = LoadManager.ELoadStatus.LoadingScene;
-            LoadManager.LoadHistory.Add("Loading game: " + save.OrganisationName);
         }
         else
         {
@@ -196,6 +243,7 @@ public class MenuComponent : MonoBehaviour
                         Plugin.Logger.LogError($"Failed to connect client: {args.ConnectionState}");
                         LoadingScreen.Instance.Close();
                         LoadManager.Instance.ExitToMenu();
+                        ApplyLaunchMode();
                     }
                     else
                     {
@@ -235,6 +283,7 @@ public class MenuComponent : MonoBehaviour
                         InstanceFinder.ServerManager.OnServerConnectionState -= ServerDone;
                         LoadingScreen.Instance.Close();
                         LoadManager.Instance.ExitToMenu();
+                        ApplyLaunchMode();
                     }
                     else
                     {
@@ -264,6 +313,7 @@ public class MenuComponent : MonoBehaviour
                             Plugin.Logger.LogError($"Failed to connect client");
                             LoadingScreen.Instance.Close();
                             LoadManager.Instance.ExitToMenu();
+                            ApplyLaunchMode();
                         }
 
                         return;
