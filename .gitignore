@@ -485,3 +485,6 @@ $RECYCLE.BIN/
 
 # User specific variables
 /DevVars.targets
+
+# These already exist in root folder, but they're generated automatically if you open a script file from unity (assuming you use vscode)
+UnityAssets/.vscode
