@@ -32,7 +32,7 @@ public static class AssetCreationUtil
     {
         var netObj = prefab.GetComponent<NetworkObject>() ?? prefab.AddComponent<NetworkObject>();
 
-        var prefabs = InstanceFinder.NetworkManager.GetPrefabObjects<SinglePrefabObjects>(SPAWNABLE_COLLECTION_ID, true);
+        var prefabs = InstanceFinder.NetworkManager.GetPrefabObjects<SinglePrefabObjects>(SPAWNABLE_COLLECTION_ID, createIfMissing: true);
         prefabs.AddObject(netObj);
     }
 }
