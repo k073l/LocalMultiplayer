@@ -1,8 +1,10 @@
 ﻿using BepInEx;
 using BepInEx.Logging;
+using FishNet;
 using HarmonyLib;
 using RealRadio.Assets;
 using ScheduleOne.NPCs.CharacterClasses;
+using ScheduleOne.Persistence;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -14,6 +16,8 @@ public class Plugin : BaseUnityPlugin
     public static new ManualLogSource Logger { get; private set; } = null!;
 
     private Harmony? harmony;
+
+    private bool visitedMenu;
 
     private void Awake()
     {
@@ -27,6 +31,12 @@ public class Plugin : BaseUnityPlugin
 
         SceneManager.activeSceneChanged += (oldScene, newScene) =>
         {
+            if (newScene.name == "Menu" && !visitedMenu)
+            {
+                visitedMenu = true;
+                LoadManager.Instance.onLoadComplete.AddListener(this, AccessTools.Method(GetType(), nameof(OnMainSceneLoadComplete)));
+            }
+
             if (newScene.name == "Main")
             {
                 var go = new GameObject("RadioSpawner");
@@ -36,5 +46,19 @@ public class Plugin : BaseUnityPlugin
                 shopNpc.ShopInterface.CreateListingUI(AssetRegistry.ShopListings.RadioTier1);
             }
         };
+    }
+
+    private void OnMainSceneLoadComplete()
+    {
+        if (InstanceFinder.IsServer)
+        {
+            CreateSingletons();
+        }
+    }
+
+    private void CreateSingletons()
+    {
+        Logger.LogInfo("Creating singletons");
+        InstanceFinder.ServerManager.Spawn(Instantiate(AssetRegistry.SingletonPrefabs.OffGridBuildManager));
     }
 }

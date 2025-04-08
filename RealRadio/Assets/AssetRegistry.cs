@@ -9,6 +9,7 @@ public static class AssetRegistry
     public static ItemDefinitions ItemDefinitions { get; private set; } = null!;
     public static ShopListings ShopListings { get; private set; } = null!;
     public static RadioPrefabs RadioPrefabs { get; private set; } = null!;
+    public static SingletonPrefabs SingletonPrefabs { get; private set; } = null!;
 
     private static bool initialized;
 
@@ -20,7 +21,8 @@ public static class AssetRegistry
         initialized = true;
 
         // IMPORTANT: Some of these may depend on each other, so the order that these are created in matters.
-        RadioPrefabs = new RadioPrefabs(registry);
+        RadioPrefabs = new RadioPrefabs();
+        SingletonPrefabs = new SingletonPrefabs();
         ItemDefinitions = new ItemDefinitions(registry);
         ShopListings = new ShopListings();
     }

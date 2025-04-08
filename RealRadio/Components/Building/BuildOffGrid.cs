@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using FishNet;
 using RealRadio;
+using RealRadio.Components.Building;
 using ScheduleOne;
 using ScheduleOne.Building;
 using ScheduleOne.DevUtilities;
@@ -405,13 +406,8 @@ public class BuildUpdateOffGrid : BuildUpdate_Base
         Vector3 position = lastValidPosition;
         Quaternion rotation = lastValidRotation;
 
-        // todo: spawn off grid item
-        var item = Instantiate(buildStart.ItemDefinition.BuiltItem);
-        item.transform.position = position;
-        item.transform.rotation = rotation;
-        InstanceFinder.ServerManager.Spawn(item.gameObject);
-
-        //PlayerSingleton<PlayerInventory>.Instance.equippedSlot.ChangeQuantity(-1);
+        OffGridBuildManager.Instance.SpawnBuilding(buildStart.ItemInstance.GetCopy(1), position, rotation);
+        PlayerSingleton<PlayerInventory>.Instance.equippedSlot.ChangeQuantity(-1);
         Singleton<BuildManager>.Instance.PlayBuildSound(buildStart.ItemDefinition.BuildSoundType, position);
     }
 }
