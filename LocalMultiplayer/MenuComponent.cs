@@ -64,7 +64,7 @@ public class MenuComponent : MonoBehaviour
         }
     }
 
-    private SaveInfo? GetLastSave() => LoadManager.LastPlayedGame;
+    private SaveInfo? GetLastSave() => LoadManager.SaveGames.FirstOrDefault(save => save != null && !save.MetaData.PlayTutorial);
 
     private void UpdateInstructionText()
     {
@@ -72,7 +72,6 @@ public class MenuComponent : MonoBehaviour
             return;
 
         var save = GetLastSave();
-
         var builder = new StringBuilder();
 
         if (save == null)
@@ -93,7 +92,7 @@ public class MenuComponent : MonoBehaviour
         Plugin.Logger.LogInfo("Starting server...");
         PreChecks();
 
-        var save = LoadManager.SaveGames.FirstOrDefault(save => save != null && !save.MetaData.PlayTutorial);
+        var save = GetLastSave();
 
         if (save == null)
         {
