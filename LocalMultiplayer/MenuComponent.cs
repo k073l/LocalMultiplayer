@@ -133,6 +133,11 @@ public class MenuComponent : MonoBehaviour
         }
 
         builder.AppendLine("Press F6 to connect to localhost");
+
+        builder.AppendLine("protip: --host or --join launch arguments work too");
+        builder.AppendLine("protip: --adjust-window will align the windows side by side");
+        builder.AppendLine("protip: --left-offset [pixels] will leave a gap\non the left side of the screen to fit the console windows");
+
         text.text = builder.ToString();
     }
 
