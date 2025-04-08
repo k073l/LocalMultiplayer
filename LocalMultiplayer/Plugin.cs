@@ -111,6 +111,6 @@ internal class LaunchArguments
     [Option('j', "join", SetName = "mode")]
     public bool Join { get; set; }
 
-    [Option('s', "adjust-window", Default = true)]
+    [Option('s', "adjust-window")]
     public bool SetWindowPositionSize { get; set; }
 }
