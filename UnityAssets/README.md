@@ -1,4 +1,6 @@
-# Unity Project for Schedule One
+# Unity assets project for RealRadio
+
+Contains prefabs, scriptable objects, models, etc for RealRadio.
 
 All script methods/etc have been stripped, but scriptable objects and prefabs etc still work fine at runtime if loaded with a mod loader like BepInEx or MelonLoader.
 
