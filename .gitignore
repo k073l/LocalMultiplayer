@@ -488,3 +488,6 @@ $RECYCLE.BIN/
 
 # These already exist in root folder, but they're generated automatically if you open a script file from unity (assuming you use vscode)
 UnityAssets/.vscode
+
+# Include meta files for dependencies
+!UnityAssets/Assets/Plugins/**/*.meta
