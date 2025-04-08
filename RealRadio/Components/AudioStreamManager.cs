@@ -51,7 +51,7 @@ public class AudioStreamManager : MonoBehaviour
         go.transform.SetParent(transform);
 
         var host = go.AddComponent<StreamAudioHost>();
-        host.AudioStream = new MediaFoundationAudioStream(url, resetReaderAtEof: true)
+        host.AudioStream = new MediaFoundationAudioStream(url, resetReaderAtEof: false)
         {
             ResampleFormat = WaveFormat.CreateIeeeFloatWaveFormat(sampleRate: AudioSettings.GetSampleRate(), channels: 2),
         };
