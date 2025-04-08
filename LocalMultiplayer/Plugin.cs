@@ -80,9 +80,16 @@ public class Plugin : BaseUnityPlugin
         if (LaunchArguments == null)
             return;
 
-        int offsetLeft = 1000;
+        int offsetLeft = Math.Max(0, LaunchArguments.LeftOffset);
         var mainDisplay = Screen.GetMainWindowDisplayInfo();
         RectInt workArea = mainDisplay.workArea;
+
+        if (LaunchArguments.LeftOffset > workArea.width)
+        {
+            Logger.LogWarning("Left offset is greater than the width of the screen, cancelling window adjustment");
+            return;
+        }
+
         workArea.width -= offsetLeft;
         var windowSize = new Vector2Int(workArea.width / 2, workArea.height);
         Vector2Int position = Vector2Int.zero;
@@ -113,4 +120,7 @@ internal class LaunchArguments
 
     [Option('s', "adjust-window")]
     public bool SetWindowPositionSize { get; set; }
+
+    [Option('o', "left-offset")]
+    public int LeftOffset { get; set; }
 }
