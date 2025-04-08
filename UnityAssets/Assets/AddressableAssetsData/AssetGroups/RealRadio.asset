@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bbb281ee3bf0b054c82ac2347e9e782c, type: 3}
+  m_Name: RealRadio
+  m_EditorClassIdentifier: 
+  m_GroupName: RealReadio
+  m_Data:
+    m_SerializedData: []
+  m_GUID: ea3bbfe76108e0446a35225f3c33cf09
+  m_SerializeEntries: []
+  m_ReadOnly: 0
+  m_Settings: {fileID: 11400000, guid: 15ffa3acb3518214481073122f74a15e, type: 2}
+  m_SchemaSet:
+    m_Schemas:
+    - {fileID: 11400000, guid: e7fb090fc7464b7458401a717a88d1f3, type: 2}
+    - {fileID: 11400000, guid: e9a353183f920554f8e7c8f8c8300542, type: 2}
