@@ -14,11 +14,11 @@ PlayerSettings:
   accelerometerFrequency: 60
   companyName: TVGS
   productName: Schedule I
-  defaultCursor: {fileID: 2800000, guid: 4e84365178aaeb4499a5c851364a723c, type: 3}
+  defaultCursor: {fileID: 0}
   cursorHotspot: {x: 6, y: 2}
   m_SplashScreenBackgroundColor: {r: 0, g: 0, b: 0, a: 1}
   m_ShowUnitySplashScreen: 1
-  m_ShowUnitySplashLogo: 0
+  m_ShowUnitySplashLogo: 1
   m_SplashScreenOverlayOpacity: 1
   m_SplashScreenAnimation: 0
   m_SplashScreenLogoStyle: 1
@@ -163,7 +163,8 @@ PlayerSettings:
   resetResolutionOnWindowResize: 0
   androidSupportedAspectRatio: 1
   androidMaxAspectRatio: 2.1
-  applicationIdentifier: {}
+  applicationIdentifier:
+    Standalone: com.TVGS.Schedule-I
   buildNumber:
     Standalone: 0
     VisionOS: 0
@@ -579,15 +580,15 @@ PlayerSettings:
   m_RenderingPath: 0
   m_MobileRenderingPath: 0
   metroPackageName: 
-  metroPackageVersion: 
+  metroPackageVersion: 1.0.0.0
   metroCertificatePath: 
   metroCertificatePassword: 
   metroCertificateSubject: 
   metroCertificateIssuer: 
   metroCertificateNotAfter: daf06edb8a9952ca
-  metroApplicationDescription: 
+  metroApplicationDescription: Schedule I
   wsaImages: {}
-  metroTileShortName: 
+  metroTileShortName: Schedule I
   metroTileShowName: 0
   metroMediumTileShowName: 0
   metroLargeTileShowName: 0
