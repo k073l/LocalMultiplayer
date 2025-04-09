@@ -491,3 +491,4 @@ UnityAssets/.vscode
 
 # Include meta files in unity project
 !UnityAssets/**/*.meta
+!UnityAssets/Packages/**/*
