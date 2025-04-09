@@ -72,12 +72,18 @@ public class AssetRegistry : ScriptableObject
                 continue;
             }
 
-            var networkObject = assetBundle.LoadAsset<GameObject>(assetName)?.GetComponent<NetworkObject>();
+            GameObject gameObject = assetBundle.LoadAsset<GameObject>(assetName);
 
-            if (networkObject != null)
+            if (gameObject != null)
             {
-                Plugin.Logger.LogInfo($"Registering NetworkObject {networkObject.name} from {assetName}");
-                netPrefabs.AddObject(networkObject, checkForDuplicates: true);
+                var networkObject = gameObject.GetComponent<NetworkObject>();
+
+                if (networkObject != null)
+                {
+                    Plugin.Logger.LogInfo($"Registering NetworkObject {networkObject.name} from {assetName}");
+                    netPrefabs.AddObject(networkObject, checkForDuplicates: true);
+                }
+
                 continue;
             }
         }
