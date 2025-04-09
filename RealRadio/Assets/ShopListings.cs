@@ -1,19 +1,15 @@
+using System;
+using System.Collections.Generic;
+using ScheduleOne.NPCs;
 using ScheduleOne.UI.Shop;
+using UnityEngine;
 
 namespace RealRadio.Assets;
 
-public class ShopListings
+[Serializable]
+[CreateAssetMenu(fileName = "ShopListings", menuName = "RealRadio/ScriptableObjects/ShopListings", order = 1)]
+public class ShopListings : ScriptableObject
 {
-    public ShopListing RadioTier1 { get; set; }
-
-    public ShopListings()
-    {
-        RadioTier1 = new ShopListing
-        {
-            CanBeDelivered = true,
-            name = "Scuffed Radio",
-            Item = AssetRegistry.ItemDefinitions.RadioTier1,
-            StockQuantity = 10
-        };
-    }
+    [SerializeField]
+    public ShopListing[] Listings = [];
 }
