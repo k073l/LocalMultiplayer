@@ -20,7 +20,7 @@ MonoBehaviour:
   Keywords:
   - radio
   AvailableInDemo: 1
-  LabelDisplayColor: {r: 0, g: 0, b: 0, a: 0}
+  LabelDisplayColor: {r: 1, g: 1, b: 1, a: 1}
   StackLimit: 10
   Equippable: {fileID: 4594350203163546566, guid: a08004eb11f7fb1449b95ef623864bbc, type: 3}
   CustomItemUI: {fileID: 0}
