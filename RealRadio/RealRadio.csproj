@@ -94,4 +94,20 @@
     <Message Importance="high" Text="Copying asset files to plugin folder: $(Destination)" />
     <Copy SourceFiles="@(AssetFiles)" DestinationFiles="@(AssetFiles->'$(Destination)\Assets\%(RecursiveDir)%(Filename)%(Extension)')" />
   </Target>
+
+  <Target Name="CopyToUnityProject" AfterTargets="PostBuildEvent" Condition="'$(CI)' == ''">
+    <PropertyGroup>
+      <PluginDestination>$(SolutionDir)UnityAssets\Assets\Plugins\RealRadio</PluginDestination>
+      <BepInExDestination>$(SolutionDir)UnityAssets\Assets\Plugins\BepInEx</BepInExDestination>
+      <ManagedFolder>@(ManagedFolder)</ManagedFolder>
+      <BepInExSource>$(ManagedFolder)\..\..\BepInEx\core</BepInExSource>
+    </PropertyGroup>
+    <ItemGroup>
+      <BepInExDeps Include="$(BepInExSource)\*.dll" />
+      <BepInExDeps Remove="$(BepInExSource)\BepInEx.Harmony.dll" />
+    </ItemGroup>
+    <Message Importance="high" Text="Copying files @(BepInExDeps) to Unity project" />
+    <Copy SourceFiles="@(CopyToPluginFolder)" DestinationFolder="$(PluginDestination)" />
+    <Copy SourceFiles="@(BepInExDeps)" DestinationFolder="$(BepInExDestination)" />
+  </Target>
 </Project>

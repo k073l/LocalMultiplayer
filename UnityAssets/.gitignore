@@ -73,8 +73,8 @@ crashlytics-build.properties
 /[Aa]ssets/[Ss]treamingAssets/aa.meta
 /[Aa]ssets/[Ss]treamingAssets/aa/*
 
-# Game dependencies
-Assets/Plugins/ScheduleOne/*.dll
+# Asset dependencies
+Assets/Plugins/**/*.dll
 
 # The project is not launchable from editor
 .vscode/launch.json
