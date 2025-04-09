@@ -1,0 +1,39 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c0648b2367bab503b89767a44e44ae0a, type: 3}
+  m_Name: Scuffed Radio
+  m_EditorClassIdentifier: 
+  Name: Scuffed Radio
+  Description: A radio with low quality audio.
+  ID: com.skipcast.realradio.radio_t1
+  Icon: {fileID: 0}
+  Category: 4
+  Keywords:
+  - radio
+  AvailableInDemo: 1
+  LabelDisplayColor: {r: 0, g: 0, b: 0, a: 0}
+  StackLimit: 10
+  Equippable: {fileID: 4594350203163546566, guid: a08004eb11f7fb1449b95ef623864bbc, type: 3}
+  CustomItemUI: {fileID: 0}
+  CustomInfoContent: {fileID: 0}
+  legalStatus: 0
+  BasePurchasePrice: 200
+  ShopCategories:
+  - Category: 1
+  RequiresLevelToPurchase: 0
+  RequiredRank:
+    Rank: 0
+    Tier: 1
+  StoredItem: {fileID: 0}
+  StationItem: {fileID: 0}
+  BuiltItem: {fileID: 282256406128686012, guid: 4b399b16392b2ab42af1eabf662056d6, type: 3}
+  BuildSoundType: 2
