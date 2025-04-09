@@ -58,8 +58,6 @@ public class BuildStartOffGrid : BuildStart_Base
     {
         Plugin.Logger.LogInfo($"BuildStartOffGrid.StartBuilding {item}");
 
-        ItemInstance = item;
-
         if (item.Definition is not BuildableItemDefinition itemDef)
         {
             Plugin.Logger.LogError($"item.Definition is not BuildableItemDefinition: {item.Definition}");
@@ -75,6 +73,7 @@ public class BuildStartOffGrid : BuildStart_Base
         InputPromptsCanvas inputPrompts = Singleton<InputPromptsCanvas>.Instance;
         inputPrompts.LoadModule("building");
 
+        ItemInstance = item;
         GhostObject = CreateGhostModel(itemDef);
         BuildableItem = GhostObject.GetComponent<BuildableItem>() ?? throw new InvalidOperationException("BuildableItem component not found on BuiltItem prefab");
     }
@@ -87,6 +86,7 @@ public class BuildStartOffGrid : BuildStart_Base
         Destroy(GhostObject);
         GhostObject = null;
         BuildableItem = null;
+        ItemInstance = null;
     }
 
     private GameObject CreateGhostModel(BuildableItemDefinition itemDef)
@@ -407,8 +407,8 @@ public class BuildUpdateOffGrid : BuildUpdate_Base
         Quaternion rotation = lastValidRotation;
 
         OffGridBuildManager.Instance.SpawnBuilding(buildStart.ItemInstance.GetCopy(1), position, rotation);
-        PlayerSingleton<PlayerInventory>.Instance.equippedSlot.ChangeQuantity(-1);
         Singleton<BuildManager>.Instance.PlayBuildSound(buildStart.ItemDefinition.BuildSoundType, position);
+        PlayerSingleton<PlayerInventory>.Instance.equippedSlot.ChangeQuantity(-1);
     }
 }
 

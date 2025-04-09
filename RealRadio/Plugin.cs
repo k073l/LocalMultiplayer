@@ -1,4 +1,7 @@
-﻿using BepInEx;
+﻿using System;
+using System.IO;
+using System.Reflection;
+using BepInEx;
 using BepInEx.Logging;
 using FishNet;
 using HarmonyLib;
@@ -15,13 +18,38 @@ public class Plugin : BaseUnityPlugin
 {
     public static new ManualLogSource Logger { get; private set; } = null!;
 
+    public static AssetRegistry? Assets
+    {
+        get => assets;
+        internal set
+        {
+            if (value == null)
+                throw new ArgumentNullException(nameof(value));
+
+            if (assets != null)
+                throw new InvalidOperationException("Assets have already been set");
+
+            assets = value;
+        }
+    }
+    public static AssetBundle AssetBundle { get; private set; } = null!;
+
     private Harmony? harmony;
 
     private bool visitedMenu;
+    private static AssetRegistry? assets;
 
     private void Awake()
     {
         Logger = base.Logger;
+
+        AssetBundle = LoadAssetBundle();
+        Logger.LogInfo($"Loaded asset bundle: {AssetBundle.name}");
+
+        foreach (var path in AssetBundle.GetAllAssetNames())
+        {
+            Logger.LogInfo($"- Found asset: {path}");
+        }
 
         harmony = new Harmony("com.skipcast.realradio");
         harmony.PatchAll();
@@ -41,12 +69,40 @@ public class Plugin : BaseUnityPlugin
             {
                 var go = new GameObject("RadioSpawner");
                 go.AddComponent<Components.Debugging.RadioSpawner>();
-
-                //var shopNpc = FindObjectOfType<Dan>();
-                //shopNpc.ShopInterface.CreateListingUI(AssetRegistry.ShopListings.RadioTier1);
             }
         };
     }
+
+    private AssetBundle LoadAssetBundle()
+    {
+        string path = GetAssetBundlePath();
+
+        try
+        {
+            AssetBundle assetBundle = AssetBundle.LoadFromFile(path);
+
+            if (assetBundle == null)
+            {
+                if (!File.Exists(path))
+                {
+                    throw new FileNotFoundException("Asset bundle file not found", path);
+                }
+                else
+                {
+                    throw new Exception("Failed to load asset bundle");
+                }
+            }
+
+            return assetBundle;
+        }
+        catch (Exception)
+        {
+            Logger.LogError("Failed to load asset bundle!");
+            throw;
+        }
+    }
+
+    internal static string GetAssetBundlePath() => Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "Assets", "assets");
 
     private void OnMainSceneLoadComplete()
     {
@@ -58,7 +114,10 @@ public class Plugin : BaseUnityPlugin
 
     private void CreateSingletons()
     {
+        if (Assets == null)
+            throw new InvalidOperationException("Assets have not been set");
+
         Logger.LogInfo("Creating singletons");
-        InstanceFinder.ServerManager.Spawn(Instantiate(AssetRegistry.SingletonPrefabs.OffGridBuildManager));
+        InstanceFinder.ServerManager.Spawn(Instantiate(Assets.Singletons.OffGridBuildManager));
     }
 }
