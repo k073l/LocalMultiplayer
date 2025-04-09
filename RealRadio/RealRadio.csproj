@@ -70,7 +70,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <!-- <AssetFile Include="..." /> -->
+    <AssetFiles Include="$(SolutionDir)AssetBundles\assets" Condition="Exists('$(SolutionDir)AssetBundles\assets')" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(Configuration)' == 'Debug'">
