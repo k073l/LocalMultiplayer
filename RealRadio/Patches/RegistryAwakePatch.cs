@@ -10,7 +10,9 @@ public static class RegistryAwakePatch
 {
     public static void Prefix(Registry __instance)
     {
-        Plugin.Assets = AssetRegistry.LoadFromAssetBundle(Plugin.AssetBundle);
+        if (Plugin.Assets == null)
+            Plugin.Assets = AssetRegistry.LoadFromAssetBundle(Plugin.AssetBundle);
+
         AssetRegistry.Register(__instance, InstanceFinder.NetworkManager, Plugin.AssetBundle);
     }
 }
