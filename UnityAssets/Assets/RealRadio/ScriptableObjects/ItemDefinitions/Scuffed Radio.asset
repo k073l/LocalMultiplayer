@@ -35,5 +35,5 @@ MonoBehaviour:
     Tier: 1
   StoredItem: {fileID: 0}
   StationItem: {fileID: 0}
-  BuiltItem: {fileID: 282256406128686012, guid: 4b399b16392b2ab42af1eabf662056d6, type: 3}
+  BuiltItem: {fileID: 5699954089044675498, guid: 4b399b16392b2ab42af1eabf662056d6, type: 3}
   BuildSoundType: 2
