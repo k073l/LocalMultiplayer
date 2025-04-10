@@ -45,4 +45,4 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   CanInteractWhenEquipped: 0
-  CanPickUpWhenEquipped: 0
+  CanPickUpWhenEquipped: 1
