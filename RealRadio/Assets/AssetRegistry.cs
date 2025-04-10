@@ -44,6 +44,9 @@ public class AssetRegistry : ScriptableObject
         return result;
     }
 
+    /// <summary>
+    /// Register all assets so they work with the game. NOTE: This method may be called multiple times! Each time a new Registry is instantiated.
+    /// </summary>
     internal static void Register(Registry registry, NetworkManager networkManager, AssetBundle assetBundle)
     {
         ushort assetBundleHash = assetBundle.Get16BitHash();
