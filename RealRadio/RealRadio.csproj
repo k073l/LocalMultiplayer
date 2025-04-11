@@ -37,10 +37,6 @@
   <ItemGroup>
     <ProjectReference Include="../AudioStreamer/AudioStreamer.csproj" />
     <ProjectReference Include="../AudioStreamer.MediaFoundation/AudioStreamer.MediaFoundation.csproj" />
-    <ProjectReference Include="../FishNet.SourceGenerator/FishNet.SourceGenerator.csproj"
-                      OutputItemType="Analyzer"
-                      ReferenceOutputAssembly="false"
-    />
   </ItemGroup>
 
   <ItemGroup>
