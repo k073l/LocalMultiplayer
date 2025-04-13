@@ -1,8 +1,10 @@
-using RealRadio.Data;
+using FishNet.Object;
+using FishNet.Object.Synchronizing;
 
 namespace RealRadio.Components.Building.Buildables;
 
 public class Radio : TogglableOffGridItem
 {
-    public RadioStation? RadioStation { get; set; }
+    [field: SyncVar(Channel = FishNet.Transporting.Channel.Reliable, ReadPermissions = ReadPermission.ExcludeOwner, WritePermissions = WritePermission.ServerOnly)]
+    public int RadioStationIndex { get; [ServerRpc(RunLocally = true, RequireOwnership = false)] set; }
 }
