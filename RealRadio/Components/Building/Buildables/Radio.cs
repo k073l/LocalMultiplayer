@@ -25,7 +25,7 @@ public class Radio : TogglableOffGridItem
         else
         {
             if (audioClient != null)
-                audioClient.enabled = false;
+                audioClient.gameObject.SetActive(false);
         }
     }
 
@@ -38,6 +38,6 @@ public class Radio : TogglableOffGridItem
             return;
         }
 
-        audioClient.enabled = true;
+        audioClient.gameObject.SetActive(true);
     }
 }
