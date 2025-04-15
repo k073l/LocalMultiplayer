@@ -7,10 +7,8 @@ using UnityEngine;
 
 namespace RealRadio.Components.Building;
 
-public class OffGridBuildManager : Singleton<OffGridBuildManager>
+public class OffGridBuildManager : NetworkSingleton<OffGridBuildManager>
 {
-    private NetworkObject networkObject = null!;
-
     public override void Awake()
     {
         base.Awake();
@@ -19,33 +17,39 @@ public class OffGridBuildManager : Singleton<OffGridBuildManager>
             return;
 
         gameObject.hideFlags = HideFlags.HideAndDontSave;
-
-        networkObject = GetComponent<NetworkObject>() ?? throw new InvalidOperationException("No NetworkObject component found on game object");
     }
 
-    private void OnEnable()
-    {
-        Plugin.Logger.LogInfo("** OffGridBuildManager enabled **");
-    }
-
-    private void OnDisable()
-    {
-        Plugin.Logger.LogInfo("** OffGridBuildManager disabled **");
-    }
-
-    public OffGridItem SpawnBuilding(ItemInstance itemInstance, Vector3 position, Quaternion rotation, Guid? id = null)
+    /// <summary>
+    /// Spawns a building. If this is the server, it will spawn the building instantly. Otherwise it will request the server to spawn the building.
+    /// </summary>
+    /// <exception cref="ArgumentException">Thrown if itemInstance.Definition is not BuildableItemDefinition.</exception>
+    public void SpawnBuilding(ItemInstance itemInstance, Vector3 position, Quaternion rotation)
     {
         if (itemInstance.Definition is not BuildableItemDefinition itemDefinition)
         {
             throw new ArgumentException("itemInstance.Definition is not BuildableItemDefinition");
         }
 
-        Guid guid = id ?? GUIDManager.GenerateUniqueGUID();
-        OffGridItem item = Instantiate(itemDefinition.BuiltItem.gameObject).GetComponent<OffGridItem>();
-        item.SetLocallyBuilt();
-        item.InitializeOffGridItem(itemInstance, position, rotation, guid);
-        networkObject.Spawn(item.gameObject);
+        if (NetworkManager.IsServer)
+        {
+            Guid guid = GUIDManager.GenerateUniqueGUID();
+            OffGridItem item = Instantiate(itemDefinition.BuiltItem.gameObject).GetComponent<OffGridItem>();
+            item.SetLocallyBuilt();
+            item.InitializeOffGridItem(itemInstance, position, rotation, guid);
+            NetworkObject.Spawn(item.gameObject);
+        }
+        else
+        {
+            RequestSpawnBuilding(itemInstance, position, rotation);
+        }
+    }
 
-        return item;
+    [ServerRpc(RequireOwnership = false)]
+    private void RequestSpawnBuilding(ItemInstance itemInstance, Vector3 position, Quaternion rotation)
+    {
+        if (itemInstance == null)
+            return;
+
+        SpawnBuilding(itemInstance, position, rotation);
     }
 }

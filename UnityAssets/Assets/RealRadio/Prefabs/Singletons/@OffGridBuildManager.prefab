@@ -77,3 +77,5 @@ MonoBehaviour:
   m_Script: {fileID: 190275677, guid: 06549ed6e3aa5624283039434632ccf8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _componentIndexCache: 255
+  _networkObjectCache: {fileID: 0}

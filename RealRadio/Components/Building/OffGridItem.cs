@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using FishNet.Object;
 using ScheduleOne.EntityFramework;
 using ScheduleOne.ItemFramework;
 using ScheduleOne.Properties;
@@ -22,5 +23,10 @@ public abstract class OffGridItem : BuildableItem
         transform.rotation = rotation;
 
         Initialized = true;
+    }
+
+    public override void OnStartServer()
+    {
+        base.OnStartServer();
     }
 }
