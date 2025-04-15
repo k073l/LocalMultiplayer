@@ -33,6 +33,7 @@ MonoBehaviour:
   RequiredRank:
     Rank: 0
     Tier: 1
+  ResellMultiplier: 0.5
   StoredItem: {fileID: 0}
   StationItem: {fileID: 0}
   BuiltItem: {fileID: 5699954089044675498, guid: 4b399b16392b2ab42af1eabf662056d6, type: 3}
