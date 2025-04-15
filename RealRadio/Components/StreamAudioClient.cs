@@ -27,6 +27,8 @@ namespace RealRadio.Components
 
         public int Id { get; set; }
 
+        public AudioSource AudioSource => audioSource;
+
         private StreamAudioHost? host;
         private bool initialized;
         private AudioSource audioSource = null!;
