@@ -13,6 +13,13 @@ namespace RealRadio.Components;
 [RequireComponent(typeof(AudioSource))]
 public class StreamAudioHost : MonoBehaviour
 {
+    public float MaxClientInactivityTime = 30f;
+
+    public int NumActiveClients => enabledClients.Count;
+
+    public Action? OnStreamStarted;
+    public Action? OnStreamStopped;
+
     public AudioStream? AudioStream;
 
     public float[]? AudioData { get; private set; }
@@ -24,6 +31,7 @@ public class StreamAudioHost : MonoBehaviour
     private List<StreamAudioClient> spawnedClients = [];
     private HashSet<StreamAudioClient> enabledClients = [];
     private int clientIdCounter;
+    private float? inactiveTimer;
 
     public StreamAudioClient CreateClient(Transform? parent = null, Vector3? localPosition = null)
     {
@@ -98,6 +106,17 @@ public class StreamAudioHost : MonoBehaviour
     private void Update()
     {
         CheckStartStreamTask();
+
+        if (inactiveTimer != null)
+        {
+            inactiveTimer += Time.unscaledDeltaTime;
+
+            if (inactiveTimer >= MaxClientInactivityTime)
+            {
+                Plugin.Logger.LogInfo("Stopping audio stream host due to inactivity");
+                StopAudioStream();
+            }
+        }
     }
 
     private void OnEnable()
@@ -142,10 +161,12 @@ public class StreamAudioHost : MonoBehaviour
             Destroy(client.gameObject);
     }
 
-    private void StartAudioStream()
+    public void StartAudioStream()
     {
-        if (startStreamTask != null)
-            throw new InvalidOperationException("AudioStream is already starting");
+        if (startStreamTask != null || AudioStream?.Started == true)
+            return; // Already starting
+
+        inactiveTimer = null;
 
         startStreamCts = new CancellationTokenSource();
         startStreamTask = Task.Run(() =>
@@ -156,6 +177,14 @@ public class StreamAudioHost : MonoBehaviour
             AudioStream.Start();
             AudioStream.WarmupReader();
         }, startStreamCts.Token);
+    }
+
+    public void StopAudioStream()
+    {
+        AudioStream?.Stop();
+        audioSource.Stop();
+        OnStreamStopped?.Invoke();
+        inactiveTimer = null;
     }
 
     private void CheckStartStreamTask()
@@ -178,6 +207,8 @@ public class StreamAudioHost : MonoBehaviour
         startStreamTask = null;
         startStreamCts?.Dispose();
         startStreamCts = null;
+
+        OnStreamStarted?.Invoke();
     }
 
     private void OnAudioFilterRead(float[] data, int channels)
@@ -222,14 +253,13 @@ public class StreamAudioHost : MonoBehaviour
 
         if (enabledClients.Count > 0 && (AudioStream == null || !AudioStream.Started))
         {
+            inactiveTimer = null;
             Plugin.Logger.LogInfo("Starting audio stream");
             StartAudioStream();
         }
         else if (enabledClients.Count == 0)
         {
-            Plugin.Logger.LogInfo("Stopping audio stream");
-            AudioStream?.Stop();
-            audioSource.Stop();
+            inactiveTimer = 0;
         }
     }
 }

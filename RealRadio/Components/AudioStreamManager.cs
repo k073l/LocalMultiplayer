@@ -9,13 +9,22 @@ namespace RealRadio.Components;
 
 public class AudioStreamManager : MonoBehaviour
 {
+    public uint MaxActiveInaudibleHosts = 5;
+
+    public int NumActiveHosts => hosts.Count(host => host.Value.AudioStream?.Started == true);
+
     private Dictionary<string, StreamAudioHost> hosts = new();
+    private LinkedList<StreamAudioHost> activeHosts = new();
+    private StreamAudioHost[]? activeHostsBuffer;
 
     public static AudioStreamManager Instance => GetOrInitInstance();
     private static AudioStreamManager? cachedInstance;
 
     private static AudioStreamManager GetOrInitInstance()
     {
+        if (!cachedInstance)
+            cachedInstance = null;
+
         cachedInstance ??= FindObjectOfType<AudioStreamManager>() ?? new GameObject("AudioStreamManager").AddComponent<AudioStreamManager>();
         return cachedInstance;
     }
@@ -56,16 +65,60 @@ public class AudioStreamManager : MonoBehaviour
             ResampleFormat = WaveFormat.CreateIeeeFloatWaveFormat(sampleRate: AudioSettings.GetSampleRate(), channels: 2),
         };
 
+        host.OnStreamStarted += () => OnHostStreamToggled(host, true);
+        host.OnStreamStopped += () => OnHostStreamToggled(host, false);
+
         return host;
+    }
+
+    private void OnHostStreamToggled(StreamAudioHost host, bool started)
+    {
+        if (started)
+        {
+            activeHosts.AddLast(host);
+        }
+        else
+        {
+            activeHosts.Remove(host);
+        }
     }
 
     private void Awake()
     {
-        if (cachedInstance != null)
+        if (cachedInstance)
         {
             UnityEngine.Debug.LogWarning("An instance of AudioStreamManager already exists");
             Destroy(this);
             return;
+        }
+    }
+
+    private void Update()
+    {
+        int numActiveHosts = NumActiveHosts;
+
+        while (numActiveHosts > MaxActiveInaudibleHosts)
+        {
+            if (activeHostsBuffer == null || activeHostsBuffer.Length < numActiveHosts)
+            {
+                activeHostsBuffer = new StreamAudioHost[numActiveHosts];
+            }
+
+            activeHosts.CopyTo(activeHostsBuffer, 0);
+
+            foreach (var host in activeHostsBuffer)
+            {
+                if (host.NumActiveClients == 0)
+                {
+                    Plugin.Logger.LogInfo("Killing quiet audio host before inactive timer expires due to too many active hosts");
+
+                    host.StopAudioStream();
+                    --numActiveHosts;
+
+                    if (numActiveHosts <= 5)
+                        break;
+                }
+            }
         }
     }
 
