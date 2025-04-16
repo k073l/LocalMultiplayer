@@ -92,9 +92,11 @@ public class BuildStartOffGrid : BuildStart_Base
     private GameObject CreateGhostModel(BuildableItemDefinition itemDef)
     {
         itemDef.BuiltItem.isGhost = true;
+        itemDef.BuiltItem.gameObject.SetActive(false);
         var prefab = itemDef.BuiltItem.gameObject;
         var result = Instantiate(prefab, parent: transform);
         itemDef.BuiltItem.isGhost = false;
+        itemDef.BuiltItem.gameObject.SetActive(true);
 
         var buildManager = BuildManager.Instance;
         buildManager.DisableColliders(result);
@@ -107,6 +109,12 @@ public class BuildStartOffGrid : BuildStart_Base
             component.gameObject.SetActive(true);
         }
 
+        foreach (var component in gameObject.GetComponentsInChildren<DestroyWhenGhost>())
+        {
+            Destroy(component.gameObject);
+        }
+
+        result.SetActive(true);
         return result;
     }
 }

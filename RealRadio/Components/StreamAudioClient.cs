@@ -37,7 +37,6 @@ namespace RealRadio.Components
         private void Awake()
         {
             audioSource = GetComponent<AudioSource>() ?? throw new InvalidOperationException("No AudioSource component found on game object");
-            audioSource.priority = 1;
 
             int numChannels = 1;
             audioSource.clip = AudioClip.Create("Dummy", 2048, numChannels, AudioSettings.GetSampleRate(), false);
@@ -47,12 +46,12 @@ namespace RealRadio.Components
             audioSource.clip.SetData(audioData, 0);
 
             // Set some sane defaults on the audio source
-            audioSource.volume = 0.1f;
+            /*audioSource.volume = 0.1f;
             audioSource.spatialBlend = 1f;
             audioSource.rolloffMode = AudioRolloffMode.Custom;
             audioSource.SetCustomCurve(AudioSourceCurveType.CustomRolloff, CreateLogarithmicRolloffCurve(maxDistance: 30f));
             audioSource.maxDistance = 30f;
-            audioSource.dopplerLevel = 0.25f;
+            audioSource.dopplerLevel = 0.25f;*/
         }
 
         private AnimationCurve CreateLogarithmicRolloffCurve(float maxDistance)
@@ -84,11 +83,8 @@ namespace RealRadio.Components
 
         private void OnEnable()
         {
-            if (!initialized)
+            if (!initialized || host == null)
                 return;
-
-            if (host == null)
-                throw new InvalidOperationException("Host is not set");
 
             audioSource.Play();
         }

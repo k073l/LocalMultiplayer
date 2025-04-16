@@ -34,16 +34,35 @@ public class StreamAudioHost : MonoBehaviour
         if (localPosition != null)
             go.transform.localPosition = localPosition ?? Vector3.zero;
 
-        var client = go.AddComponent<StreamAudioClient>();
-        client.Host = this;
-        client.Id = clientIdCounter++;
-        var audioSource = client.GetComponent<AudioSource>();
-        audioSource.playOnAwake = false;
-        audioSource.volume = 0.2f;
+        var client = AddClient(go);
 
-        if (transform != null || localPosition != null)
+        if (parent != null || localPosition != null)
         {
             audioSource.spatialBlend = 1;
+        }
+
+        return client;
+    }
+
+    public StreamAudioClient AddClient(GameObject gameObject)
+    {
+        bool createdAudioSource = false;
+        var audioSource = gameObject.GetComponent<AudioSource>();
+
+        if (audioSource == null)
+        {
+            audioSource = gameObject.AddComponent<AudioSource>();
+            createdAudioSource = true;
+        }
+
+        var client = gameObject.GetComponent<StreamAudioClient>() ?? gameObject.AddComponent<StreamAudioClient>();
+        client.Host = this;
+        client.Id = clientIdCounter++;
+        audioSource.playOnAwake = false;
+
+        if (createdAudioSource)
+        {
+            audioSource.volume = 0.2f;
         }
 
         spawnedClients.Add(client);
