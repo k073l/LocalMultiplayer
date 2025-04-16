@@ -415,8 +415,8 @@ public class BuildUpdateOffGrid : BuildUpdate_Base
         Quaternion rotation = lastValidRotation;
 
         OffGridBuildManager.Instance.SpawnBuilding(buildStart.ItemInstance.GetCopy(1), position, rotation);
-        Singleton<BuildManager>.Instance.PlayBuildSound(buildStart.ItemDefinition.BuildSoundType, position);
-        PlayerSingleton<PlayerInventory>.Instance.equippedSlot.ChangeQuantity(-1);
+        BuildManager.Instance.PlayBuildSound(buildStart.ItemDefinition.BuildSoundType, position);
+        PlayerInventory.Instance.equippedSlot.ChangeQuantity(-1);
     }
 }
 
