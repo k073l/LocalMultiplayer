@@ -105,6 +105,9 @@ namespace RealRadio.Components
         private void Update()
         {
             hostEnabled = host?.enabled ?? false;
+
+            if (hostEnabled && !audioSource.isPlaying)
+                audioSource.Play();
         }
 
         private void OnAudioFilterRead(float[] data, int channels)
