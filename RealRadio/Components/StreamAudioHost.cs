@@ -22,6 +22,7 @@ public class StreamAudioHost : MonoBehaviour
     private Task? startStreamTask;
     private CancellationTokenSource? startStreamCts;
     private List<StreamAudioClient> spawnedClients = [];
+    private HashSet<StreamAudioClient> enabledClients = [];
     private int clientIdCounter;
 
     public StreamAudioClient CreateClient(Transform? parent = null, Vector3? localPosition = null)
@@ -66,6 +67,11 @@ public class StreamAudioHost : MonoBehaviour
         }
 
         spawnedClients.Add(client);
+
+        if (client.isActiveAndEnabled)
+        {
+            enabledClients.Add(client);
+        }
 
         return client;
     }
@@ -166,6 +172,9 @@ public class StreamAudioHost : MonoBehaviour
             Plugin.Logger.LogError(startStreamTask.Exception);
         }
 
+        if (!audioSource.isPlaying)
+            audioSource.Play();
+
         startStreamTask = null;
         startStreamCts?.Dispose();
         startStreamCts = null;
@@ -193,5 +202,34 @@ public class StreamAudioHost : MonoBehaviour
 
         var numFloatsRead = AudioStream.Read(AudioData, 0, data.Length);
         AudioDataLength = numFloatsRead;
+    }
+
+    internal void OnClientEnabled(StreamAudioClient client)
+    {
+        enabledClients.Add(client);
+        OnNumActiveClientsChanged();
+    }
+
+    internal void OnClientDisabled(StreamAudioClient client)
+    {
+        enabledClients.Remove(client);
+        OnNumActiveClientsChanged();
+    }
+
+    private void OnNumActiveClientsChanged()
+    {
+        Plugin.Logger.LogInfo($"Num active clients: {enabledClients.Count}");
+
+        if (enabledClients.Count > 0 && (AudioStream == null || !AudioStream.Started))
+        {
+            Plugin.Logger.LogInfo("Starting audio stream");
+            StartAudioStream();
+        }
+        else if (enabledClients.Count == 0)
+        {
+            Plugin.Logger.LogInfo("Stopping audio stream");
+            AudioStream?.Stop();
+            audioSource.Stop();
+        }
     }
 }

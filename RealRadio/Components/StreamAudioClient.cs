@@ -86,6 +86,7 @@ namespace RealRadio.Components
             if (!initialized || host == null)
                 return;
 
+            Host?.OnClientEnabled(this);
             audioSource.Play();
         }
 
@@ -95,6 +96,7 @@ namespace RealRadio.Components
                 return;
 
             audioSource.Stop();
+            Host?.OnClientDisabled(this);
         }
 
         private void OnDestroy()
