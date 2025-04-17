@@ -5,7 +5,7 @@ using AudioStreamer.MediaFoundation;
 using NAudio.Wave;
 using UnityEngine;
 
-namespace RealRadio.Components;
+namespace RealRadio.Components.Audio;
 
 public class AudioStreamManager : MonoBehaviour
 {

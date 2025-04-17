@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.Audio;
 using UnityEngine.Experimental.Audio;
 
-namespace RealRadio.Components
+namespace RealRadio.Components.Audio
 {
     [RequireComponent(typeof(AudioSource))]
     public class StreamAudioClient : MonoBehaviour

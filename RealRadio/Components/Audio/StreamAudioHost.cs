@@ -8,7 +8,7 @@ using NAudio.Wave.SampleProviders;
 using ScheduleOne.NPCs.CharacterClasses;
 using UnityEngine;
 
-namespace RealRadio.Components;
+namespace RealRadio.Components.Audio;
 
 [RequireComponent(typeof(AudioSource))]
 public class StreamAudioHost : MonoBehaviour

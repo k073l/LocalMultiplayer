@@ -3,6 +3,7 @@ using System.Collections;
 using AudioStreamer;
 using AudioStreamer.MediaFoundation;
 using NAudio.Wave;
+using RealRadio.Components.Audio;
 using ScheduleOne.NPCs;
 using UnityEngine;
 
