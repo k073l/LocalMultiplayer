@@ -79,6 +79,7 @@ public class StreamAudioHost : MonoBehaviour
         if (client.isActiveAndEnabled)
         {
             enabledClients.Add(client);
+            OnNumActiveClientsChanged();
         }
 
         return client;
