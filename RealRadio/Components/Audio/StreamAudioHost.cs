@@ -41,13 +41,13 @@ public class StreamAudioHost : MonoBehaviour
             go.transform.SetParent(parent ?? transform, false);
 
         if (localPosition != null)
-            go.transform.localPosition = localPosition ?? Vector3.zero;
+            go.transform.localPosition = localPosition.Value;
 
         var client = AddClient(go);
 
         if (parent != null || localPosition != null)
         {
-            audioSource.spatialBlend = 1;
+            client.AudioSource.spatialBlend = 1;
         }
 
         return client;
