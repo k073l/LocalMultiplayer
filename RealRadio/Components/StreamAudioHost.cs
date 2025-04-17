@@ -28,7 +28,7 @@ public class StreamAudioHost : MonoBehaviour
     private AudioSource audioSource = null!;
     private Task? startStreamTask;
     private CancellationTokenSource? startStreamCts;
-    private List<StreamAudioClient> spawnedClients = [];
+    private HashSet<StreamAudioClient> spawnedClients = [];
     private HashSet<StreamAudioClient> enabledClients = [];
     private int clientIdCounter;
     private float? inactiveTimer;
@@ -168,6 +168,12 @@ public class StreamAudioHost : MonoBehaviour
 
         inactiveTimer = null;
 
+        foreach (var client in enabledClients)
+        {
+            Plugin.Logger.LogInfo($"Invoking OnHostStartRequested for client {client.Id}");
+            client.OnHostStartRequested?.Invoke();
+        }
+
         startStreamCts = new CancellationTokenSource();
         startStreamTask = Task.Run(() =>
         {
@@ -183,8 +189,8 @@ public class StreamAudioHost : MonoBehaviour
     {
         AudioStream?.Stop();
         audioSource.Stop();
-        OnStreamStopped?.Invoke();
         inactiveTimer = null;
+        OnStreamStopped?.Invoke();
     }
 
     private void CheckStartStreamTask()
@@ -251,11 +257,15 @@ public class StreamAudioHost : MonoBehaviour
     {
         Plugin.Logger.LogInfo($"Num active clients: {enabledClients.Count}");
 
-        if (enabledClients.Count > 0 && (AudioStream == null || !AudioStream.Started))
+        if (enabledClients.Count > 0)
         {
             inactiveTimer = null;
-            Plugin.Logger.LogInfo("Starting audio stream");
-            StartAudioStream();
+
+            if (AudioStream == null || !AudioStream.Started)
+            {
+                Plugin.Logger.LogInfo("Starting audio stream");
+                StartAudioStream();
+            }
         }
         else if (enabledClients.Count == 0)
         {

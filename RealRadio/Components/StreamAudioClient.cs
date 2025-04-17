@@ -21,13 +21,26 @@ namespace RealRadio.Components
                 if (host != null)
                     throw new InvalidOperationException("Host is already set");
 
+                if (host != null)
+                {
+                    host.OnStreamStarted -= OnHostStreamStarted;
+                    host.OnStreamStopped -= OnHostStreamStopped;
+                }
+
                 host = value;
+
+                host.OnStreamStarted += OnHostStreamStarted;
+                host.OnStreamStopped += OnHostStreamStopped;
             }
         }
 
         public int Id { get; set; }
 
         public AudioSource AudioSource => audioSource;
+
+        public Action? OnHostStreamStarted;
+        public Action? OnHostStreamStopped;
+        public Action? OnHostStartRequested;
 
         private StreamAudioHost? host;
         private bool initialized;
