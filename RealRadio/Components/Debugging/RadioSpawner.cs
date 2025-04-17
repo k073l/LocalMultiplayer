@@ -20,11 +20,6 @@ public class RadioSpawner : MonoBehaviour
             Plugin.Logger.LogInfo("Try spawn radio");
             TrySpawnRadio();
         }
-
-        if (Input.GetKeyDown(KeyCode.F3))
-        {
-            SpawnRadioOnAllNpcs();
-        }
     }
 
     private void TrySpawnRadio()
@@ -59,39 +54,5 @@ public class RadioSpawner : MonoBehaviour
         }
 
         return audioHost;
-    }
-
-    /*private void CreateAudioStreamIfNeeded()
-    {
-        if (audioHost == null)
-        {
-            audioHost = new MediaFoundationAudioStream("https://stream.simulatorradio.com", resetReaderAtEof: true)
-            {
-                ResampleFormat = WaveFormat.CreateIeeeFloatWaveFormat(sampleRate: 44100, channels: 2),
-            };
-        }
-    }*/
-
-    private void SpawnRadioOnAllNpcs()
-    {
-        var npcs = FindObjectsOfType<NPC>();
-
-        foreach (var npc in npcs)
-        {
-            if (npc.gameObject.GetComponentInChildren<StreamAudioHost>())
-                continue;
-
-            //CreateAudioStreamIfNeeded();
-
-            /*var audioStream = new MediaFoundationAudioStream("https://stream.simulatorradio.com", resetReaderAtEof: true)
-            {
-                ResampleFormat = WaveFormat.CreateIeeeFloatWaveFormat(sampleRate: AudioSettings.GetSampleRate(), channels: 2),
-            };
-
-            var audioGo = StreamAudioHost.CreateGameObject(audioStream!, false, npc.transform).gameObject;
-            var audioSource = audioGo.GetComponent<AudioSource>();
-            audioSource.volume = 0.2f;
-            audioSource.spatialBlend = 1f;*/
-        }
     }
 }
