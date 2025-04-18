@@ -336,6 +336,7 @@ GameObject:
   - component: {fileID: 5743561013313586034}
   - component: {fileID: 4345280818189304200}
   - component: {fileID: 7348883563641285678}
+  - component: {fileID: 1554412451429965449}
   - component: {fileID: 3299743202205600344}
   m_Layer: 0
   m_Name: AudioSource
@@ -542,6 +543,27 @@ MonoBehaviour:
   <Blend>k__BackingField: 0
   MainSource: {fileID: 5927970929593700213}
   CrossfadeSource: {fileID: 6567015238805833979}
+--- !u!114 &1554412451429965449
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6342895549113500183}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 032d0b58230633efb8de577d6e5187b9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  DEBUG: 0
+  AudioSource: {fileID: 5927970929593700213}
+  AudioType: 4
+  DefaultVolume: 1
+  RandomizePitch: 0
+  MinPitch: 1
+  MaxPitch: 1
+  VolumeMultiplier: 1
+  PitchMultiplier: 1
 --- !u!114 &3299743202205600344
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -613,6 +635,7 @@ GameObject:
   - component: {fileID: 3715241948391014493}
   - component: {fileID: 6567015238805833979}
   - component: {fileID: 4760959847838364395}
+  - component: {fileID: 267359155889256888}
   m_Layer: 0
   m_Name: NoiseSource
   m_TagString: Untagged
@@ -777,6 +800,27 @@ AudioHighPassFilter:
   m_Enabled: 1
   m_CutoffFrequency: 500
   m_HighpassResonanceQ: 1
+--- !u!114 &267359155889256888
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9219180499705013754}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 032d0b58230633efb8de577d6e5187b9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  DEBUG: 0
+  AudioSource: {fileID: 6567015238805833979}
+  AudioType: 4
+  DefaultVolume: 1
+  RandomizePitch: 0
+  MinPitch: 1
+  MaxPitch: 1
+  VolumeMultiplier: 1
+  PitchMultiplier: 1
 --- !u!1001 &1341501118021335843
 PrefabInstance:
   m_ObjectHideFlags: 0

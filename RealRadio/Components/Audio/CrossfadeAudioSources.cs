@@ -1,3 +1,4 @@
+using ScheduleOne.Audio;
 using UnityEngine;
 
 namespace RealRadio.Components.Audio
@@ -14,6 +15,15 @@ namespace RealRadio.Components.Audio
         public AudioSource? MainSource;
         public AudioSource? CrossfadeSource;
 
+        private AudioSourceController? MainSourceController;
+        private AudioSourceController? CrossfadeSourceController;
+
+        private void Awake()
+        {
+            MainSourceController = MainSource?.GetComponent<AudioSourceController>();
+            CrossfadeSourceController = CrossfadeSource?.GetComponent<AudioSourceController>();
+        }
+
         private void Update()
         {
             if (MainSource == null || CrossfadeSource == null)
@@ -27,13 +37,29 @@ namespace RealRadio.Components.Audio
                 return;
             }
 
-            MainSource.volume = (1 - Blend) * Mathf.Clamp(Volume, 0, 1);
-            CrossfadeSource.volume = Blend * Mathf.Clamp(Volume, 0, 1);
+            UpdateVolume(MainSource, MainSourceController, (1 - Blend) * Volume);
+            UpdateVolume(CrossfadeSource, CrossfadeSourceController, Blend * Volume);
 
             if (CrossfadeSource.volume > 0 && !CrossfadeSource.isPlaying)
                 CrossfadeSource.Play();
             else if (CrossfadeSource.volume == 0 && CrossfadeSource.isPlaying)
                 CrossfadeSource.Stop();
+        }
+
+        private void UpdateVolume(AudioSource source, AudioSourceController? controller, float volume)
+        {
+            volume = Mathf.Clamp(volume, 0, 1);
+
+            if (controller == null)
+            {
+                if (!Mathf.Approximately(source.volume, volume))
+                    source.volume = volume;
+            }
+            else
+            {
+                if (!Mathf.Approximately(controller.Volume, volume))
+                    controller.SetVolume(volume);
+            }
         }
     }
 }

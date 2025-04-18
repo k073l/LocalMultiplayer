@@ -1,4 +1,5 @@
 using System;
+using ScheduleOne.Audio;
 using UnityEngine;
 using UnityEngine.Audio;
 using UnityEngine.Experimental.Audio;
@@ -46,6 +47,7 @@ namespace RealRadio.Components.Audio
         private bool initialized;
         private AudioSource audioSource = null!;
         private bool hostEnabled;
+        private AudioSourceController? audioSourceController;
 
         private void Awake()
         {
@@ -57,6 +59,8 @@ namespace RealRadio.Components.Audio
             float[] audioData = new float[2048 * numChannels];
             Array.Fill(audioData, 1);
             audioSource.clip.SetData(audioData, 0);
+
+            audioSourceController = GetComponent<AudioSourceController>();
 
             // Set some sane defaults on the audio source
             /*audioSource.volume = 0.1f;
@@ -101,6 +105,9 @@ namespace RealRadio.Components.Audio
 
             Host?.OnClientEnabled(this);
             audioSource.Play();
+
+            if (audioSourceController != null)
+                audioSourceController.isPlayingCached = true;
         }
 
         private void OnDisable()
@@ -122,7 +129,12 @@ namespace RealRadio.Components.Audio
             hostEnabled = host?.enabled ?? false;
 
             if (hostEnabled && !audioSource.isPlaying)
+            {
                 audioSource.Play();
+
+                if (audioSourceController != null)
+                    audioSourceController.isPlayingCached = true;
+            }
         }
 
         private void OnAudioFilterRead(float[] data, int channels)
