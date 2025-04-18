@@ -106,6 +106,8 @@ public class SingletonPrefabs : ScriptableObject
 {
 #nullable disable
     public GameObject OffGridBuildManager;
+    public GameObject RadioStationManager;
+    public GameObject RadioSyncManager;
 #nullable enable
 }
 

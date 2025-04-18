@@ -62,7 +62,8 @@ public class Plugin : BaseUnityPlugin
             if (newScene.name == "Menu" && !visitedMenu)
             {
                 visitedMenu = true;
-                LoadManager.Instance.onLoadComplete.AddListener(this, AccessTools.Method(GetType(), nameof(OnMainSceneLoadComplete)));
+                LoadManager.Instance.onLoadComplete.AddListener(OnMainSceneLoadComplete);
+                CreatePersistentSingletons();
             }
 
             if (newScene.name == "Main")
@@ -108,16 +109,26 @@ public class Plugin : BaseUnityPlugin
     {
         if (InstanceFinder.IsServer)
         {
-            CreateSingletons();
+            CreateMainSceneSingletons();
         }
     }
 
-    private void CreateSingletons()
+    private void CreateMainSceneSingletons()
     {
         if (Assets == null)
             throw new InvalidOperationException("Assets have not been set");
 
-        Logger.LogInfo("Creating singletons");
+        Logger.LogInfo("Creating main scene singletons");
         InstanceFinder.ServerManager.Spawn(Instantiate(Assets.Singletons.OffGridBuildManager));
+        InstanceFinder.ServerManager.Spawn(Instantiate(Assets.Singletons.RadioSyncManager));
+    }
+
+    private void CreatePersistentSingletons()
+    {
+        if (Assets == null)
+            throw new InvalidOperationException("Assets have not been set");
+
+        Logger.LogInfo("Creating persistent singletons");
+        Instantiate(Assets.Singletons.RadioStationManager);
     }
 }
