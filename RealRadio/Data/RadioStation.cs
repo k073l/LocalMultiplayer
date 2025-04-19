@@ -1,7 +1,9 @@
+using System;
 using System.IO;
 
 namespace RealRadio.Data;
 
+[Serializable]
 public struct RadioStation
 {
     public string Name;
