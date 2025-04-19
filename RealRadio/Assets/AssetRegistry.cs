@@ -1,10 +1,12 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.Serialization;
 using FishNet.Managing;
 using FishNet.Managing.Object;
 using FishNet.Object;
+using RealRadio.Data;
 using RealRadio.Helpers;
 using ScheduleOne;
 using ScheduleOne.DevUtilities;
@@ -22,6 +24,7 @@ public class AssetRegistry : ScriptableObject
     public ItemDefinitionAssets ItemDefinitions;
     public SingletonPrefabs Singletons;
     public ShopListings ShopListings;
+    [NonSerialized] public RadioStation[] DefaultRadioStations;
 #nullable enable
 
     /// <summary>
@@ -40,6 +43,8 @@ public class AssetRegistry : ScriptableObject
 
         if (result.Singletons.OffGridBuildManager == null)
             throw new AssetRegistryLoadException("Singletons.OffGridBuildManager is null");
+
+        result.DefaultRadioStations = assetBundle.LoadAllAssets<RadioStation>();
 
         return result;
     }

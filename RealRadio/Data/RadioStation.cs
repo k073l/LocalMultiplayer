@@ -1,12 +1,13 @@
 using System;
-using System.IO;
+using UnityEngine;
 
 namespace RealRadio.Data;
 
 [Serializable]
-public struct RadioStation
+[CreateAssetMenu(fileName = "RadioStation", menuName = "RealRadio/ScriptableObjects/RadioStation")]
+public class RadioStation : ScriptableObject
 {
-    public string Name;
+    public string? Name;
     public RadioType Type;
 
     /// <summary>

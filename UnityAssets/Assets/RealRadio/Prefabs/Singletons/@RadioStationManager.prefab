@@ -42,42 +42,5 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: -1200178222, guid: 06549ed6e3aa5624283039434632ccf8, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  defaultStations:
-  - Name: Simulator Radio
-    Type: 0
-    Url: https://stream.simulatorradio.com
-    DirectoryPath: 
-  - Name: TruckersFM
-    Type: 0
-    Url: https://live.truckers.fm
-    DirectoryPath: 
-  - Name: 1.FM Amsterdam Trance
-    Type: 0
-    Url: https://strm112.1.fm/top40_mobile_mp3
-    DirectoryPath: 
-  - Name: Vibes FM
-    Type: 0
-    Url: https://a10.asurahosting.com:9040/radio.mp3
-    DirectoryPath: 
-  - Name: Heart 80s
-    Type: 0
-    Url: https://media-ice.musicradio.com/Heart80sMP3
-    DirectoryPath: 
-  - Name: Heart 90s
-    Type: 0
-    Url: https://media-ice.musicradio.com/Heart90sMP3
-    DirectoryPath: 
-  - Name: Heart 00s
-    Type: 0
-    Url: https://media-ice.musicradio.com/Heart90sMP3
-    DirectoryPath: 
-  - Name: Heart Dance
-    Type: 0
-    Url: https://media-ice.musicradio.com/HeartDanceMP3
-    DirectoryPath: 
-  - Name: LAPD Police Radio
-    Type: 0
-    Url: https://broadcastify.cdnstream1.com/20296
-    DirectoryPath: 
+  m_Name:
+  m_EditorClassIdentifier:

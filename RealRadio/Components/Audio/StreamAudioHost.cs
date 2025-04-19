@@ -93,6 +93,27 @@ public class StreamAudioHost : MonoBehaviour
         }
     }
 
+    public void DetachClient(GameObject gameObject)
+    {
+        var client = gameObject.GetComponent<StreamAudioClient>();
+
+        if (client == null)
+            return;
+
+        if (client.Host != this)
+            throw new InvalidOperationException("Client is not owned by this host");
+
+        if (spawnedClients.Remove(client))
+        {
+            enabledClients.Remove(client);
+
+            client.Host = null;
+            client.Id = 0;
+
+            OnNumActiveClientsChanged();
+        }
+    }
+
     private void Awake()
     {
         audioSource = GetComponent<AudioSource>() ?? throw new InvalidOperationException("No AudioSource component found on game object");
