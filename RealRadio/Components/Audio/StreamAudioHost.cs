@@ -76,7 +76,7 @@ public class StreamAudioHost : MonoBehaviour
 
         spawnedClients.Add(client);
 
-        if (client.gameObject.activeInHierarchy)
+        if (client.isActiveAndEnabled)
         {
             enabledClients.Add(client);
             OnNumActiveClientsChanged();
