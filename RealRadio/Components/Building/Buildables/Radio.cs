@@ -7,6 +7,8 @@ using FishNet.Object.Synchronizing;
 using RealRadio.Components.Audio;
 using RealRadio.Components.Radio;
 using RealRadio.Data;
+using RealRadio.Events;
+using ScheduleOne.Interaction;
 using UnityEngine;
 
 namespace RealRadio.Components.Building.Buildables;
@@ -21,6 +23,9 @@ public class Radio : TogglableOffGridItem
     public GameObject AudioClientObject = null!;
 
     private StreamAudioClient? audioClient;
+
+    private InteractableOptions? interactableOptions;
+    private InteractableObject? interactableObject;
 
     [ServerRpc(RequireOwnership = false, RunLocally = true)]
     public void SetRadioStationIndex(int index)
@@ -39,9 +44,40 @@ public class Radio : TogglableOffGridItem
         base.Awake();
 
         if (isGhost)
+        {
             Destroy(AudioClientObject);
-        else if (AudioClientObject == null)
+            return;
+        }
+
+        if (AudioClientObject == null)
             throw new InvalidOperationException("AudioClientObject is null");
+
+        interactableObject = GetComponentInChildren<InteractableObject>() ?? throw new InvalidOperationException("No InteractableObject component found in self or children");
+        interactableOptions = GetComponentInChildren<InteractableOptions>() ?? throw new InvalidOperationException("No InteractableOptions component found in self or children");
+        interactableOptions.OnInteract += OnInteract;
+        interactableOptions.OnUpdateInteractionText += OnUpdateInteractionText;
+    }
+
+    private void OnUpdateInteractionText(InteractableOption? option, EventRefData<string> data)
+    {
+        if (option?.Id == "toggle")
+            data.Value = IsOn ? "Turn off" : "Turn on";
+    }
+
+    private void OnInteract(string optionId)
+    {
+        switch (optionId)
+        {
+            case "toggle":
+                IsOn = !IsOn;
+                break;
+            case "configure":
+                Plugin.Logger.LogInfo("Start configure radio");
+                break;
+            default:
+                Plugin.Logger.LogWarning($"Unknown option id: {optionId}");
+                break;
+        }
     }
 
     public override void OnStartServer()
