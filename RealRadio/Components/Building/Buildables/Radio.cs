@@ -34,18 +34,6 @@ public class Radio : TogglableOffGridItem
         RadioStationIndex = index;
     }
 
-    [TargetRpc]
-    private void ReceiveRadioStationIndex(NetworkConnection conn, int index)
-    {
-        if (index < 0 || index >= RadioStationManager.Instance.Stations.Count)
-        {
-            Plugin.Logger.LogWarning($"Invalid radio station index (out of range): {index}");
-            return;
-        }
-
-        RadioStationIndex = index;
-    }
-
     public override void Awake()
     {
         base.Awake();
