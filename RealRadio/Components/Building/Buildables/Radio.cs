@@ -59,6 +59,7 @@ public class Radio : TogglableOffGridItem
     public override void OnStartServer()
     {
         base.OnStartServer();
+        RadioStationIndex = 0; // temp for testing
         OnStationChanged(-1, RadioStationIndex, true);
     }
 

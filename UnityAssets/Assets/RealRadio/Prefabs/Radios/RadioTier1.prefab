@@ -120,7 +120,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   <IsOn>k__BackingField: 0
-  <RadioStationIndex>k__BackingField: 0
+  <RadioStationIndex>k__BackingField: -1
   AudioClientObject: {fileID: 6342895549113500183}
 --- !u!1 &1411287135716648670
 GameObject:
