@@ -76,7 +76,7 @@ public class StreamAudioHost : MonoBehaviour
 
         spawnedClients.Add(client);
 
-        if (client.isActiveAndEnabled)
+        if (client.gameObject.activeInHierarchy)
         {
             enabledClients.Add(client);
             OnNumActiveClientsChanged();
@@ -149,7 +149,7 @@ public class StreamAudioHost : MonoBehaviour
             return;
         }
 
-        if (!AudioStream.Started)
+        if (!AudioStream.Started && enabledClients.Count > 0)
             StartAudioStream();
     }
 

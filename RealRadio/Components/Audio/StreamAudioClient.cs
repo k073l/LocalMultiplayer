@@ -16,12 +16,6 @@ namespace RealRadio.Components.Audio
             get => host;
             set
             {
-                if (value == null)
-                    throw new ArgumentNullException(nameof(value));
-
-                if (host != null)
-                    throw new InvalidOperationException("Host is already set");
-
                 if (host != null)
                 {
                     host.OnStreamStarted -= OnHostStreamStarted;
@@ -30,8 +24,11 @@ namespace RealRadio.Components.Audio
 
                 host = value;
 
-                host.OnStreamStarted += OnHostStreamStarted;
-                host.OnStreamStopped += OnHostStreamStopped;
+                if (host != null)
+                {
+                    host.OnStreamStarted += OnHostStreamStarted;
+                    host.OnStreamStopped += OnHostStreamStopped;
+                }
             }
         }
 
