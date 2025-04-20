@@ -109,18 +109,29 @@ public class Plugin : BaseUnityPlugin
     {
         if (InstanceFinder.IsServer)
         {
-            CreateMainSceneSingletons();
+            CreateMainSceneServerSingletons();
         }
+
+        CreateMainSceneClientSingletons();
     }
 
-    private void CreateMainSceneSingletons()
+    private void CreateMainSceneServerSingletons()
     {
         if (Assets == null)
             throw new InvalidOperationException("Assets have not been set");
 
-        Logger.LogInfo("Creating main scene singletons");
+        Logger.LogInfo("Creating main scene server singletons");
         InstanceFinder.ServerManager.Spawn(Instantiate(Assets.Singletons.OffGridBuildManager));
         InstanceFinder.ServerManager.Spawn(Instantiate(Assets.Singletons.RadioSyncManager));
+    }
+
+    private void CreateMainSceneClientSingletons()
+    {
+        if (Assets == null)
+            throw new InvalidOperationException("Assets have not been set");
+
+        Logger.LogInfo("Creating main scene client singletons");
+        Instantiate(Assets.Singletons.RadialMenu);
     }
 
     private void CreatePersistentSingletons()

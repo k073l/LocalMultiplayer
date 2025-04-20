@@ -1,0 +1,19 @@
+@import "/Assets/RealRadio/UI/DefaultStyle.uss";
+
+.root {
+    width: 100%;
+    height: 100%;
+    align-items: center;
+    justify-content: center;
+    flex-grow: 1;
+}
+
+.root.invisible {
+    opacity: 0;
+}
+
+.test-text {
+    width: 100%;
+    height: 100%;
+    -unity-text-align: middle-center;
+}

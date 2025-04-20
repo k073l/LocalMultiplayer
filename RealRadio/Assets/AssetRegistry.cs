@@ -44,6 +44,15 @@ public class AssetRegistry : ScriptableObject
         if (result.Singletons.OffGridBuildManager == null)
             throw new AssetRegistryLoadException("Singletons.OffGridBuildManager is null");
 
+        if (result.Singletons.RadioStationManager == null)
+            throw new AssetRegistryLoadException("Singletons.RadioStationManager is null");
+
+        if (result.Singletons.RadioSyncManager == null)
+            throw new AssetRegistryLoadException("Singletons.RadioSyncManager is null");
+
+        if (result.Singletons.RadialMenu == null)
+            throw new AssetRegistryLoadException("Singletons.RadialMenu is null");
+
         result.DefaultRadioStations = assetBundle.LoadAllAssets<RadioStation>();
 
         return result;
@@ -113,6 +122,7 @@ public class SingletonPrefabs : ScriptableObject
     public GameObject OffGridBuildManager;
     public GameObject RadioStationManager;
     public GameObject RadioSyncManager;
+    public GameObject RadialMenu;
 #nullable enable
 }
 

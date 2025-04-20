@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using RealRadio.Components.UI;
 using RealRadio.Events;
 using ScheduleOne.Interaction;
 using ScheduleOne.Management.Presets.Options;
@@ -100,10 +101,12 @@ public class InteractableOptions : MonoBehaviour
 
     public virtual void OnShowOptions()
     {
+        RadialMenu.Instance.Show(Options);
     }
 
     public virtual void OnHideOptions()
     {
+        RadialMenu.Instance.Hide();
     }
 
     private void LockInput()
