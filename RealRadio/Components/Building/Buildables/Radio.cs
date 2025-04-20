@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Linq;
+using FishNet.Connection;
 using FishNet.Object;
 using FishNet.Object.Synchronizing;
 using RealRadio.Components.Audio;
@@ -14,12 +15,36 @@ public class Radio : TogglableOffGridItem
 {
     public RadioStation? RadioStation { get; private set; }
 
-    [field: SyncVar(Channel = FishNet.Transporting.Channel.Reliable, ReadPermissions = ReadPermission.Observers, WritePermissions = WritePermission.ServerOnly, OnChange = nameof(OnStationChanged))]
-    public int RadioStationIndex { get; [ServerRpc(RequireOwnership = false)] set; } = -1;
+    [field: SyncVar(Channel = FishNet.Transporting.Channel.Reliable, ReadPermissions = ReadPermission.Observers, WritePermissions = WritePermission.ClientUnsynchronized, OnChange = nameof(OnStationChanged))]
+    public int RadioStationIndex { get; private set; }
 
     public GameObject AudioClientObject = null!;
 
     private StreamAudioClient? audioClient;
+
+    [ServerRpc(RequireOwnership = false, RunLocally = true)]
+    public void SetRadioStationIndex(int index)
+    {
+        if (index < 0 || index >= RadioStationManager.Instance.Stations.Count)
+        {
+            Plugin.Logger.LogWarning($"Invalid radio station index (out of range): {index}");
+            return;
+        }
+
+        RadioStationIndex = index;
+    }
+
+    [TargetRpc]
+    private void ReceiveRadioStationIndex(NetworkConnection conn, int index)
+    {
+        if (index < 0 || index >= RadioStationManager.Instance.Stations.Count)
+        {
+            Plugin.Logger.LogWarning($"Invalid radio station index (out of range): {index}");
+            return;
+        }
+
+        RadioStationIndex = index;
+    }
 
     public override void Awake()
     {
@@ -31,44 +56,21 @@ public class Radio : TogglableOffGridItem
             throw new InvalidOperationException("AudioClientObject is null");
     }
 
-    public override void Start()
-    {
-        base.Start();
-
-        if (isGhost)
-            return;
-    }
-
     public override void OnStartServer()
     {
         base.OnStartServer();
-
-        StartCoroutine(SetRadioIndex());
+        OnStationChanged(-1, RadioStationIndex, true);
     }
 
-    private IEnumerator SetRadioIndex()
+    public override void OnStartClient()
     {
-        if (!NetworkManager.IsServer || RadioStationManager.Instance.Stations.Count == 0)
-        {
-            Plugin.Logger.LogInfo($"IsServer: {IsServer}, Stations.Count: {RadioStationManager.Instance.Stations.Count}");
-            yield break;
-        }
-
-        while (!IsClientInitialized)
-        {
-            Plugin.Logger.LogInfo("Waiting for client initialization");
-            yield return null;
-        }
-
-        RadioStationIndex = 0;
-        OnStationChanged(-1, 0, true);
+        base.OnStartClient();
+        OnStationChanged(-1, RadioStationIndex, false);
     }
 
     protected override void OnStateToggled(bool prev, bool next, bool asServer)
     {
         base.OnStateToggled(prev, next, asServer);
-
-        Plugin.Logger.LogInfo($"OnStateToggled prev: {prev}, next: {next}, asServer: {asServer}");
 
         if (asServer || isGhost)
             return;
@@ -94,7 +96,7 @@ public class Radio : TogglableOffGridItem
         if (nextStation == RadioStation)
             return;
 
-        Plugin.Logger.LogInfo($"Radio station index changing from {prevStation?.ToString() ?? "null"} to {nextStation?.ToString() ?? "null"}");
+        Plugin.Logger.LogDebug($"Radio station changing from {prevStation?.ToString() ?? "null"} to {nextStation?.ToString() ?? "null"}");
 
         if (RadioStation != null)
             UnbindAudioClient();
