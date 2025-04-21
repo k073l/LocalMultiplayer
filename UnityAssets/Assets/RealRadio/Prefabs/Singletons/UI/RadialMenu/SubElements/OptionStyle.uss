@@ -1,0 +1,12 @@
+@import url("/Assets/RealRadio/UI/DefaultStyle.uss");
+
+#Root {
+    width: 100px;
+    height: 100px;
+    align-items: center;
+    justify-content: center;
+    flex-grow: 1;
+
+    border-width: 2px;
+    border-color: red;
+}

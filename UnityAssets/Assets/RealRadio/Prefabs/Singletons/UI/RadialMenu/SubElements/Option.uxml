@@ -1,0 +1,6 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="project://database/Assets/RealRadio/Prefabs/Singletons/UI/RadialMenu/SubElements/OptionStyle.uss?fileID=7433441132597879392&amp;guid=47402a86d56ea64488d9579eeee358d2&amp;type=3#OptionStyle" />
+    <ui:VisualElement name="Root">
+        <ui:Label tabindex="-1" text="Test" parse-escape-sequences="true" display-tooltip-when-elided="true" name="TestLabel" />
+    </ui:VisualElement>
+</ui:UXML>

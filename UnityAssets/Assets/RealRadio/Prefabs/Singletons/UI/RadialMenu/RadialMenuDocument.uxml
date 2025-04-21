@@ -1,6 +1,8 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
     <Style src="project://database/Assets/RealRadio/Prefabs/Singletons/UI/RadialMenu/RadialMenuStyle.uss?fileID=7433441132597879392&amp;guid=d1153b2e62399cc4bb28f0df248aaf6b&amp;type=3#RadialMenuStyle" />
     <ui:VisualElement name="Root" class="root">
-        <ui:Label tabindex="-1" text="Test text" parse-escape-sequences="true" display-tooltip-when-elided="true" name="TestLabel" focusable="false" class="test-text" />
+        <ui:VisualElement name="BackgroundOverlay" style="flex-grow: 1;" />
+        <ui:VisualElement name="RadialItems" style="flex-grow: 1;" />
+        <ui:Label text="Selected Option" parse-escape-sequences="true" display-tooltip-when-elided="true" name="SelectedOptionLabel" />
     </ui:VisualElement>
 </ui:UXML>

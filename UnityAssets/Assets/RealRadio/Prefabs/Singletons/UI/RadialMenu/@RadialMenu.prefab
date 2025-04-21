@@ -61,3 +61,4 @@ MonoBehaviour:
   m_Script: {fileID: 1579253900, guid: 06549ed6e3aa5624283039434632ccf8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  RadialItemAsset: {fileID: 9197481963319205126, guid: d2a69afb2c5c3654688b8eb2ba8947e6, type: 3}
