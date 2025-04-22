@@ -1,9 +1,12 @@
 using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using RealRadio.Components.Building;
 using ScheduleOne.DevUtilities;
 using UnityEngine;
+using UnityEngine.InputSystem;
 using UnityEngine.UIElements;
+using VLB;
 
 namespace RealRadio.Components.UI;
 
@@ -91,17 +94,32 @@ public class RadialMenu : Singleton<RadialMenu>
         if (!isVisible)
             return;
 
+        LimitMousePosition();
         UpdateHoveredOption();
+    }
+
+    private void LimitMousePosition()
+    {
+        var middle = new Vector2(Screen.width / 2, Screen.height / 2);
+        float angle = GetMouseAngleFromMiddle();
+        float distanceFromMiddle = ((Vector2)Input.mousePosition - middle).magnitude;
+        float maxDistance = GetItemOffsetFromMiddle();
+
+        if (distanceFromMiddle > maxDistance)
+        {
+            Vector2 angleAsVec2 = new(
+                Mathf.Sin(angle * Mathf.Deg2Rad),
+                Mathf.Cos(angle * Mathf.Deg2Rad)
+            );
+            Vector2 newPosition = middle + (angleAsVec2 * maxDistance);
+            Mouse.current.WarpCursorPosition(newPosition);
+        }
     }
 
     private void UpdateHoveredOption()
     {
         float sliceSize = 360 / options.Count;
-        float angle = Mathf.Atan2(Input.mousePosition.y - Screen.height / 2, Input.mousePosition.x - Screen.width / 2) * Mathf.Rad2Deg;
-        angle -= 90f;
-
-        angle = angle < 0 ? angle + 360f : angle;
-        angle = 360f - angle;
+        float angle = GetMouseAngleFromMiddle();
 
         // Round index to nearest slice
         int index = Mathf.RoundToInt(angle / sliceSize);
@@ -110,6 +128,17 @@ public class RadialMenu : Singleton<RadialMenu>
             index = 0;
 
         HoveredOption = options[index];
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static float GetMouseAngleFromMiddle()
+    {
+        float angle = Mathf.Atan2(Input.mousePosition.y - Screen.height / 2, Input.mousePosition.x - Screen.width / 2) * Mathf.Rad2Deg;
+        angle -= 90f;
+
+        angle = angle < 0 ? angle + 360f : angle;
+        angle = 360f - angle;
+        return angle;
     }
 
     public void SetOptions(IEnumerable<InteractableOption> options)
@@ -183,7 +212,7 @@ public class RadialMenu : Singleton<RadialMenu>
 
         Vector2 middle = new Vector2(Screen.width / 2, Screen.height / 2);
         float angle = (sliceSize * i) - 90f;
-        float offsetFromMiddle = Mathf.Min(Screen.width, Screen.height) * 0.2f;
+        float offsetFromMiddle = GetItemOffsetFromMiddle();
         float x = Mathf.Cos(angle * Mathf.Deg2Rad) * offsetFromMiddle;
         float y = Mathf.Sin(angle * Mathf.Deg2Rad) * offsetFromMiddle;
 
@@ -193,5 +222,10 @@ public class RadialMenu : Singleton<RadialMenu>
 
         uiOption.MarkDirtyRepaint();
         uiOption.visible = true;
+    }
+
+    private static float GetItemOffsetFromMiddle()
+    {
+        return Mathf.Min(Screen.width, Screen.height) * 0.2f;
     }
 }
