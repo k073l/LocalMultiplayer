@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using RealRadio.Components.Building;
 using ScheduleOne.DevUtilities;
+using ScheduleOne.PlayerScripts;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UIElements;
-using VLB;
 
 namespace RealRadio.Components.UI;
 
@@ -165,10 +165,12 @@ public class RadialMenu : Singleton<RadialMenu>
         if (isVisible)
         {
             root.RemoveFromClassList("invisible");
+            PlayerCamera.Instance.AddActiveUIElement("RadialMenu");
         }
         else
         {
             root.AddToClassList("invisible");
+            PlayerCamera.Instance.RemoveActiveUIElement("RadialMenu");
             HoveredOption = null;
         }
     }
