@@ -1,11 +1,9 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using RealRadio.Components.Building;
 using ScheduleOne.DevUtilities;
 using UnityEngine;
 using UnityEngine.UIElements;
-using UnityEngine.Yoga;
 
 namespace RealRadio.Components.UI;
 
@@ -14,7 +12,36 @@ public class RadialMenu : Singleton<RadialMenu>
 {
     public VisualTreeAsset RadialItemAsset = null!;
 
-    public InteractableOption? HoveredOption { get; private set; }
+    public InteractableOption? HoveredOption
+    {
+        get => hoveredOption;
+        private set
+        {
+            if (value == hoveredOption)
+                return;
+
+
+            if (hoveredOption != null)
+            {
+                var element = optionElements[hoveredOption];
+                element.Query(name: "Root").First().RemoveFromClassList("hovered");
+            }
+
+            hoveredOption = value;
+
+            if (hoveredOption != null)
+            {
+                var element = optionElements[hoveredOption];
+                element.Query(name: "Root").First().AddToClassList("hovered");
+
+                optionLabel.text = hoveredOption.Name;
+            }
+            else
+            {
+                optionLabel.text = string.Empty;
+            }
+        }
+    }
     public Action<InteractableOption>? OnOptionSelected { get; set; }
 
     public bool IsVisible
@@ -32,10 +59,12 @@ public class RadialMenu : Singleton<RadialMenu>
 
     private bool isVisible;
     private List<InteractableOption> options = new(capacity: 16);
+    private Dictionary<InteractableOption, VisualElement> optionElements = new(capacity: 16);
     private UIDocument document = null!;
     private VisualElement root = null!;
     private Label optionLabel = null!;
     private VisualElement radialItemsContainer = null!;
+    private InteractableOption? hoveredOption;
 
     public override void Awake()
     {
@@ -55,6 +84,32 @@ public class RadialMenu : Singleton<RadialMenu>
         base.Start();
 
         OnVisibilityChanged();
+    }
+
+    private void Update()
+    {
+        if (!isVisible)
+            return;
+
+        UpdateHoveredOption();
+    }
+
+    private void UpdateHoveredOption()
+    {
+        float sliceSize = 360 / options.Count;
+        float angle = Mathf.Atan2(Input.mousePosition.y - Screen.height / 2, Input.mousePosition.x - Screen.width / 2) * Mathf.Rad2Deg;
+        angle -= 90f;
+
+        angle = angle < 0 ? angle + 360f : angle;
+        angle = 360f - angle;
+
+        // Round index to nearest slice
+        int index = Mathf.RoundToInt(angle / sliceSize);
+
+        if (index == options.Count)
+            index = 0;
+
+        HoveredOption = options[index];
     }
 
     public void SetOptions(IEnumerable<InteractableOption> options)
@@ -94,6 +149,9 @@ public class RadialMenu : Singleton<RadialMenu>
         // Remove existing children
         radialItemsContainer.Clear();
 
+        // Clear mapping of option elements
+        optionElements.Clear();
+
         if (options.Count == 0)
         {
             Plugin.Logger.LogWarning("No options to display in radial menu");
@@ -106,10 +164,10 @@ public class RadialMenu : Singleton<RadialMenu>
             VisualElement uiOption = RadialItemAsset.Instantiate();
             uiOption.visible = false;
             uiOption.userData = i;
-
             uiOption.RegisterCallback<GeometryChangedEvent>(PositionOptionElement);
 
             radialItemsContainer.Add(uiOption);
+            optionElements.Add(option, uiOption);
         }
     }
 
