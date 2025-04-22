@@ -155,15 +155,17 @@ public class InteractableOption : ScriptableObject
 {
     public string? Id;
     public string? Name;
+    public Sprite? Sprite;
 
     /// <summary>
     /// Creates an option. Meant to be used from code at runtime.
     /// </summary>
-    public static InteractableOption CreateOption(string id, string name)
+    public static InteractableOption CreateOption(string id, string name, Sprite? sprite)
     {
         var result = CreateInstance<InteractableOption>();
         result.Id = id;
         result.Name = name;
+        result.Sprite = sprite;
         return result;
     }
 }

@@ -14,3 +14,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Id: toggle
   Name: Turn on/off (this text will be updated at runtime)
+  Sprite: {fileID: 21300000, guid: 1ab7558ca4f04744ba517080a9e8cf60, type: 3}

@@ -166,6 +166,9 @@ public class RadialMenu : Singleton<RadialMenu>
             uiOption.userData = i;
             uiOption.RegisterCallback<GeometryChangedEvent>(PositionOptionElement);
 
+            var root = uiOption.Query(name: "Root").First();
+            root.style.backgroundImage = new StyleBackground(option.Sprite);
+
             radialItemsContainer.Add(uiOption);
             optionElements.Add(option, uiOption);
         }

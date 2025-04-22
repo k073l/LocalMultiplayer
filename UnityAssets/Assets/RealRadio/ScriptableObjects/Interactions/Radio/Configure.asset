@@ -14,3 +14,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Id: configure
   Name: Configure
+  Sprite: {fileID: 21300000, guid: a737cb708e3e4d248bee91609a8bad0d, type: 3}
