@@ -307,10 +307,12 @@ public class RadialMenu : Singleton<RadialMenu>
     private void LockInput()
     {
         PlayerCamera.Instance.SetCanLook(false);
+        HUD.Instance.SetCrosshairVisible(false);
     }
 
     private void UnlockInput()
     {
         PlayerCamera.Instance.SetCanLook(true);
+        HUD.Instance.SetCrosshairVisible(true);
     }
 }
