@@ -87,7 +87,7 @@ public class RadialMenu : Singleton<RadialMenu>
     private Label optionLabel = null!;
     private VisualElement radialItemsContainer = null!;
     private InteractableOption? hoveredOption;
-    private Vector2[] mouseDeltaHistory = new Vector2[10]; // 10 last averages of mouse delta
+    private Vector2[] mouseDeltaHistory = new Vector2[20];
     private int mouseDeltaHistoryIndex;
     private float currentMouseHistoryTime;
     private int mouseDeltaSampleCount;
@@ -178,7 +178,7 @@ public class RadialMenu : Singleton<RadialMenu>
             ++mouseDeltaSampleCount;
         }
 
-        if (currentMouseHistoryTime >= 0.05f)
+        if (currentMouseHistoryTime >= 0.01f)
         {
             mouseDeltaHistoryIndex = (mouseDeltaHistoryIndex + 1) % mouseDeltaHistory.Length;
             currentMouseHistoryTime = 0f;
