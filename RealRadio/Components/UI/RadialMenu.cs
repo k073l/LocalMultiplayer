@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using RealRadio.Components.Building;
 using ScheduleOne;
+using ScheduleOne.Audio;
 using ScheduleOne.DevUtilities;
 using ScheduleOne.PlayerScripts;
 using UnityEngine;
@@ -15,6 +16,18 @@ namespace RealRadio.Components.UI;
 public class RadialMenu : Singleton<RadialMenu>
 {
     public VisualTreeAsset RadialItemAsset = null!;
+
+    [field: SerializeField]
+    public AudioSource? OptionChangeSound { get; set; }
+
+    [field: SerializeField]
+    public AudioSource? OptionSelectSound { get; set; }
+
+    [field: SerializeField]
+    public AudioSource? ShowSound { get; set; }
+
+    [field: SerializeField]
+    public AudioSource? HideSound { get; set; }
 
     public InteractableOption? HoveredOption
     {
@@ -39,6 +52,8 @@ public class RadialMenu : Singleton<RadialMenu>
                 element.Query(name: "Root").First().AddToClassList("hovered");
 
                 optionLabel.text = hoveredOption.Name;
+
+                OnHoveredOptionChanged?.Invoke(hoveredOption);
             }
             else
             {
@@ -47,6 +62,7 @@ public class RadialMenu : Singleton<RadialMenu>
         }
     }
     public Action<InteractableOption>? OnOptionSelected { get; set; }
+    public Action<InteractableOption>? OnHoveredOptionChanged { get; set; }
     public Action? OnMenuOpened { get; set; }
     public Action? OnMenuClosed { get; set; }
 
@@ -89,6 +105,10 @@ public class RadialMenu : Singleton<RadialMenu>
     {
         base.Start();
 
+        OnMenuOpened += () => ShowSound?.Play();
+        OnMenuClosed += () => HideSound?.Play();
+        OnHoveredOptionChanged += (option) => OptionChangeSound?.Play();
+        OnOptionSelected += (option) => OptionSelectSound?.Play();
         OnVisibilityChanged();
     }
 
