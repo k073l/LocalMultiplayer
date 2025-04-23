@@ -101,7 +101,7 @@ public class InteractableOptions : MonoBehaviour
 
     public virtual void OnShowOptions()
     {
-        RadialMenu.Instance.Show(Options);
+        RadialMenu.Instance.Show(Options, OnOptionSelected);
     }
 
     public virtual void OnHideOptions()
@@ -146,6 +146,13 @@ public class InteractableOptions : MonoBehaviour
                 UnlockInput();
             }
         }
+    }
+
+    private void OnOptionSelected(InteractableOption option)
+    {
+        selectedOption = option;
+        InteractionManager.Instance.interactedObject.EndInteract();
+        InteractionManager.Instance.interactedObject = null;
     }
 }
 

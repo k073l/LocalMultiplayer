@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using RealRadio.Components.Building;
+using ScheduleOne;
 using ScheduleOne.DevUtilities;
 using ScheduleOne.PlayerScripts;
 using UnityEngine;
@@ -46,6 +47,8 @@ public class RadialMenu : Singleton<RadialMenu>
         }
     }
     public Action<InteractableOption>? OnOptionSelected { get; set; }
+    public Action? OnMenuOpened { get; set; }
+    public Action? OnMenuClosed { get; set; }
 
     public bool IsVisible
     {
@@ -96,6 +99,7 @@ public class RadialMenu : Singleton<RadialMenu>
 
         LimitMousePosition();
         UpdateHoveredOption();
+        CheckForPrimaryInput();
     }
 
     private void LimitMousePosition()
@@ -130,6 +134,20 @@ public class RadialMenu : Singleton<RadialMenu>
         HoveredOption = options[index];
     }
 
+    private void CheckForPrimaryInput()
+    {
+        if (!GameInput.GetButtonDown(GameInput.ButtonCode.PrimaryClick))
+            return;
+
+        if (HoveredOption == null)
+        {
+            Plugin.Logger.LogWarning("Hovered option is null");
+            return;
+        }
+
+        OnOptionSelected?.Invoke(HoveredOption);
+    }
+
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static float GetMouseAngleFromMiddle()
     {
@@ -148,16 +166,25 @@ public class RadialMenu : Singleton<RadialMenu>
         RebuildMenu();
     }
 
-    public void Show(IEnumerable<InteractableOption> options)
+    public void Show(IEnumerable<InteractableOption> options, Action<InteractableOption>? onOptionSelected = null)
     {
         SetOptions(options);
         IsVisible = true;
         RebuildMenu();
+        OnOptionSelected += OnSelected;
+        OnMenuOpened?.Invoke();
+
+        void OnSelected(InteractableOption option)
+        {
+            OnOptionSelected -= OnSelected;
+            onOptionSelected?.Invoke(option);
+        }
     }
 
     public void Hide()
     {
         IsVisible = false;
+        OnMenuClosed?.Invoke();
     }
 
     private void OnVisibilityChanged()
