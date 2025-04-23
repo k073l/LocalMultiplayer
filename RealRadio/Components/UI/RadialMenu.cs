@@ -204,6 +204,14 @@ public class RadialMenu : Singleton<RadialMenu>
         return average / mouseDeltaHistory.Length;
     }
 
+    private void ResetMouseDeltaHistory()
+    {
+        Array.Fill(mouseDeltaHistory, Vector2.zero);
+        mouseDeltaHistoryIndex = 0;
+        currentMouseHistoryTime = 0f;
+        mouseDeltaSampleCount = 0;
+    }
+
     public void SetOptions(IEnumerable<InteractableOption> options)
     {
         this.options.Clear();
@@ -232,6 +240,7 @@ public class RadialMenu : Singleton<RadialMenu>
         IsVisible = false;
         OnMenuClosed?.Invoke();
         UnlockInput();
+        ResetMouseDeltaHistory();
     }
 
     private void OnVisibilityChanged()
