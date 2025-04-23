@@ -270,6 +270,9 @@ public class RadialMenu : Singleton<RadialMenu>
             uiOption.visible = false;
             uiOption.userData = i;
             uiOption.RegisterCallback<GeometryChangedEvent>(PositionOptionElement);
+            uiOption.style.position = Position.Absolute;
+            uiOption.style.left = Screen.width / 2;
+            uiOption.style.top = Screen.height / 2;
 
             var root = uiOption.Query(name: "Root").First();
             root.style.backgroundImage = new StyleBackground(option.Sprite);
@@ -283,6 +286,9 @@ public class RadialMenu : Singleton<RadialMenu>
     {
         VisualElement uiOption = (VisualElement)evt.target;
 
+        if (uiOption.resolvedStyle.width == float.NaN)
+            return;
+
         int i = (int)uiOption.userData;
         float sliceSize = 360 / options.Count;
 
@@ -292,9 +298,12 @@ public class RadialMenu : Singleton<RadialMenu>
         float x = Mathf.Cos(angle * Mathf.Deg2Rad) * offsetFromMiddle;
         float y = Mathf.Sin(angle * Mathf.Deg2Rad) * offsetFromMiddle;
 
-        uiOption.style.position = Position.Absolute;
-        uiOption.style.left = new StyleLength(new Length(middle.x + x - (uiOption.resolvedStyle.width / 2), LengthUnit.Pixel));
-        uiOption.style.top = new StyleLength(new Length(middle.y + y - (uiOption.resolvedStyle.height / 2), LengthUnit.Pixel));
+        var translation = new Translate(
+            new Length(x - (uiOption.resolvedStyle.width / 2), LengthUnit.Pixel),
+            new Length(y - (uiOption.resolvedStyle.height / 2), LengthUnit.Pixel)
+        );
+        var root = uiOption.Query(name: "Root").First();
+        root.style.translate = translation;
 
         uiOption.MarkDirtyRepaint();
         uiOption.visible = true;

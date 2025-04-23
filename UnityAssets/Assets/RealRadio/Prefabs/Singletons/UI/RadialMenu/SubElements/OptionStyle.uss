@@ -6,7 +6,6 @@
     justify-content: center;
     flex-grow: 1;
     transition: all 0.1s ease-out;
-    opacity: 0.75;
     background-image: url("project://database/Assets/RealRadio/Sprites/UI/gear.png?fileID=21300000&guid=a737cb708e3e4d248bee91609a8bad0d&type=3#gear");
     background-position: center;
     -unity-background-image-tint-color: #aaa;
@@ -14,6 +13,5 @@
 
 #Root.hovered {
     scale: 1.2;
-    opacity: 1;
     -unity-background-image-tint-color: #fff;
 }
