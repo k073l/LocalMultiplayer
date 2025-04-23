@@ -87,6 +87,10 @@ public class RadialMenu : Singleton<RadialMenu>
     private Label optionLabel = null!;
     private VisualElement radialItemsContainer = null!;
     private InteractableOption? hoveredOption;
+    private Vector2[] mouseDeltaHistory = new Vector2[10]; // 10 last averages of mouse delta
+    private int mouseDeltaHistoryIndex;
+    private float currentMouseHistoryTime;
+    private int mouseDeltaSampleCount;
 
     public override void Awake()
     {
@@ -117,27 +121,9 @@ public class RadialMenu : Singleton<RadialMenu>
         if (!isVisible)
             return;
 
-        LimitMousePosition();
+        UpdateAverageMouseDelta();
         UpdateHoveredOption();
         CheckForPrimaryInput();
-    }
-
-    private void LimitMousePosition()
-    {
-        var middle = new Vector2(Screen.width / 2, Screen.height / 2);
-        float angle = GetMouseAngleFromMiddle();
-        float distanceFromMiddle = ((Vector2)Input.mousePosition - middle).magnitude;
-        float maxDistance = GetItemOffsetFromMiddle();
-
-        if (distanceFromMiddle > maxDistance)
-        {
-            Vector2 angleAsVec2 = new(
-                Mathf.Sin(angle * Mathf.Deg2Rad),
-                Mathf.Cos(angle * Mathf.Deg2Rad)
-            );
-            Vector2 newPosition = middle + (angleAsVec2 * maxDistance);
-            Mouse.current.WarpCursorPosition(newPosition);
-        }
     }
 
     private void UpdateHoveredOption()
@@ -169,14 +155,52 @@ public class RadialMenu : Singleton<RadialMenu>
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static float GetMouseAngleFromMiddle()
+    private float GetMouseAngleFromMiddle()
     {
-        float angle = Mathf.Atan2(Input.mousePosition.y - Screen.height / 2, Input.mousePosition.x - Screen.width / 2) * Mathf.Rad2Deg;
+        Vector2 mouseDelta = GetAverageMouseDelta();
+        float angle = Mathf.Atan2(mouseDelta.y, mouseDelta.x) * Mathf.Rad2Deg;
         angle -= 90f;
 
         angle = angle < 0 ? angle + 360f : angle;
         angle = 360f - angle;
         return angle;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private void UpdateAverageMouseDelta()
+    {
+        currentMouseHistoryTime += Time.unscaledDeltaTime;
+        Vector2 mouseDelta = GameInput.MouseDelta;
+
+        if (mouseDelta.sqrMagnitude > 0)
+        {
+            mouseDeltaHistory[mouseDeltaHistoryIndex] += mouseDelta;
+            ++mouseDeltaSampleCount;
+        }
+
+        if (currentMouseHistoryTime >= 0.05f)
+        {
+            mouseDeltaHistoryIndex = (mouseDeltaHistoryIndex + 1) % mouseDeltaHistory.Length;
+            currentMouseHistoryTime = 0f;
+
+            if (mouseDeltaSampleCount > 0)
+            {
+                mouseDeltaHistory[mouseDeltaHistoryIndex] /= mouseDeltaSampleCount;
+                mouseDeltaSampleCount = 0;
+            }
+        }
+    }
+
+    private Vector2 GetAverageMouseDelta()
+    {
+        Vector2 average = Vector2.zero;
+
+        for (int i = 0; i < mouseDeltaHistory.Length; ++i)
+        {
+            average += mouseDeltaHistory[i];
+        }
+
+        return average / mouseDeltaHistory.Length;
     }
 
     public void SetOptions(IEnumerable<InteractableOption> options)
@@ -188,6 +212,7 @@ public class RadialMenu : Singleton<RadialMenu>
 
     public void Show(IEnumerable<InteractableOption> options, Action<InteractableOption>? onOptionSelected = null)
     {
+        LockInput();
         SetOptions(options);
         IsVisible = true;
         RebuildMenu();
@@ -205,6 +230,7 @@ public class RadialMenu : Singleton<RadialMenu>
     {
         IsVisible = false;
         OnMenuClosed?.Invoke();
+        UnlockInput();
     }
 
     private void OnVisibilityChanged()
@@ -276,5 +302,15 @@ public class RadialMenu : Singleton<RadialMenu>
     private static float GetItemOffsetFromMiddle()
     {
         return Mathf.Min(Screen.width, Screen.height) * 0.2f;
+    }
+
+    private void LockInput()
+    {
+        PlayerCamera.Instance.SetCanLook(false);
+    }
+
+    private void UnlockInput()
+    {
+        PlayerCamera.Instance.SetCanLook(true);
     }
 }

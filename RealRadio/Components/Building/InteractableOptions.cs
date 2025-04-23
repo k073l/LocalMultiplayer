@@ -76,7 +76,6 @@ public class InteractableOptions : MonoBehaviour
         heldTime = null;
         showingOptions = false;
         OnHideOptions();
-        LockInput();
 
         if (selectedOption == null)
             return;
@@ -109,18 +108,6 @@ public class InteractableOptions : MonoBehaviour
         RadialMenu.Instance.Hide();
     }
 
-    private void LockInput()
-    {
-        PlayerCamera.Instance.SetCanLook(true);
-        PlayerCamera.Instance.LockMouse();
-    }
-
-    private void UnlockInput()
-    {
-        PlayerCamera.Instance.SetCanLook(false);
-        PlayerCamera.Instance.FreeMouse();
-    }
-
     private void UpdateInteractionText()
     {
         if (!InteractableObject)
@@ -143,7 +130,6 @@ public class InteractableOptions : MonoBehaviour
             {
                 showingOptions = true;
                 OnShowOptions();
-                UnlockInput();
             }
         }
     }
