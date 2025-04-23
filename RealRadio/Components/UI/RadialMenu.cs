@@ -6,6 +6,7 @@ using ScheduleOne;
 using ScheduleOne.Audio;
 using ScheduleOne.DevUtilities;
 using ScheduleOne.PlayerScripts;
+using ScheduleOne.UI;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UIElements;
