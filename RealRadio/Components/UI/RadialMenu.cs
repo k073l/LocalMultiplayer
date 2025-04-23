@@ -270,9 +270,6 @@ public class RadialMenu : Singleton<RadialMenu>
             uiOption.visible = false;
             uiOption.userData = i;
             uiOption.RegisterCallback<GeometryChangedEvent>(PositionOptionElement);
-            uiOption.style.position = Position.Absolute;
-            uiOption.style.left = Screen.width / 2;
-            uiOption.style.top = Screen.height / 2;
 
             var root = uiOption.Query(name: "Root").First();
             root.style.backgroundImage = new StyleBackground(option.Sprite);
@@ -289,18 +286,21 @@ public class RadialMenu : Singleton<RadialMenu>
         if (uiOption.resolvedStyle.width == float.NaN)
             return;
 
+        uiOption.style.position = Position.Absolute;
+        uiOption.style.left = (Screen.width / 2) - (uiOption.resolvedStyle.width / 2);
+        uiOption.style.top = (Screen.height / 2) - (uiOption.resolvedStyle.height / 2);
+
         int i = (int)uiOption.userData;
         float sliceSize = 360 / options.Count;
 
-        Vector2 middle = new Vector2(Screen.width / 2, Screen.height / 2);
         float angle = (sliceSize * i) - 90f;
         float offsetFromMiddle = GetItemOffsetFromMiddle();
         float x = Mathf.Cos(angle * Mathf.Deg2Rad) * offsetFromMiddle;
         float y = Mathf.Sin(angle * Mathf.Deg2Rad) * offsetFromMiddle;
 
         var translation = new Translate(
-            new Length(x - (uiOption.resolvedStyle.width / 2), LengthUnit.Pixel),
-            new Length(y - (uiOption.resolvedStyle.height / 2), LengthUnit.Pixel)
+            new Length(x, LengthUnit.Pixel),
+            new Length(y, LengthUnit.Pixel)
         );
         var root = uiOption.Query(name: "Root").First();
         root.style.translate = translation;
