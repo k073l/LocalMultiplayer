@@ -206,7 +206,7 @@ public class RadialMenu : Singleton<RadialMenu>
 
     private void ResetMouseDeltaHistory()
     {
-        Array.Fill(mouseDeltaHistory, Vector2.zero);
+        Array.Fill(mouseDeltaHistory, new Vector2(0, 1f));
         mouseDeltaHistoryIndex = 0;
         currentMouseHistoryTime = 0f;
         mouseDeltaSampleCount = 0;
