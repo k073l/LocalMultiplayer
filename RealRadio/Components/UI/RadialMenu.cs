@@ -243,13 +243,6 @@ public class RadialMenu : Singleton<RadialMenu>
     {
         this.options.Clear();
         this.options.AddRange(options);
-
-        int count = this.options.Count * 4;
-        for (int i = 0; i < count; ++i)
-        {
-            this.options.Add(InteractableOption.CreateOption($"test_{i}", $"Test {i}", null));
-        }
-
         RebuildMenu();
     }
 
