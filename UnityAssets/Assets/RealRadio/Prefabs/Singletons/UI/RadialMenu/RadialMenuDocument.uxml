@@ -1,8 +1,10 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <ui:Template name="Arrow" src="project://database/Assets/RealRadio/Prefabs/Singletons/UI/RadialMenu/SubElements/Arrow.uxml?fileID=9197481963319205126&amp;guid=635f4ba35a72e094ba359d3a349b67a0&amp;type=3#Arrow" />
     <Style src="project://database/Assets/RealRadio/Prefabs/Singletons/UI/RadialMenu/RadialMenuStyle.uss?fileID=7433441132597879392&amp;guid=d1153b2e62399cc4bb28f0df248aaf6b&amp;type=3#RadialMenuStyle" />
     <ui:VisualElement name="Root" class="root">
         <ui:VisualElement name="BackgroundOverlay" style="flex-grow: 1;" />
         <ui:VisualElement name="RadialItems" style="flex-grow: 1;" />
         <ui:Label text="Selected Option" parse-escape-sequences="true" display-tooltip-when-elided="true" name="SelectedOptionLabel" />
+        <ui:Instance template="Arrow" name="Arrow" />
     </ui:VisualElement>
 </ui:UXML>

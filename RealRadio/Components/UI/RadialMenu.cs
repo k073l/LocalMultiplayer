@@ -38,19 +38,14 @@ public class RadialMenu : Singleton<RadialMenu>
             if (value == hoveredOption)
                 return;
 
-
-            if (hoveredOption != null)
-            {
-                var element = optionElements[hoveredOption];
-                element.Query(name: "Root").First().RemoveFromClassList("hovered");
-            }
+            DisableHoverEffectsOnActiveOption();
 
             hoveredOption = value;
+            arrowOffset = null;
 
             if (hoveredOption != null)
             {
-                var element = optionElements[hoveredOption];
-                element.Query(name: "Root").First().AddToClassList("hovered");
+                EnableHoverEffectsOnHoveredOption();
 
                 optionLabel.text = hoveredOption.Name;
 
@@ -62,6 +57,7 @@ public class RadialMenu : Singleton<RadialMenu>
             }
         }
     }
+
     public Action<InteractableOption>? OnOptionSelected { get; set; }
     public Action<InteractableOption>? OnHoveredOptionChanged { get; set; }
     public Action? OnMenuOpened { get; set; }
@@ -87,6 +83,8 @@ public class RadialMenu : Singleton<RadialMenu>
     private VisualElement root = null!;
     private Label optionLabel = null!;
     private VisualElement radialItemsContainer = null!;
+    private VisualElement arrow = null!;
+    private float? arrowOffset;
     private InteractableOption? hoveredOption;
     private Vector2[] mouseDeltaHistory = new Vector2[20];
     private int mouseDeltaHistoryIndex;
@@ -98,12 +96,13 @@ public class RadialMenu : Singleton<RadialMenu>
         base.Awake();
 
         if (RadialItemAsset == null)
-            throw new InvalidOperationException("RadialItemDocument is not set");
+            throw new InvalidOperationException("RadialItemAsset is not set");
 
         document = GetComponent<UIDocument>() ?? throw new InvalidOperationException("No UIDocument component found on game object");
         root = document.rootVisualElement.Query(className: "root").First() ?? throw new InvalidOperationException("Could not find root ui element");
         optionLabel = root.Query<Label>(name: "SelectedOptionLabel").First() ?? throw new InvalidOperationException("Could not find option label ui element");
         radialItemsContainer = root.Query(name: "RadialItems").First() ?? throw new InvalidOperationException("Could not find radial items container ui element");
+        arrow = root.Query(name: "Arrow").First() ?? throw new InvalidOperationException("Could not find arrow ui element");
     }
 
     public override void Start()
@@ -123,6 +122,7 @@ public class RadialMenu : Singleton<RadialMenu>
             return;
 
         UpdateAverageMouseDelta();
+        UpdateArrow();
         UpdateHoveredOption();
         CheckForPrimaryInput();
     }
@@ -212,10 +212,44 @@ public class RadialMenu : Singleton<RadialMenu>
         mouseDeltaSampleCount = 0;
     }
 
+    private void UpdateArrow()
+    {
+        float angle = GetMouseAngleFromMiddle();
+        arrow.style.rotate = new StyleRotate(new UnityEngine.UIElements.Rotate(new Angle(angle, AngleUnit.Degree)));
+
+        arrow.style.position = Position.Absolute;
+        arrow.style.left = (Screen.width / 2) - (arrow.resolvedStyle.width / 2);
+        arrow.style.top = (Screen.height / 2) - (arrow.resolvedStyle.height / 2);
+
+        if (arrowOffset == null && HoveredOption != null && optionElements.TryGetValue(HoveredOption, out var hoveredElement))
+        {
+            var size = hoveredElement.resolvedStyle.width;
+
+            if (size != float.NaN)
+                arrowOffset = GetItemOffsetFromMiddle() - size;
+        }
+
+        if (arrowOffset != null)
+        {
+            var root = arrow.Query(name: "Root").First();
+            var translation = root.style.translate.value;
+            translation.x = new Length(-50f, Length.Unit.Percent);
+            translation.y = -arrowOffset.Value;
+            root.style.translate = translation;
+        }
+    }
+
     public void SetOptions(IEnumerable<InteractableOption> options)
     {
         this.options.Clear();
         this.options.AddRange(options);
+
+        int count = this.options.Count * 4;
+        for (int i = 0; i < count; ++i)
+        {
+            this.options.Add(InteractableOption.CreateOption($"test_{i}", $"Test {i}", null));
+        }
+
         RebuildMenu();
     }
 
@@ -281,7 +315,9 @@ public class RadialMenu : Singleton<RadialMenu>
             uiOption.RegisterCallback<GeometryChangedEvent>(PositionOptionElement);
 
             var root = uiOption.Query(name: "Root").First();
-            root.style.backgroundImage = new StyleBackground(option.Sprite);
+
+            if (option.Sprite != null)
+                root.style.backgroundImage = new StyleBackground(option.Sprite);
 
             radialItemsContainer.Add(uiOption);
             optionElements.Add(option, uiOption);
@@ -333,5 +369,23 @@ public class RadialMenu : Singleton<RadialMenu>
     {
         PlayerCamera.Instance.SetCanLook(true);
         HUD.Instance.SetCrosshairVisible(true);
+    }
+
+    private void DisableHoverEffectsOnActiveOption()
+    {
+        if (hoveredOption != null)
+        {
+            var element = optionElements[hoveredOption];
+            element.Query(name: "Root").First().RemoveFromClassList("hovered");
+        }
+    }
+
+    private void EnableHoverEffectsOnHoveredOption()
+    {
+        if (hoveredOption == null)
+            return;
+
+        var element = optionElements[hoveredOption];
+        element.Query(name: "Root").First().AddToClassList("hovered");
     }
 }
