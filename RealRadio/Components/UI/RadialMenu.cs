@@ -19,16 +19,16 @@ public class RadialMenu : Singleton<RadialMenu>
     public VisualTreeAsset RadialItemAsset = null!;
 
     [field: SerializeField]
-    public AudioSource? OptionChangeSound { get; set; }
+    public AudioSource? OptionChangeSound { get; private set; }
 
     [field: SerializeField]
-    public AudioSource? OptionSelectSound { get; set; }
+    public AudioSource? OptionSelectSound { get; private set; }
 
     [field: SerializeField]
-    public AudioSource? ShowSound { get; set; }
+    public AudioSource? ShowSound { get; private set; }
 
     [field: SerializeField]
-    public AudioSource? HideSound { get; set; }
+    public AudioSource? HideSound { get; private set; }
 
     public InteractableOption? HoveredOption
     {
