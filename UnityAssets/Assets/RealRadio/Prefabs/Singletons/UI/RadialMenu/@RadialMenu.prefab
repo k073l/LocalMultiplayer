@@ -519,8 +519,8 @@ MonoBehaviour:
   ArrowAsset: {fileID: 0}
   <OptionChangeSound>k__BackingField: {fileID: 4857745207713616434}
   <OptionSelectSound>k__BackingField: {fileID: 3523316780347853906}
-  <ShowSound>k__BackingField: {fileID: 0}
-  <HideSound>k__BackingField: {fileID: 0}
+  <ShowSound>k__BackingField: {fileID: 5405276284394357979}
+  <HideSound>k__BackingField: {fileID: 7493595496882892155}
 --- !u!1 &9081106815403978077
 GameObject:
   m_ObjectHideFlags: 0
