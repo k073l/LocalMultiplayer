@@ -248,6 +248,7 @@ public class RadialMenu : Singleton<RadialMenu>
 
     public void Show(IEnumerable<InteractableOption> options, Action<InteractableOption>? onOptionSelected = null)
     {
+        ResetMouseDeltaHistory();
         LockInput();
         SetOptions(options);
         IsVisible = true;
@@ -267,7 +268,6 @@ public class RadialMenu : Singleton<RadialMenu>
         IsVisible = false;
         OnMenuClosed?.Invoke();
         UnlockInput();
-        ResetMouseDeltaHistory();
     }
 
     private void OnVisibilityChanged()
