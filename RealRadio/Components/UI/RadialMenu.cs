@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using RealRadio.Components.Building;
+using RealRadio.Events;
 using ScheduleOne;
 using ScheduleOne.Audio;
 using ScheduleOne.DevUtilities;
@@ -47,7 +48,9 @@ public class RadialMenu : Singleton<RadialMenu>
             {
                 EnableHoverEffectsOnHoveredOption();
 
-                optionLabel.text = hoveredOption.Name;
+                var eventData = new EventRefData<string>(hoveredOption.name);
+                OnUpdateInteractionText?.Invoke(hoveredOption, eventData);
+                optionLabel.text = eventData.Value;
 
                 OnHoveredOptionChanged?.Invoke(hoveredOption);
             }
@@ -60,6 +63,7 @@ public class RadialMenu : Singleton<RadialMenu>
 
     public Action<InteractableOption>? OnOptionSelected { get; set; }
     public Action<InteractableOption>? OnHoveredOptionChanged { get; set; }
+    public Action<InteractableOption, EventRefData<string>>? OnUpdateInteractionText { get; set; }
     public Action? OnMenuOpened { get; set; }
     public Action? OnMenuClosed { get; set; }
 
@@ -246,10 +250,20 @@ public class RadialMenu : Singleton<RadialMenu>
         RebuildMenu();
     }
 
-    public void Show(IEnumerable<InteractableOption> options, Action<InteractableOption>? onOptionSelected = null)
+    /// <summary>
+    /// Shows the radial menu with the given options. If the menu is already open it will not be updated with the new options and the callback will never be called.
+    /// </summary>
+    /// <param name="onOptionSelected">This callback will be invoked when an option is selected. It will only be called once for the current menu.</param>
+    /// <param name="onUpdateInteractionText">This callback will be invoked when updating the interaction text. It will only be called while the current menu is open.</param>
+    /// <returns>True if the menu was shown, false if it's already open.</returns>
+    public bool Show(
+        IEnumerable<InteractableOption> options,
+        Action<InteractableOption>? onOptionSelected = null,
+        Action<InteractableOption, EventRefData<string>>? onUpdateInteractionText = null
+    )
     {
         if (IsVisible)
-            return;
+            return false;
 
         IsVisible = true;
         ResetMouseDeltaHistory();
@@ -257,12 +271,27 @@ public class RadialMenu : Singleton<RadialMenu>
         SetOptions(options);
         RebuildMenu();
         OnOptionSelected += OnSelected;
+        OnUpdateInteractionText += onUpdateInteractionText;
+        OnMenuClosed += MenuClosed;
         OnMenuOpened?.Invoke();
+
+        return true;
+
+        void MenuClosed()
+        {
+            OnMenuClosed -= MenuClosed;
+            OnOptionSelected -= OnSelected;
+            OnUpdateInteractionText -= UpdateInteractionText;
+        }
 
         void OnSelected(InteractableOption option)
         {
-            OnOptionSelected -= OnSelected;
             onOptionSelected?.Invoke(option);
+        }
+
+        void UpdateInteractionText(InteractableOption option, EventRefData<string> data)
+        {
+            onUpdateInteractionText?.Invoke(option, data);
         }
     }
 

@@ -74,7 +74,6 @@ public class InteractableOptions : MonoBehaviour
             selectedOption = Options.FirstOrDefault();
 
         heldTime = null;
-        showingOptions = false;
         OnHideOptions();
 
         if (selectedOption == null)
@@ -100,12 +99,21 @@ public class InteractableOptions : MonoBehaviour
 
     public virtual void OnShowOptions()
     {
-        RadialMenu.Instance.Show(Options, OnOptionSelected);
+        if (RadialMenu.Instance.Show(Options, OnOptionSelected, OnUpdateInteractionText))
+            showingOptions = true;
+        else
+        {
+            Plugin.Logger.LogWarning("Radial menu is already open");
+        }
     }
 
     public virtual void OnHideOptions()
     {
-        RadialMenu.Instance.Hide();
+        if (showingOptions)
+        {
+            showingOptions = false;
+            RadialMenu.Instance.Hide();
+        }
     }
 
     private void UpdateInteractionText()
@@ -128,7 +136,6 @@ public class InteractableOptions : MonoBehaviour
 
             if (heldTime >= MaxHoldTimeBeforeShowOptions && !showingOptions)
             {
-                showingOptions = true;
                 OnShowOptions();
             }
         }
