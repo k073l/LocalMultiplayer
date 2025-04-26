@@ -11,9 +11,9 @@ GameObject:
   - component: {fileID: 3438792403443083995}
   - component: {fileID: -6709152971503119748}
   - component: {fileID: 1848190948864422224}
-  - component: {fileID: 5699954089044675498}
+  - component: {fileID: 1105361499676334438}
   m_Layer: 0
-  m_Name: RadioTier1
+  m_Name: SmallAnalogRadio
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -89,7 +89,7 @@ MonoBehaviour:
   _allowSpawning: 1
   _allowDespawning: 1
   _allowSyncTypes: 1
---- !u!114 &5699954089044675498
+--- !u!114 &1105361499676334438
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -98,7 +98,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 251173476112223084}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 556773170, guid: 06549ed6e3aa5624283039434632ccf8, type: 3}
+  m_Script: {fileID: 2133007480, guid: 06549ed6e3aa5624283039434632ccf8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   _componentIndexCache: 255
@@ -337,7 +337,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   InteractableObject: {fileID: 0}
-  RadialMenuPrefab: {fileID: 8057417580075597099, guid: 49ed30c016b04eb40a0c2f148a98c93e, type: 3}
   <Options>k__BackingField:
   - {fileID: 11400000, guid: 6fbf496bbbe4c1e458a80e5e46f3be4e, type: 2}
   - {fileID: 11400000, guid: 0e982848fc147274bbd4f35c4e7fe25f, type: 2}

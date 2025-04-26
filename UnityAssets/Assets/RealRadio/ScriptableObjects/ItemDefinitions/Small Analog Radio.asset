@@ -10,11 +10,11 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: c0648b2367bab503b89767a44e44ae0a, type: 3}
-  m_Name: Scuffed Radio
+  m_Name: Small Analog Radio
   m_EditorClassIdentifier: 
-  Name: Scuffed Radio
+  Name: Small Analog Radio
   Description: A radio with low quality audio.
-  ID: com.skipcast.realradio.radio_t1
+  ID: com.skipcast.realradio.small_analog_radio
   Icon: {fileID: 0}
   Category: 4
   Keywords:
@@ -36,5 +36,5 @@ MonoBehaviour:
   ResellMultiplier: 0.5
   StoredItem: {fileID: 0}
   StationItem: {fileID: 0}
-  BuiltItem: {fileID: 5699954089044675498, guid: 4b399b16392b2ab42af1eabf662056d6, type: 3}
+  BuiltItem: {fileID: 1105361499676334438, guid: 4b399b16392b2ab42af1eabf662056d6, type: 3}
   BuildSoundType: 2
