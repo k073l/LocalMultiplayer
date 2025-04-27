@@ -38,6 +38,7 @@ Transform:
   - {fileID: 6311721486726773722}
   - {fileID: 5019784376050373459}
   - {fileID: 1643216596985336181}
+  - {fileID: 463682333348077495}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &-6709152971503119748
@@ -122,6 +123,9 @@ MonoBehaviour:
   <IsOn>k__BackingField: 0
   <RadioStationIndex>k__BackingField: -1
   AudioClientObject: {fileID: 6342895549113500183}
+  ConfigureCameraTransform: {fileID: 463682333348077495}
+  <NPCUserObject>k__BackingField: {fileID: 0}
+  <PlayerUserObject>k__BackingField: {fileID: 0}
 --- !u!1 &1411287135716648670
 GameObject:
   m_ObjectHideFlags: 0
@@ -232,6 +236,37 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: -0.035, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 3438792403443083995}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &4650523783256528299
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 463682333348077495}
+  m_Layer: 0
+  m_Name: ConfigureCameraTransform
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &463682333348077495
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4650523783256528299}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0.037629087, y: -0.93494976, z: 0.104514085, w: -0.33694184}
+  m_LocalPosition: {x: -0.09590549, y: 0.028437678, z: 0.104530394}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []

@@ -4,28 +4,42 @@ using System.Linq;
 using FishNet.Connection;
 using FishNet.Object;
 using FishNet.Object.Synchronizing;
+using FishNet.Transporting;
 using RealRadio.Components.Audio;
 using RealRadio.Components.Radio;
 using RealRadio.Data;
 using RealRadio.Events;
+using ScheduleOne;
 using ScheduleOne.Interaction;
+using ScheduleOne.Management;
+using ScheduleOne.PlayerScripts;
+using ScheduleOne.UI;
+using ScheduleOne.UI.Compass;
 using UnityEngine;
 
 namespace RealRadio.Components.Building.Buildables;
 
-public class Radio : TogglableOffGridItem
+public class Radio : TogglableOffGridItem, IUsable
 {
     public RadioStation? RadioStation { get; private set; }
 
-    [field: SyncVar(Channel = FishNet.Transporting.Channel.Reliable, ReadPermissions = ReadPermission.Observers, WritePermissions = WritePermission.ClientUnsynchronized, OnChange = nameof(OnStationChanged))]
+    [field: SyncVar(Channel = Channel.Reliable, ReadPermissions = ReadPermission.Observers, WritePermissions = WritePermission.ClientUnsynchronized, OnChange = nameof(OnStationChanged))]
     public int RadioStationIndex { get; private set; }
 
     public GameObject AudioClientObject = null!;
+
+    public Transform ConfigureCameraTransform = null!;
 
     private StreamAudioClient? audioClient;
 
     private InteractableOptions? interactableOptions;
     private InteractableObject? interactableObject;
+
+    [field: SyncVar(Channel = Channel.Reliable, ReadPermissions = ReadPermission.Observers, WritePermissions = WritePermission.ServerOnly)]
+    public NetworkObject? NPCUserObject { get; set; }
+
+    [field: SyncVar(Channel = Channel.Reliable, ReadPermissions = ReadPermission.Observers, WritePermissions = WritePermission.ServerOnly)]
+    public NetworkObject? PlayerUserObject { get; set; }
 
     [ServerRpc(RequireOwnership = false, RunLocally = true)]
     public void SetRadioStationIndex(int index)
@@ -37,6 +51,18 @@ public class Radio : TogglableOffGridItem
         }
 
         RadioStationIndex = index;
+    }
+
+    [ServerRpc(RequireOwnership = false, RunLocally = true)]
+    public void SetNPCUser(NetworkObject? npcObject)
+    {
+        NPCUserObject = npcObject;
+    }
+
+    [ServerRpc(RequireOwnership = false, RunLocally = true)]
+    public void SetPlayerUser(NetworkObject? playerObject)
+    {
+        PlayerUserObject = playerObject;
     }
 
     public override void Awake()
@@ -52,10 +78,24 @@ public class Radio : TogglableOffGridItem
         if (AudioClientObject == null)
             throw new InvalidOperationException("AudioClientObject is null");
 
+        if (ConfigureCameraTransform == null)
+            throw new InvalidOperationException("ConfigureCameraTransform is null");
+
         interactableObject = GetComponentInChildren<InteractableObject>() ?? throw new InvalidOperationException("No InteractableObject component found in self or children");
         interactableOptions = GetComponentInChildren<InteractableOptions>() ?? throw new InvalidOperationException("No InteractableOptions component found in self or children");
         interactableOptions.OnInteract += OnInteract;
         interactableOptions.OnUpdateInteractionText += OnUpdateInteractionText;
+    }
+
+    public virtual void Update()
+    {
+        if (PlayerUserObject == Player.Local.NetworkObject)
+        {
+            if (GameInput.GetButtonDown(GameInput.ButtonCode.Back))
+            {
+                StopConfiguring();
+            }
+        }
     }
 
     private void OnUpdateInteractionText(InteractableOption? option, EventRefData<string> data)
@@ -72,7 +112,7 @@ public class Radio : TogglableOffGridItem
                 IsOn = !IsOn;
                 break;
             case "configure":
-                Plugin.Logger.LogInfo("Start configure radio");
+                StartConfigureIfPossible();
                 break;
             default:
                 Plugin.Logger.LogWarning($"Unknown option id: {optionId}");
@@ -111,7 +151,7 @@ public class Radio : TogglableOffGridItem
         }
     }
 
-    private void OnStationChanged(int prev, int next, bool asServer)
+    protected virtual void OnStationChanged(int prev, int next, bool asServer)
     {
         Plugin.Logger.LogInfo($"prev: {prev}, next: {next}, asServer: {asServer}");
 
@@ -132,6 +172,45 @@ public class Radio : TogglableOffGridItem
         {
             InitAudioClient();
         }
+    }
+
+    private void StartConfigureIfPossible()
+    {
+        if (((IUsable)this).IsInUse)
+            return;
+
+        Plugin.Logger.LogInfo("Start configure radio");
+        SetPlayerUser(Player.Local.NetworkObject);
+        OnStartConfigure();
+    }
+
+    private void StopConfiguring()
+    {
+        Plugin.Logger.LogInfo("Stop configure radio");
+        OnEndConfigure();
+        SetPlayerUser(null);
+    }
+
+    protected virtual void OnStartConfigure()
+    {
+        PlayerCamera.Instance.AddActiveUIElement(name);
+        PlayerCamera.Instance.FreeMouse();
+        PlayerCamera.Instance.OverrideTransform(ConfigureCameraTransform.position, ConfigureCameraTransform.rotation, lerpTime: 0.2f);
+        PlayerCamera.Instance.OverrideFOV(60f, 0.2f);
+        PlayerInventory.Instance.SetInventoryEnabled(false);
+        PlayerMovement.Instance.canMove = false;
+        CompassManager.Instance.SetVisible(false);
+    }
+
+    protected virtual void OnEndConfigure()
+    {
+        PlayerCamera.Instance.RemoveActiveUIElement(name);
+        PlayerCamera.Instance.LockMouse();
+        PlayerCamera.Instance.StopFOVOverride(0.2f);
+        PlayerCamera.Instance.StopTransformOverride(0.2f);
+        PlayerInventory.Instance.SetInventoryEnabled(true);
+        PlayerMovement.Instance.canMove = true;
+        CompassManager.Instance.SetVisible(true);
     }
 
     private void InitAudioClient()
