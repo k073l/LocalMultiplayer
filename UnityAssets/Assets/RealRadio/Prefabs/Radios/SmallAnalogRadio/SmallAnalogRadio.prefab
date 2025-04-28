@@ -39,6 +39,7 @@ Transform:
   - {fileID: 5019784376050373459}
   - {fileID: 1643216596985336181}
   - {fileID: 463682333348077495}
+  - {fileID: 6517992084465805285}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &-6709152971503119748
@@ -126,6 +127,10 @@ MonoBehaviour:
   ConfigureCameraTransform: {fileID: 463682333348077495}
   <NPCUserObject>k__BackingField: {fileID: 0}
   <PlayerUserObject>k__BackingField: {fileID: 0}
+  DragDistanceToChangeStation: 10
+  StationHorizontalMouseDragDirection: 0
+  StationInvertDragDirection: 0
+  stationEditCollider: {fileID: 5403772359456387099}
 --- !u!1 &1411287135716648670
 GameObject:
   m_ObjectHideFlags: 0
@@ -178,6 +183,59 @@ BoxCollider:
   m_Enabled: 1
   serializedVersion: 3
   m_Size: {x: 0.12, y: 0.067, z: 0.03}
+  m_Center: {x: 0, y: 0, z: 0}
+--- !u!1 &1733616054076140758
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 6517992084465805285}
+  - component: {fileID: 5403772359456387099}
+  m_Layer: 5
+  m_Name: StationEditCollider
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &6517992084465805285
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1733616054076140758}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: -0.05272, y: 0.02391, z: 0.00592}
+  m_LocalScale: {x: 0.025053298, y: 0.02172482, z: 0.00477383}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 3438792403443083995}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!135 &5403772359456387099
+SphereCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1733616054076140758}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Radius: 0.5
   m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &3372910105349487644
 GameObject:
