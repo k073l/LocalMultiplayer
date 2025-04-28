@@ -4,6 +4,7 @@ using ScheduleOne;
 using ScheduleOne.PlayerScripts;
 using ScheduleOne.UI;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 namespace RealRadio.Components.Building.Buildables;
 
@@ -18,6 +19,8 @@ public class AnalogRadio : Radio
 
     private bool editingStation;
     private float stationDragDistance;
+
+    private Vector2? lockedMousePosition;
 
     public override void Awake()
     {
@@ -52,17 +55,7 @@ public class AnalogRadio : Radio
             return;
 
         editingStation = true;
-    }
-
-    private bool HoveringOverStationEditCollider()
-    {
-        if (!PlayerCamera.Instance.MouseRaycast(range: 10f, out var hit, Layers.UI.ToLayerMask()))
-            return false;
-
-        if (hit.collider != stationEditCollider)
-            return false;
-
-        return true;
+        lockedMousePosition = GameInput.MousePosition;
     }
 
     private void CheckStationInteractionEnd()
@@ -74,6 +67,7 @@ public class AnalogRadio : Radio
             return;
 
         editingStation = false;
+        lockedMousePosition = null;
         stationDragDistance = 0f;
     }
 
@@ -112,5 +106,21 @@ public class AnalogRadio : Radio
             type = CursorManager.ECursorType.Grab;
 
         CursorManager.Instance.SetCursorAppearance(type);
+
+        if (lockedMousePosition != null)
+        {
+            Mouse.current.WarpCursorPosition(lockedMousePosition.Value);
+        }
+    }
+
+    private bool HoveringOverStationEditCollider()
+    {
+        if (!PlayerCamera.Instance.MouseRaycast(range: 10f, out var hit, Layers.UI.ToLayerMask()))
+            return false;
+
+        if (hit.collider != stationEditCollider)
+            return false;
+
+        return true;
     }
 }
