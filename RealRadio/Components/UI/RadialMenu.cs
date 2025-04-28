@@ -309,11 +309,13 @@ public class RadialMenu : Singleton<RadialMenu>
     {
         if (isVisible)
         {
+            root.style.display = DisplayStyle.Flex;
             root.RemoveFromClassList("invisible");
             PlayerCamera.Instance.AddActiveUIElement("RadialMenu");
         }
         else
         {
+            root.style.display = DisplayStyle.None;
             root.AddToClassList("invisible");
             PlayerCamera.Instance.RemoveActiveUIElement("RadialMenu");
             HoveredOption = null;
