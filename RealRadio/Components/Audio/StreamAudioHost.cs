@@ -232,8 +232,6 @@ public class StreamAudioHost : MonoBehaviour
 
     private void StopAudioStreamNow()
     {
-        stopRequested = false;
-
         if (startStreamCts != null)
         {
             Plugin.Logger.LogInfo("Cancelling start stream task");
@@ -264,6 +262,8 @@ public class StreamAudioHost : MonoBehaviour
 
         if (isActiveAndEnabled && streamStarted)
             OnStreamStopped?.Invoke();
+
+        stopRequested = false;
     }
 
     private void CheckStartStreamTask()
