@@ -122,10 +122,10 @@ public class MediaFoundationAudioStream(string url, bool resetReaderAtEof) : Aud
         if (reader == null)
             return;
 
+        hasReadOnce = false;
         reader.Dispose();
         resampler?.Dispose();
         reader = null;
         resampler = null;
-        hasReadOnce = false;
     }
 }

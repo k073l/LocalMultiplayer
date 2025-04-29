@@ -32,6 +32,10 @@ public class StreamAudioHost : MonoBehaviour
     private HashSet<StreamAudioClient> enabledClients = [];
     private int clientIdCounter;
     private float? inactiveTimer;
+    private bool startRequested;
+    private bool stopRequested;
+    private bool readingAudioData;
+    private bool waitingForWarmup;
 
     public StreamAudioClient CreateClient(Transform? parent = null, Vector3? localPosition = null)
     {
@@ -141,6 +145,22 @@ public class StreamAudioHost : MonoBehaviour
         }
     }
 
+    private void LateUpdate()
+    {
+        bool startRequested = this.startRequested;
+        bool stopRequested = this.stopRequested;
+
+        if (startRequested && !stopRequested)
+        {
+            StartAudioStreamNow();
+        }
+
+        if (stopRequested && !readingAudioData && !waitingForWarmup)
+        {
+            StopAudioStreamNow();
+        }
+    }
+
     private void OnEnable()
     {
         if (AudioStream == null)
@@ -155,15 +175,73 @@ public class StreamAudioHost : MonoBehaviour
 
     private void OnDisable()
     {
-        audioSource?.Stop();
-        AudioStream?.Stop();
+        StopAudioStreamNow();
+    }
+
+    private void OnDestroy()
+    {
+        foreach (var client in spawnedClients)
+            Destroy(client.gameObject);
+    }
+
+    public void StartAudioStream()
+    {
+        startRequested = true;
+    }
+
+    public void StopAudioStream()
+    {
+        stopRequested = true;
+    }
+
+    public void StartAudioStreamNow()
+    {
+        startRequested = false;
+
+        if (startStreamTask != null || AudioStream?.Started == true)
+            return; // Already starting
+
+        inactiveTimer = null;
+        waitingForWarmup = true;
+
+        foreach (var client in enabledClients)
+        {
+            Plugin.Logger.LogInfo($"Invoking OnHostStartRequested for client {client.Id}");
+            client.OnHostStartRequested?.Invoke();
+        }
+
+        startStreamCts = new CancellationTokenSource();
+        var token = startStreamCts.Token;
+        startStreamTask = Task.Run(() =>
+        {
+            if (AudioStream == null)
+                throw new InvalidOperationException("AudioStream is not set");
+
+            AudioStream.Start();
+
+            if (token.IsCancellationRequested || !AudioStream.Started)
+            {
+                waitingForWarmup = false;
+                return;
+            }
+
+            AudioStream.WarmupReader();
+            waitingForWarmup = false;
+        });
+    }
+
+    private void StopAudioStreamNow()
+    {
+        stopRequested = false;
 
         if (startStreamCts != null)
         {
+            Plugin.Logger.LogInfo("Cancelling start stream task");
             startStreamCts.Cancel();
 
             try
             {
+                Plugin.Logger.LogInfo("Waiting for start stream task to complete");
                 startStreamTask?.Wait();
             }
             catch (AggregateException)
@@ -175,44 +253,17 @@ public class StreamAudioHost : MonoBehaviour
             startStreamCts.Dispose();
             startStreamCts = null;
         }
-    }
 
-    private void OnDestroy()
-    {
-        foreach (var client in spawnedClients)
-            Destroy(client.gameObject);
-    }
+        bool streamStarted = AudioStream?.Started == true;
 
-    public void StartAudioStream()
-    {
-        if (startStreamTask != null || AudioStream?.Started == true)
-            return; // Already starting
+        if (streamStarted)
+            AudioStream!.Stop();
 
-        inactiveTimer = null;
-
-        foreach (var client in enabledClients)
-        {
-            Plugin.Logger.LogInfo($"Invoking OnHostStartRequested for client {client.Id}");
-            client.OnHostStartRequested?.Invoke();
-        }
-
-        startStreamCts = new CancellationTokenSource();
-        startStreamTask = Task.Run(() =>
-        {
-            if (AudioStream == null)
-                throw new InvalidOperationException("AudioStream is not set");
-
-            AudioStream.Start();
-            AudioStream.WarmupReader();
-        }, startStreamCts.Token);
-    }
-
-    public void StopAudioStream()
-    {
-        AudioStream?.Stop();
         audioSource.Stop();
         inactiveTimer = null;
-        OnStreamStopped?.Invoke();
+
+        if (isActiveAndEnabled && streamStarted)
+            OnStreamStopped?.Invoke();
     }
 
     private void CheckStartStreamTask()
@@ -241,9 +292,12 @@ public class StreamAudioHost : MonoBehaviour
 
     private void OnAudioFilterRead(float[] data, int channels)
     {
-        if (AudioStream == null || !AudioStream.StreamAvailable)
+        readingAudioData = true;
+
+        if (AudioStream == null || !AudioStream.StreamAvailable || stopRequested)
         {
             Array.Fill(data, 0);
+            readingAudioData = false;
             return;
         }
 
@@ -251,6 +305,7 @@ public class StreamAudioHost : MonoBehaviour
         {
             // bepinex logger doesn't work here (doesn't work on audio thread i guess?), so use unity logger
             UnityEngine.Debug.LogError($"Channels mismatch: audio stream has {AudioStream.WaveFormat.Channels} channels but unity wants {channels}");
+            readingAudioData = false;
             return;
         }
 
@@ -261,6 +316,7 @@ public class StreamAudioHost : MonoBehaviour
 
         var numFloatsRead = AudioStream.Read(AudioData, 0, data.Length);
         AudioDataLength = numFloatsRead;
+        readingAudioData = false;
     }
 
     internal void OnClientEnabled(StreamAudioClient client)

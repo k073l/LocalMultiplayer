@@ -153,15 +153,13 @@ public class Radio : TogglableOffGridItem, IUsable
 
     protected virtual void OnStationChanged(int prev, int next, bool asServer)
     {
-        Plugin.Logger.LogInfo($"prev: {prev}, next: {next}, asServer: {asServer}");
-
         var prevStation = prev == -1 ? null : RadioStationManager.Instance.Stations.ElementAtOrDefault(prev);
         var nextStation = next == -1 ? null : RadioStationManager.Instance.Stations.ElementAtOrDefault(next);
 
         if (nextStation == RadioStation)
             return;
 
-        Plugin.Logger.LogDebug($"Radio station changing from {prevStation?.ToString() ?? "null"} to {nextStation?.ToString() ?? "null"}");
+        Plugin.Logger.LogInfo($"Radio station changing from {prevStation?.ToString() ?? "null"} to {nextStation?.ToString() ?? "null"}");
 
         if (RadioStation != null)
             UnbindAudioClient();

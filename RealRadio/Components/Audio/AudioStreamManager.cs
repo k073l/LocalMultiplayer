@@ -73,11 +73,11 @@ public class AudioStreamManager : MonoBehaviour
 
     private void OnHostStreamToggled(StreamAudioHost host, bool started)
     {
-        if (started)
+        if (started && !activeHosts.Contains(host))
         {
             activeHosts.AddLast(host);
         }
-        else
+        else if (!started && activeHosts.Contains(host))
         {
             activeHosts.Remove(host);
         }
@@ -108,6 +108,9 @@ public class AudioStreamManager : MonoBehaviour
 
             foreach (var host in activeHostsBuffer)
             {
+                if (host == null)
+                    continue;
+
                 if (host.NumActiveClients == 0)
                 {
                     Plugin.Logger.LogInfo("Killing quiet audio host before inactive timer expires due to too many active hosts");
@@ -115,7 +118,7 @@ public class AudioStreamManager : MonoBehaviour
                     host.StopAudioStream();
                     --numActiveHosts;
 
-                    if (numActiveHosts <= 5)
+                    if (numActiveHosts <= MaxActiveInaudibleHosts)
                         break;
                 }
             }
