@@ -13,7 +13,7 @@ namespace RealRadio.Components.Audio;
 [RequireComponent(typeof(AudioSource))]
 public class StreamAudioHost : MonoBehaviour
 {
-    public float MaxClientInactivityTime = 30f;
+    public float MaxClientInactivityTime = 10f;
 
     public int NumActiveClients => enabledClients.Count;
 
