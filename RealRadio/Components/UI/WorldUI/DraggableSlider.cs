@@ -35,10 +35,12 @@ namespace RealRadio.Components.UI.WorldUI
         public float MaxValue = 100f;
         public float MinValue = -100f;
         [SerializeField] private float value;
+#pragma warning disable CS0649 // Field is never assigned (fields are assigned by unity)
         [SerializeField] private DragDirection dragDirection = DragDirection.Horizontal;
         [SerializeField] private bool invertDragDirection;
         [SerializeField] private float dragMultiplier = 1f;
         [SerializeField] private bool loopAround;
+#pragma warning restore CS0649
 
         [Header("Events")]
         public UnityEvent<float> ValueChanged = null!;
