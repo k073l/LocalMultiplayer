@@ -127,10 +127,7 @@ MonoBehaviour:
   ConfigureCameraTransform: {fileID: 463682333348077495}
   <NPCUserObject>k__BackingField: {fileID: 0}
   <PlayerUserObject>k__BackingField: {fileID: 0}
-  DragDistanceToChangeStation: 10
-  StationHorizontalMouseDragDirection: 0
-  StationInvertDragDirection: 0
-  stationEditCollider: {fileID: 5403772359456387099}
+  stationEditSlider: {fileID: 1371069387430685807}
 --- !u!1 &1411287135716648670
 GameObject:
   m_ObjectHideFlags: 0
@@ -194,6 +191,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6517992084465805285}
   - component: {fileID: 5403772359456387099}
+  - component: {fileID: 1371069387430685807}
   m_Layer: 5
   m_Name: StationEditCollider
   m_TagString: Untagged
@@ -237,6 +235,32 @@ SphereCollider:
   serializedVersion: 3
   m_Radius: 0.5
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &1371069387430685807
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1733616054076140758}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: -1364409623, guid: 06549ed6e3aa5624283039434632ccf8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  MaxValue: 5
+  MinValue: -5
+  value: 0
+  dragDirection: 1
+  invertDragDirection: 0
+  dragMultiplier: 1
+  loopAround: 1
+  ValueChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  LoopedAround:
+    m_PersistentCalls:
+      m_Calls: []
+  dragCollider: {fileID: 5403772359456387099}
 --- !u!1 &3372910105349487644
 GameObject:
   m_ObjectHideFlags: 0

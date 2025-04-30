@@ -38,7 +38,7 @@ public class Radio : TogglableOffGridItem, IUsable
     [field: SyncVar(Channel = Channel.Reliable, ReadPermissions = ReadPermission.Observers, WritePermissions = WritePermission.ServerOnly)]
     public NetworkObject? NPCUserObject { get; set; }
 
-    [field: SyncVar(Channel = Channel.Reliable, ReadPermissions = ReadPermission.Observers, WritePermissions = WritePermission.ServerOnly)]
+    [field: SyncVar(Channel = Channel.Reliable, ReadPermissions = ReadPermission.Observers, WritePermissions = WritePermission.ServerOnly, OnChange = nameof(OnPlayerUserChanged))]
     public NetworkObject? PlayerUserObject { get; set; }
 
     [ServerRpc(RequireOwnership = false, RunLocally = true)]
@@ -63,6 +63,10 @@ public class Radio : TogglableOffGridItem, IUsable
     public void SetPlayerUser(NetworkObject? playerObject)
     {
         PlayerUserObject = playerObject;
+    }
+
+    protected virtual void OnPlayerUserChanged(NetworkObject prev, NetworkObject next, bool asServer)
+    {
     }
 
     public override void Awake()

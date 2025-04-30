@@ -1,5 +1,7 @@
 using System;
+using FishNet.Object;
 using RealRadio.Components.Radio;
+using RealRadio.Components.UI.WorldUI;
 using ScheduleOne;
 using ScheduleOne.PlayerScripts;
 using ScheduleOne.UI;
@@ -10,117 +12,37 @@ namespace RealRadio.Components.Building.Buildables;
 
 public class AnalogRadio : Radio
 {
-    public float DragDistanceToChangeStation = 1f;
-
-    public bool StationHorizontalMouseDragDirection;
-    public bool StationInvertDragDirection;
-
-    [SerializeField] private Collider stationEditCollider = null!;
-
-    private bool editingStation;
-    private float stationDragDistance;
-
-    private Vector2? lockedMousePosition;
+    [SerializeField] private DraggableSlider stationEditSlider = null!;
 
     public override void Awake()
     {
         base.Awake();
 
-        if (stationEditCollider == null)
-            throw new InvalidOperationException("StationEditCollider is null");
+        if (stationEditSlider == null)
+            throw new InvalidOperationException("StationEditSlider is null");
+
+        stationEditSlider.LoopedAround.AddListener(OnSliderLoopedAround);
     }
 
-    public override void Update()
+    private void OnSliderLoopedAround(float direction)
     {
-        base.Update();
+        int nextIndex = RadioStationIndex + (int)direction;
+        nextIndex = (nextIndex + RadioStationManager.Instance.Stations.Count) % RadioStationManager.Instance.Stations.Count;
 
-        if (PlayerUserObject != Player.Local.NetworkObject)
-            return;
+        if (nextIndex < 0)
+            nextIndex += RadioStationManager.Instance.Stations.Count;
 
-        CheckStationInteractionStart();
-        CheckStationInteractionEnd();
-        UpdateStationIndexFromInput();
-        UpdateCursor();
+        SetRadioStationIndex(nextIndex);
     }
 
-    private void CheckStationInteractionStart()
+    protected override void OnPlayerUserChanged(NetworkObject prev, NetworkObject next, bool asServer)
     {
-        if (editingStation)
-            return;
+        base.OnPlayerUserChanged(prev, next, asServer);
 
-        if (!GameInput.GetButtonDown(GameInput.ButtonCode.PrimaryClick))
-            return;
-
-        if (!HoveringOverStationEditCollider())
-            return;
-
-        editingStation = true;
-        lockedMousePosition = GameInput.MousePosition;
-    }
-
-    private void CheckStationInteractionEnd()
-    {
-        if (!editingStation)
-            return;
-
-        if (!GameInput.GetButtonUp(GameInput.ButtonCode.PrimaryClick))
-            return;
-
-        editingStation = false;
-        lockedMousePosition = null;
-        stationDragDistance = 0f;
-    }
-
-    private void UpdateStationIndexFromInput()
-    {
-        if (!editingStation)
-            return;
-
-        if (StationHorizontalMouseDragDirection)
-            stationDragDistance += GameInput.MouseDelta.x * (StationInvertDragDirection ? -1f : 1f);
-        else
-            stationDragDistance += GameInput.MouseDelta.y * (StationInvertDragDirection ? -1f : 1f);
-
-        if (Math.Abs(stationDragDistance) >= DragDistanceToChangeStation)
+        if (!asServer)
         {
-            int direction = Math.Sign(stationDragDistance);
-            stationDragDistance = 0f;
-
-            int newIndex = (RadioStationIndex + direction) % RadioStationManager.Instance.Stations.Count;
-
-            if (newIndex < 0)
-                newIndex += RadioStationManager.Instance.Stations.Count;
-
-            SetRadioStationIndex(newIndex);
+            Plugin.Logger.LogInfo($"Player user changed to {next?.ToString() ?? "null"}");
+            stationEditSlider.gameObject.SetActive(next == Player.Local.NetworkObject);
         }
-    }
-
-    private void UpdateCursor()
-    {
-        CursorManager.ECursorType type = CursorManager.ECursorType.Default;
-
-        if (HoveringOverStationEditCollider())
-            type = CursorManager.ECursorType.OpenHand;
-
-        if (editingStation)
-            type = CursorManager.ECursorType.Grab;
-
-        CursorManager.Instance.SetCursorAppearance(type);
-
-        if (lockedMousePosition != null)
-        {
-            Mouse.current.WarpCursorPosition(lockedMousePosition.Value);
-        }
-    }
-
-    private bool HoveringOverStationEditCollider()
-    {
-        if (!PlayerCamera.Instance.MouseRaycast(range: 10f, out var hit, Layers.UI.ToLayerMask()))
-            return false;
-
-        if (hit.collider != stationEditCollider)
-            return false;
-
-        return true;
     }
 }
