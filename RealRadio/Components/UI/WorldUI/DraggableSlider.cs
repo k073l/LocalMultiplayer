@@ -33,7 +33,7 @@ namespace RealRadio.Components.UI.WorldUI
 
         [Header("Drag Settings")]
         public float MaxValue = 100f;
-        public float MinValue = -100f;
+        public float MinValue = 0f;
         [SerializeField] private float value;
 #pragma warning disable CS0649 // Field is never assigned (fields are assigned by unity)
         [SerializeField] private DragDirection dragDirection = DragDirection.Horizontal;
