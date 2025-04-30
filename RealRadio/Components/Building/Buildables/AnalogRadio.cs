@@ -41,7 +41,6 @@ public class AnalogRadio : Radio
 
         if (!asServer)
         {
-            Plugin.Logger.LogInfo($"Player user changed to {next?.ToString() ?? "null"}");
             stationEditSlider.gameObject.SetActive(next == Player.Local.NetworkObject);
         }
     }
