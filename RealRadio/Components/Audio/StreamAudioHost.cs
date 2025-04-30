@@ -83,6 +83,12 @@ public class StreamAudioHost : MonoBehaviour
         if (client.isActiveAndEnabled)
         {
             enabledClients.Add(client);
+
+            if (AudioStream?.Started == true && startStreamTask != null)
+                client.OnHostStartRequested?.Invoke();
+            else if (AudioStream?.Started == true)
+                client.OnHostStreamStarted?.Invoke();
+
             OnNumActiveClientsChanged();
         }
 
