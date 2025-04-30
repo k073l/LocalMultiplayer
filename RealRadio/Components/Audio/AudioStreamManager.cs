@@ -9,7 +9,7 @@ namespace RealRadio.Components.Audio;
 
 public class AudioStreamManager : MonoBehaviour
 {
-    public uint MaxActiveInaudibleHosts = 50;
+    public uint MaxActiveInaudibleHosts = 5;
 
     public int NumActiveHosts => hosts.Count(host => host.Value.AudioStream?.Started == true);
 
@@ -97,7 +97,7 @@ public class AudioStreamManager : MonoBehaviour
     {
         int numActiveHosts = NumActiveHosts;
 
-        while (numActiveHosts > MaxActiveInaudibleHosts)
+        if (numActiveHosts > MaxActiveInaudibleHosts)
         {
             if (activeHostsBuffer == null || activeHostsBuffer.Length < numActiveHosts)
             {
@@ -106,11 +106,8 @@ public class AudioStreamManager : MonoBehaviour
 
             activeHosts.CopyTo(activeHostsBuffer, 0);
 
-            foreach (var host in activeHostsBuffer)
+            foreach (var host in activeHostsBuffer.Take(activeHosts.Count))
             {
-                if (host == null)
-                    continue;
-
                 if (host.NumActiveClients == 0)
                 {
                     Plugin.Logger.LogInfo("Killing quiet audio host before inactive timer expires due to too many active hosts");

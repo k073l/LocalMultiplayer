@@ -300,7 +300,7 @@ public class StreamAudioHost : MonoBehaviour
     {
         readingAudioData = true;
 
-        if (AudioStream == null || !AudioStream.StreamAvailable || stopRequested)
+        if (AudioStream == null || !AudioStream.StreamAvailable || stopRequested || inactiveTimer >= MaxClientInactivityTime)
         {
             Array.Fill(data, 0);
             readingAudioData = false;
