@@ -171,8 +171,6 @@ public class Radio : TogglableOffGridItem, IUsable
         if (nextStation == RadioStation)
             return;
 
-        Plugin.Logger.LogInfo($"Radio station changing from {prevStation?.ToString() ?? "null"} to {nextStation?.ToString() ?? "null"}");
-
         if (RadioStation != null)
             UnbindAudioClient();
 
@@ -188,8 +186,6 @@ public class Radio : TogglableOffGridItem, IUsable
     {
         if (asServer)
             return;
-
-        Plugin.Logger.LogInfo($"Volume changing from {prev} to {next}");
 
         if (audioClient == null)
             return;

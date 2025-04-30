@@ -52,8 +52,6 @@ public class AnalogRadio : Radio
 
     private void OnVolumeSliderValueChanged(float value)
     {
-        Plugin.Logger.LogInfo($"Volume changed to {value}");
-
         Volume = value / volumeEditSlider.MaxValue;
 
         if (value <= 0 && IsOn)
