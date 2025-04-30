@@ -40,6 +40,7 @@ Transform:
   - {fileID: 1643216596985336181}
   - {fileID: 463682333348077495}
   - {fileID: 6517992084465805285}
+  - {fileID: 7564313471257391751}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &-6709152971503119748
@@ -123,11 +124,13 @@ MonoBehaviour:
       m_Calls: []
   <IsOn>k__BackingField: 0
   <RadioStationIndex>k__BackingField: -1
+  <Volume>k__BackingField: 0
   AudioClientObject: {fileID: 6342895549113500183}
   ConfigureCameraTransform: {fileID: 463682333348077495}
   <NPCUserObject>k__BackingField: {fileID: 0}
   <PlayerUserObject>k__BackingField: {fileID: 0}
   stationEditSlider: {fileID: 1371069387430685807}
+  volumeEditSlider: {fileID: 5164722192867737216}
 --- !u!1 &1411287135716648670
 GameObject:
   m_ObjectHideFlags: 0
@@ -784,6 +787,86 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+--- !u!1 &8975611399308620327
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 7564313471257391751}
+  - component: {fileID: 5605525389176434096}
+  - component: {fileID: 5164722192867737216}
+  m_Layer: 5
+  m_Name: VolumeEditCollider
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &7564313471257391751
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8975611399308620327}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: -0.05272, y: -0.00637, z: 0.0017}
+  m_LocalScale: {x: 0.025053298, y: 0.02172482, z: 0.00477383}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 3438792403443083995}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!135 &5605525389176434096
+SphereCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8975611399308620327}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Radius: 0.5
+  m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &5164722192867737216
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8975611399308620327}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: -1364409623, guid: 06549ed6e3aa5624283039434632ccf8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  MaxValue: 100
+  MinValue: 0
+  value: 10
+  dragDirection: 1
+  invertDragDirection: 0
+  dragMultiplier: 2.5
+  loopAround: 0
+  ValueChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  LoopedAround:
+    m_PersistentCalls:
+      m_Calls: []
+  dragCollider: {fileID: 5605525389176434096}
 --- !u!1 &9219180499705013754
 GameObject:
   m_ObjectHideFlags: 0

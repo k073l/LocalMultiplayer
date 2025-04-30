@@ -10,6 +10,8 @@ using RealRadio.Components.Radio;
 using RealRadio.Data;
 using RealRadio.Events;
 using ScheduleOne;
+using ScheduleOne.Audio;
+using ScheduleOne.Dialogue;
 using ScheduleOne.Interaction;
 using ScheduleOne.Management;
 using ScheduleOne.PlayerScripts;
@@ -26,11 +28,15 @@ public class Radio : TogglableOffGridItem, IUsable
     [field: SyncVar(Channel = Channel.Reliable, ReadPermissions = ReadPermission.Observers, WritePermissions = WritePermission.ClientUnsynchronized, OnChange = nameof(OnStationChanged))]
     public int RadioStationIndex { get; private set; }
 
+    [field: SyncVar(Channel = Channel.Reliable, ReadPermissions = ReadPermission.Observers, WritePermissions = WritePermission.ServerOnly, OnChange = nameof(OnVolumeChanged))]
+    public float Volume { get; set; }
+
     public GameObject AudioClientObject = null!;
 
     public Transform ConfigureCameraTransform = null!;
 
-    private StreamAudioClient? audioClient;
+    protected StreamAudioClient? audioClient;
+    protected CrossfadeAudioSources crossFade = null!;
 
     private InteractableOptions? interactableOptions;
     private InteractableObject? interactableObject;
@@ -81,6 +87,8 @@ public class Radio : TogglableOffGridItem, IUsable
 
         if (AudioClientObject == null)
             throw new InvalidOperationException("AudioClientObject is null");
+
+        crossFade = AudioClientObject.GetComponent<CrossfadeAudioSources>() ?? throw new InvalidOperationException("No CrossfadeAudioSources component found on AudioClientObject");
 
         if (ConfigureCameraTransform == null)
             throw new InvalidOperationException("ConfigureCameraTransform is null");
@@ -174,6 +182,19 @@ public class Radio : TogglableOffGridItem, IUsable
         {
             InitAudioClient();
         }
+    }
+
+    protected virtual void OnVolumeChanged(float prev, float next, bool asServer)
+    {
+        if (asServer)
+            return;
+
+        Plugin.Logger.LogInfo($"Volume changing from {prev} to {next}");
+
+        if (audioClient == null)
+            return;
+
+        crossFade.Volume = Mathf.Clamp01(next);
     }
 
     private void StartConfigureIfPossible()

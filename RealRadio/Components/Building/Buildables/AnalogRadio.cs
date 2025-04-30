@@ -13,6 +13,7 @@ namespace RealRadio.Components.Building.Buildables;
 public class AnalogRadio : Radio
 {
     [SerializeField] private DraggableSlider stationEditSlider = null!;
+    [SerializeField] private DraggableSlider volumeEditSlider = null!;
 
     public override void Awake()
     {
@@ -21,7 +22,21 @@ public class AnalogRadio : Radio
         if (stationEditSlider == null)
             throw new InvalidOperationException("StationEditSlider is null");
 
+        if (volumeEditSlider == null)
+            throw new InvalidOperationException("VolumeEditSlider is null");
+
         stationEditSlider.LoopedAround.AddListener(OnSliderLoopedAround);
+        volumeEditSlider.ValueChanged.AddListener(OnVolumeSliderValueChanged);
+    }
+
+    public override void Start()
+    {
+        base.Start();
+
+        if (isGhost)
+            return;
+
+        volumeEditSlider.Value = crossFade.Volume * volumeEditSlider.MaxValue;
     }
 
     private void OnSliderLoopedAround(float direction)
@@ -33,6 +48,18 @@ public class AnalogRadio : Radio
             nextIndex += RadioStationManager.Instance.Stations.Count;
 
         SetRadioStationIndex(nextIndex);
+    }
+
+    private void OnVolumeSliderValueChanged(float value)
+    {
+        Plugin.Logger.LogInfo($"Volume changed to {value}");
+
+        Volume = value / volumeEditSlider.MaxValue;
+
+        if (value <= 0 && IsOn)
+            IsOn = false;
+        else if (value > 0 && !IsOn)
+            IsOn = true;
     }
 
     protected override void OnPlayerUserChanged(NetworkObject prev, NetworkObject next, bool asServer)
