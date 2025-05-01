@@ -132,6 +132,7 @@ public class Plugin : BaseUnityPlugin
         Logger.LogInfo("Creating main scene server singletons");
         InstanceFinder.ServerManager.Spawn(Instantiate(Assets.Singletons.OffGridBuildManager));
         InstanceFinder.ServerManager.Spawn(Instantiate(Assets.Singletons.RadioSyncManager));
+        InstanceFinder.ServerManager.Spawn(Instantiate(Assets.Singletons.VehicleRadioManager));
     }
 
     private void CreateMainSceneClientSingletons()
