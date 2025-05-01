@@ -23,6 +23,7 @@ public class AssetRegistry : ScriptableObject
 #nullable disable
     public ItemDefinitionAssets ItemDefinitions;
     public SingletonPrefabs Singletons;
+    public Prefabs Prefabs;
     public ShopListings ShopListings;
     [NonSerialized] public RadioStation[] DefaultRadioStations;
 #nullable enable
@@ -55,6 +56,9 @@ public class AssetRegistry : ScriptableObject
 
         if (result.Singletons.RadialMenu == null)
             throw new AssetRegistryLoadException("Singletons.RadialMenu is null");
+
+        if (result.Prefabs.VehicleRadioProxy == null)
+            throw new AssetRegistryLoadException("Prefabs.VehicleRadio is null");
 
         result.DefaultRadioStations = assetBundle.LoadAllAssets<RadioStation>();
 
@@ -141,5 +145,13 @@ public class ShopListings : ScriptableObject
 {
 #nullable disable
     public ShopListing[] Listings;
+#nullable enable
+}
+
+[CreateAssetMenu(fileName = "Prefabs", menuName = "RealRadio/ScriptableObjects/Asset Registry/Prefabs", order = 1)]
+public class Prefabs : ScriptableObject
+{
+#nullable disable
+    public GameObject VehicleRadioProxy;
 #nullable enable
 }

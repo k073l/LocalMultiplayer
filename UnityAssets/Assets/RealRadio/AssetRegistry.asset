@@ -14,4 +14,5 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ItemDefinitions: {fileID: 11400000, guid: 97d427e721547f44aad313e7262ed700, type: 2}
   Singletons: {fileID: 11400000, guid: 5a0797d0e6952b646b01c76fb5195769, type: 2}
+  Prefabs: {fileID: 11400000, guid: fed19b94fe893b54e9f65a237dec3863, type: 2}
   ShopListings: {fileID: 11400000, guid: ae3d0b143924a954c80144ff549d9952, type: 2}

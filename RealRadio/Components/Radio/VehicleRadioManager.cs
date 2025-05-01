@@ -1,4 +1,5 @@
 using System;
+using RealRadio.Components.Vehicles;
 using RealRadio.Patches;
 using ScheduleOne.DevUtilities;
 using ScheduleOne.Vehicles;
@@ -22,6 +23,9 @@ public class VehicleRadioManager : NetworkSingleton<VehicleRadioManager>
 
     private void OnVehicleSpawned(LandVehicle vehicle)
     {
-        Plugin.Logger.LogInfo($"Vehicle spawned: {vehicle.name} (player owned: {vehicle.IsPlayerOwned})");
+        var proxyPrefab = Plugin.Assets!.Prefabs.VehicleRadioProxy;
+        var proxy = Instantiate(proxyPrefab, parent: transform);
+        proxy.GetComponent<VehicleRadioProxy>().Vehicle = vehicle;
+        Spawn(proxy);
     }
 }
