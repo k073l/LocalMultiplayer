@@ -51,6 +51,13 @@ public class Plugin : BaseUnityPlugin
 
                 var go = new GameObject("LocalMultiplayerSpawner");
                 go.AddComponent<MenuComponent>();
+
+                if (FindObjectOfType<AudioComponent>() == null)
+                {
+                    var go2 = new GameObject("LocalMultiplayerAudioController");
+                    go2.AddComponent<AudioComponent>();
+                    DontDestroyOnLoad(go2);
+                }
             }
         };
     }
