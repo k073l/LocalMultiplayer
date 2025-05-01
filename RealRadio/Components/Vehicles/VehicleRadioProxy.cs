@@ -3,6 +3,11 @@ using System;
 using System.Linq;
 using FishNet.Connection;
 using FishNet.Object;
+using FishNet.Object.Synchronizing;
+using RealRadio.Components.Audio;
+using RealRadio.Components.Radio;
+using RealRadio.Data;
+using ScheduleOne.Audio;
 using ScheduleOne.PlayerScripts;
 using ScheduleOne.Vehicles;
 using UnityEngine;
@@ -11,7 +16,25 @@ namespace RealRadio.Components.Vehicles
 {
     public class VehicleRadioProxy : NetworkBehaviour
     {
+        [field: SerializeField]
+        public GameObject AudioClientPrefab { get; private set; } = null!;
+
+        public RadioStation? RadioStation { get; private set; }
+
+        [field: SyncVar(Channel = FishNet.Transporting.Channel.Reliable, ReadPermissions = ReadPermission.Observers, WritePermissions = WritePermission.ClientUnsynchronized, OnChange = nameof(OnStationChanged))]
+        public int RadioStationIndex { get; private set; } = -1;
+
         public LandVehicle Vehicle { get; set; } = null!;
+
+        private GameObject? audioClientObject;
+        private StreamAudioClient? audioClient;
+        private AudioSource? audioSource;
+
+        private void Awake()
+        {
+            if (AudioClientPrefab == null)
+                throw new InvalidOperationException("AudioClientPrefab is null");
+        }
 
         public override void OnStartServer()
         {
@@ -21,8 +44,6 @@ namespace RealRadio.Components.Vehicles
             {
                 if (Vehicle == null)
                     throw new InvalidOperationException("Vehicle is null");
-
-                OnVehicleSet();
             }
         }
 
@@ -30,6 +51,72 @@ namespace RealRadio.Components.Vehicles
         {
             base.OnStartClient();
             RequestVehicleInfo(NetworkObject.LocalConnection);
+        }
+
+        [ServerRpc(RequireOwnership = false, RunLocally = true)]
+        public void SetRadioStationIndex(int index)
+        {
+            if (index < -1 || index >= RadioStationManager.Instance.Stations.Count)
+            {
+                Plugin.Logger.LogWarning($"Invalid radio station index (out of range): {index}");
+                return;
+            }
+
+            RadioStationIndex = index;
+        }
+
+        private void OnStationChanged(int prev, int next, bool asServer)
+        {
+            if (asServer)
+                return;
+
+            RadioStation? nextStation = next == -1 ? null : RadioStationManager.Instance.Stations.ElementAtOrDefault(next);
+
+            Plugin.Logger.LogInfo($"New station: {nextStation?.Name} ({nextStation?.Url})");
+
+            if (RadioStation != null)
+                UnbindAudioClient();
+
+            RadioStation = nextStation;
+
+            if (RadioStation != null)
+                InitAudioClient();
+        }
+
+        private void InitAudioClient()
+        {
+            if (RadioStation?.Url == null)
+                return;
+
+            if (audioClientObject == null)
+                throw new InvalidOperationException("AudioClientObject is null");
+
+            if (HasOccupants())
+                audioClientObject.SetActive(true);
+            else
+                audioClientObject.SetActive(false);
+
+            if (audioClient == null)
+            {
+                audioClient = AudioStreamManager.Instance.GetOrCreateHost(RadioStation.Url).AddClient(audioClientObject);
+                audioClient.ConvertToMono = true;
+                return;
+            }
+        }
+
+        private void UnbindAudioClient()
+        {
+            if (RadioStation?.Url == null)
+                throw new InvalidOperationException("Can not unbind. RadioStation or RadioStation.Url is null");
+
+            if (audioClientObject == null)
+                throw new InvalidOperationException("AudioClientObject is null");
+
+            if (audioClient != null)
+            {
+                AudioStreamManager.Instance.GetOrCreateHost(RadioStation.Url).DetachClient(audioClientObject);
+                audioClient = null;
+            }
         }
 
         [ServerRpc(RequireOwnership = false)]
@@ -49,10 +136,19 @@ namespace RealRadio.Components.Vehicles
         {
             name = $"{name} ({Vehicle.name})";
 
+            audioClientObject = Instantiate(AudioClientPrefab);
+            audioClientObject.transform.SetParent(Vehicle.transform, worldPositionStays: false);
+            audioClientObject.SetActive(false);
+
             Vehicle.onVehicleStart.AddListener(OnVehicleStart);
             Vehicle.onVehicleStop.AddListener(OnVehicleStop);
             Vehicle.onPlayerEnterVehicle += OnPlayerEnterVehicle;
             Vehicle.onPlayerExitVehicle += OnPlayerExitVehicle;
+
+            if (HasOccupants())
+                OnEngineToggled(true);
+            else
+                OnEngineToggled(false);
         }
 
         private void Update()
@@ -63,29 +159,35 @@ namespace RealRadio.Components.Vehicles
             if (IsServer)
             {
                 if (!Vehicle)
+                {
                     Despawn(DespawnType.Destroy);
+                }
             }
+        }
+
+        private bool HasOccupants()
+        {
+            return Vehicle.OccupantPlayers.Count() > 0 || Vehicle.OccupantNPCs.Count(x => x != null) > 0;
         }
 
         private void OnVehicleStart()
         {
             // The game currently calls OnVehicleStart after a client exits the vehicle
             // We can work around it by checking the number of occupants
-            var occupants = Vehicle.OccupantPlayers.Count() + Vehicle.OccupantNPCs.Count(x => x != null);
-            OnEngineToggled(occupants > 0);
+            OnEngineToggled(HasOccupants());
         }
 
         private void OnVehicleStop()
         {
             // The game currently calls OnVehicleStart after a client exits the vehicle
             // We can work around it by checking the number of occupants
-            var occupants = Vehicle.OccupantPlayers.Count() + Vehicle.OccupantNPCs.Count(x => x != null);
-            OnEngineToggled(occupants > 0);
+            OnEngineToggled(HasOccupants());
         }
 
         private void OnEngineToggled(bool started)
         {
             Plugin.Logger.LogInfo($"Engine toggled: {started}");
+            InitAudioClient();
         }
 
         private void OnPlayerEnterVehicle(Player player)
@@ -94,6 +196,17 @@ namespace RealRadio.Components.Vehicles
                 return;
 
             Plugin.Logger.LogInfo("Local player entered vehicle");
+
+            if (audioClient == null)
+            {
+                Plugin.Logger.LogWarning("Player entered vehicle but audio client is null");
+                return;
+            }
+
+            var source = audioClient.AudioSource;
+            source.spatialBlend = 0;
+            source.GetComponent<AudioLowPassFilter>().enabled = false;
+            audioClient.ConvertToMono = false;
         }
 
         private void OnPlayerExitVehicle(Player player)
@@ -102,6 +215,17 @@ namespace RealRadio.Components.Vehicles
                 return;
 
             Plugin.Logger.LogInfo("Local player exited vehicle");
+
+            if (audioClient == null)
+            {
+                Plugin.Logger.LogWarning("Player exited vehicle but audio client is null");
+                return;
+            }
+
+            var source = audioClient.AudioSource;
+            source.spatialBlend = 1;
+            source.GetComponent<AudioLowPassFilter>().enabled = true;
+            audioClient.ConvertToMono = true;
         }
     }
 }

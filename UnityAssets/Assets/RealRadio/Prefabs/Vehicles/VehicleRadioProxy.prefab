@@ -79,3 +79,5 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _componentIndexCache: 255
   _networkObjectCache: {fileID: 0}
+  <AudioClientPrefab>k__BackingField: {fileID: 8340760668918485629, guid: 62518e03f510491439a3070f73fc7ef0, type: 3}
+  <RadioStationIndex>k__BackingField: -1
