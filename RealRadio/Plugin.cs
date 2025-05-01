@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.IO;
 using System.Reflection;
 using BepInEx;
@@ -62,12 +63,13 @@ public class Plugin : BaseUnityPlugin
             if (newScene.name == "Menu" && !visitedMenu)
             {
                 visitedMenu = true;
-                LoadManager.Instance.onLoadComplete.AddListener(OnMainSceneLoadComplete);
                 CreatePersistentSingletons();
             }
 
             if (newScene.name == "Main")
             {
+                OnMainSceneLoadComplete();
+
                 var go = new GameObject("RadioSpawner");
                 go.AddComponent<Components.Debugging.RadioSpawner>();
             }
@@ -107,6 +109,13 @@ public class Plugin : BaseUnityPlugin
 
     private void OnMainSceneLoadComplete()
     {
+        StartCoroutine(InitNetworkSingletons());
+    }
+
+    private IEnumerator InitNetworkSingletons()
+    {
+        yield return new WaitUntil(() => InstanceFinder.IsServer || InstanceFinder.IsClient);
+
         if (InstanceFinder.IsServer)
         {
             CreateMainSceneServerSingletons();
