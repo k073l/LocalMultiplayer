@@ -386,6 +386,10 @@ public class MenuComponent : MonoBehaviour
                 Plugin.Logger.LogInfo("Save loaded");
             }
         }
+        else
+        {
+            LoadManager.Instance.onLoadComplete?.Invoke();
+        }
 
         LoadManager.Instance.LoadStatus = LoadManager.ELoadStatus.None;
         LoadingScreen.Instance.Close();
