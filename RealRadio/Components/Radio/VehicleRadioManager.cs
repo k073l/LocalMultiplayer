@@ -85,6 +85,12 @@ public class VehicleRadioManager : NetworkSingleton<VehicleRadioManager>
         if (!GameInput.GetButtonDown(GameInput.ButtonCode.Reload))
             return;
 
+        // Only show the radial menu if the current vehicle has a proxy
+        var proxyRef = Player.Local.CurrentVehicle.GetComponent<VehicleRadioProxyReference>();
+
+        if (proxyRef == null)
+            return;
+
         if (radialMenuOpen)
             return;
 
