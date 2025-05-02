@@ -48,7 +48,7 @@ public class RadialMenu : Singleton<RadialMenu>
             {
                 EnableHoverEffectsOnHoveredOption();
 
-                var eventData = new EventRefData<string>(hoveredOption.name);
+                var eventData = new EventRefData<string>(hoveredOption.Name);
                 OnUpdateInteractionText?.Invoke(hoveredOption, eventData);
                 optionLabel.text = eventData.Value;
 
