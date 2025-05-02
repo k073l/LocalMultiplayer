@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using RealRadio.Components.Building;
@@ -9,6 +10,7 @@ using ScheduleOne;
 using ScheduleOne.DevUtilities;
 using ScheduleOne.PlayerScripts;
 using ScheduleOne.Vehicles;
+using UnityEngine;
 
 namespace RealRadio.Components.Radio;
 
@@ -25,10 +27,10 @@ public class VehicleRadioManager : NetworkSingleton<VehicleRadioManager>
         // Call OnVehicleSpawned for pre-existing vehicles
         foreach (var vehicle in FindObjectsOfType<LandVehicle>())
         {
-            OnVehicleSpawned(vehicle);
+            StartCoroutine(OnVehicleSpawned(vehicle));
         }
 
-        LandVehicleStartPatch.OnVehicleSpawned += OnVehicleSpawned;
+        LandVehicleStartPatch.OnVehicleSpawned += (vehicle) => StartCoroutine(OnVehicleSpawned(vehicle));
     }
 
     public override void Start()
@@ -53,10 +55,13 @@ public class VehicleRadioManager : NetworkSingleton<VehicleRadioManager>
         return options;
     }
 
-    private void OnVehicleSpawned(LandVehicle vehicle)
+    private IEnumerator OnVehicleSpawned(LandVehicle vehicle)
     {
+        if (!IsServer && !IsClient)
+            yield return new WaitUntil(() => IsServer || IsClient);
+
         if (!IsServer)
-            return;
+            yield break;
 
         var proxyPrefab = Plugin.Assets!.Prefabs.VehicleRadioProxy;
         var proxy = Instantiate(proxyPrefab, parent: transform);
