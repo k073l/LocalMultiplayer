@@ -36,6 +36,20 @@ public class VehicleRadioProxy : NetworkBehaviour
             throw new InvalidOperationException("AudioClientPrefab is null");
     }
 
+    private void OnDestroy()
+    {
+        if (audioClientObject)
+            Destroy(audioClientObject);
+
+        if (Vehicle)
+        {
+            var proxyRef = Vehicle.gameObject.GetComponent<VehicleRadioProxyReference>();
+
+            if (proxyRef)
+                Destroy(proxyRef);
+        }
+    }
+
     public override void OnStartServer()
     {
         base.OnStartServer();
@@ -146,6 +160,9 @@ public class VehicleRadioProxy : NetworkBehaviour
         Vehicle.onPlayerEnterVehicle += OnPlayerEnterVehicle;
         Vehicle.onPlayerExitVehicle += OnPlayerExitVehicle;
 
+        var proxyRef = Vehicle.gameObject.AddComponent<VehicleRadioProxyReference>();
+        proxyRef.Proxy = this;
+
         if (HasOccupants())
             OnEngineToggled(true);
         else
@@ -224,4 +241,9 @@ public class VehicleRadioProxy : NetworkBehaviour
         source.GetComponent<AudioLowPassFilter>().enabled = !isInVehicle;
         audioClient.ConvertToMono = !isInVehicle;
     }
+}
+
+public class VehicleRadioProxyReference : MonoBehaviour
+{
+    public VehicleRadioProxy? Proxy;
 }
