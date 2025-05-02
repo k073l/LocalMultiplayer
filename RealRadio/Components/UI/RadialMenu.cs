@@ -397,6 +397,10 @@ public class RadialMenu : Singleton<RadialMenu>
 
     private void UnlockInput()
     {
+        // Don't unlock input if the player is in a vehicle
+        if (Player.Local.CurrentVehicle != null)
+            return;
+
         PlayerCamera.Instance.SetCanLook(true);
         HUD.Instance.SetCrosshairVisible(true);
     }
