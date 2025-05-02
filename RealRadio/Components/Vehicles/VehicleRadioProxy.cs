@@ -1,6 +1,7 @@
 
 using System;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using FishNet.Connection;
 using FishNet.Object;
 using FishNet.Object.Synchronizing;
@@ -183,9 +184,22 @@ public class VehicleRadioProxy : NetworkBehaviour
         }
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private bool HasOccupants()
     {
-        return Vehicle.OccupantPlayers.Count > 0 || Vehicle.OccupantNPCs.Any(x => x != null);
+        return HasPlayerOccupants() || HasNPCOccupants();
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private bool HasPlayerOccupants()
+    {
+        return Vehicle.OccupantPlayers.Count > 0;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private bool HasNPCOccupants()
+    {
+        return Vehicle.OccupantNPCs.Any(x => x != null);
     }
 
     private void OnVehicleStart()
