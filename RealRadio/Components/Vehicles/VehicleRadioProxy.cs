@@ -225,7 +225,14 @@ public class VehicleRadioProxy : NetworkBehaviour
 
         if (started && HasNPCOccupants())
         {
-            RadioStationIndex = RadioStationManager.Instance.GetRandomNPCStationIndex();
+            if (UnityEngine.Random.Range(0f, 1f) <= 0.5f)
+            {
+                SetRadioStationIndex(RadioStationManager.Instance.GetRandomNPCStationIndex());
+            }
+            else
+            {
+                SetRadioStationIndex(-1);
+            }
         }
 
         InitAudioClient();
