@@ -269,9 +269,8 @@ public class RadialMenu : Singleton<RadialMenu>
         ResetMouseDeltaHistory();
         LockInput();
         SetOptions(options);
-        RebuildMenu();
         OnOptionSelected += OnSelected;
-        OnUpdateInteractionText += onUpdateInteractionText;
+        OnUpdateInteractionText += UpdateInteractionText;
         OnMenuClosed += MenuClosed;
         OnMenuOpened?.Invoke();
 
