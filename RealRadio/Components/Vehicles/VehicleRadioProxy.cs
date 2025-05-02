@@ -100,8 +100,9 @@ namespace RealRadio.Components.Vehicles
             {
                 audioClient = AudioStreamManager.Instance.GetOrCreateHost(RadioStation.Url).AddClient(audioClientObject);
                 audioClient.ConvertToMono = true;
-                return;
             }
+
+            UpdateAudioEffects();
         }
 
         private void UnbindAudioClient()
@@ -196,17 +197,7 @@ namespace RealRadio.Components.Vehicles
                 return;
 
             Plugin.Logger.LogInfo("Local player entered vehicle");
-
-            if (audioClient == null)
-            {
-                Plugin.Logger.LogWarning("Player entered vehicle but audio client is null");
-                return;
-            }
-
-            var source = audioClient.AudioSource;
-            source.spatialBlend = 0;
-            source.GetComponent<AudioLowPassFilter>().enabled = false;
-            audioClient.ConvertToMono = false;
+            UpdateAudioEffects();
         }
 
         private void OnPlayerExitVehicle(Player player)
@@ -215,17 +206,23 @@ namespace RealRadio.Components.Vehicles
                 return;
 
             Plugin.Logger.LogInfo("Local player exited vehicle");
+            UpdateAudioEffects();
+        }
 
+        private void UpdateAudioEffects()
+        {
             if (audioClient == null)
             {
-                Plugin.Logger.LogWarning("Player exited vehicle but audio client is null");
+                Plugin.Logger.LogWarning("Tried to update audio effects but audio client is null");
                 return;
             }
 
+            bool isInVehicle = Vehicle.OccupantPlayers.Contains(Player.Local);
             var source = audioClient.AudioSource;
-            source.spatialBlend = 1;
-            source.GetComponent<AudioLowPassFilter>().enabled = true;
-            audioClient.ConvertToMono = true;
+
+            source.spatialBlend = isInVehicle ? 0 : 1;
+            source.GetComponent<AudioLowPassFilter>().enabled = !isInVehicle;
+            audioClient.ConvertToMono = !isInVehicle;
         }
     }
 }
