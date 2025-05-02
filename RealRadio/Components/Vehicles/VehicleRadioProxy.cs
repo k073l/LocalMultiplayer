@@ -246,4 +246,11 @@ public class VehicleRadioProxy : NetworkBehaviour
 public class VehicleRadioProxyReference : MonoBehaviour
 {
     public VehicleRadioProxy? Proxy;
+    public bool DestroyProxyOnDestroy = true;
+
+    private void OnDestroy()
+    {
+        if (DestroyProxyOnDestroy && Proxy)
+            Destroy(Proxy!.gameObject);
+    }
 }
