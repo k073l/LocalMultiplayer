@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using RealRadio.Components.Building;
 using RealRadio.Components.UI;
 using RealRadio.Components.Vehicles;
@@ -43,7 +44,7 @@ public class VehicleRadioManager : NetworkSingleton<VehicleRadioManager>
         {
             var station = RadioStationManager.Instance.Stations[i];
             options[i] = InteractableOption.CreateOption(
-                id: station.Url!,
+                id: i.ToString(CultureInfo.InvariantCulture),
                 name: station.Name!,
                 sprite: null
             );
@@ -81,7 +82,7 @@ public class VehicleRadioManager : NetworkSingleton<VehicleRadioManager>
             return;
         }
 
-        if (!GameInput.GetButton(GameInput.ButtonCode.Reload))
+        if (!GameInput.GetButtonDown(GameInput.ButtonCode.Reload))
             return;
 
         if (radialMenuOpen)
@@ -94,6 +95,21 @@ public class VehicleRadioManager : NetworkSingleton<VehicleRadioManager>
         }
 
         radialMenuOpen = true;
-        RadialMenu.Instance.Show(radialMenuOptions);
+        RadialMenu.Instance.Show(radialMenuOptions, onOptionSelected: OnRadialOptionSelected);
+    }
+
+    private void OnRadialOptionSelected(InteractableOption option)
+    {
+        if (!int.TryParse(option.Id, out var index))
+        {
+            Plugin.Logger.LogWarning($"Failed to parse option index: {option.Id}");
+            return;
+        }
+
+        var proxyRef = Player.Local.CurrentVehicle.GetComponent<VehicleRadioProxyReference>();
+        proxyRef?.Proxy?.SetRadioStationIndex(index);
+
+        radialMenuOpen = false;
+        RadialMenu.Instance.Hide();
     }
 }
