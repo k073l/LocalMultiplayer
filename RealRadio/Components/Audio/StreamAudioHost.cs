@@ -223,7 +223,16 @@ public class StreamAudioHost : MonoBehaviour
             if (AudioStream == null)
                 throw new InvalidOperationException("AudioStream is not set");
 
-            AudioStream.Start();
+            try
+            {
+                AudioStream.Start();
+            }
+            catch (Exception ex)
+            {
+                Plugin.Logger.LogError($"Failed to start audio stream: {ex}");
+                waitingForWarmup = false;
+                return;
+            }
 
             if (token.IsCancellationRequested || !AudioStream.Started)
             {
