@@ -71,7 +71,7 @@ public class VehicleRadioManager : NetworkSingleton<VehicleRadioManager>
 
     private void UpdateRadialMenu()
     {
-        if (GameInput.GetButtonUp(GameInput.ButtonCode.Reload) || Player.Local.CurrentVehicle == null)
+        if (GameInput.GetButtonUp(GameInput.ButtonCode.Reload) || Player.Local?.CurrentVehicle == null)
         {
             if (radialMenuOpen)
             {
