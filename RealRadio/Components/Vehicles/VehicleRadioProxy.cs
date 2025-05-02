@@ -218,6 +218,9 @@ public class VehicleRadioProxy : NetworkBehaviour
 
     private void OnEngineToggled(bool started)
     {
+        if (!IsServer)
+            return;
+
         Plugin.Logger.LogInfo($"Engine toggled: {started}");
 
         if (started && HasNPCOccupants())
