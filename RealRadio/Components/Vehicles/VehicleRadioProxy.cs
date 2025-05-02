@@ -167,7 +167,7 @@ namespace RealRadio.Components.Vehicles
 
         private bool HasOccupants()
         {
-            return Vehicle.OccupantPlayers.Count() > 0 || Vehicle.OccupantNPCs.Count(x => x != null) > 0;
+            return Vehicle.OccupantPlayers.Count > 0 || Vehicle.OccupantNPCs.Any(x => x != null);
         }
 
         private void OnVehicleStart()
