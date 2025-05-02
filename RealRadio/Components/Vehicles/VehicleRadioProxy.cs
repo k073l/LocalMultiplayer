@@ -219,6 +219,12 @@ public class VehicleRadioProxy : NetworkBehaviour
     private void OnEngineToggled(bool started)
     {
         Plugin.Logger.LogInfo($"Engine toggled: {started}");
+
+        if (started && HasNPCOccupants())
+        {
+            RadioStationIndex = RadioStationManager.Instance.GetRandomNPCStationIndex();
+        }
+
         InitAudioClient();
     }
 
