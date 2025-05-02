@@ -15,6 +15,7 @@ public class RadioStationManager : PersistentSingleton<RadioStationManager>
     public IReadOnlyList<RadioStation> SortedStations { get; private set; } = null!;
 
     private List<RadioStation> stations = [];
+    private Dictionary<int, RadioStation> npcStations = [];
     private bool stationsChanged;
 
     public override void Awake()
@@ -23,7 +24,11 @@ public class RadioStationManager : PersistentSingleton<RadioStationManager>
 
         if (Plugin.Assets?.DefaultRadioStations != null)
         {
-            stations.AddRange(Plugin.Assets.DefaultRadioStations);
+            foreach (var station in Plugin.Assets.DefaultRadioStations)
+            {
+                AddRadioStation(station);
+            }
+
             InternalOnStationsChanged();
         }
     }
@@ -31,13 +36,24 @@ public class RadioStationManager : PersistentSingleton<RadioStationManager>
     public void AddRadioStation(RadioStation station)
     {
         stations.Add(station);
+
+        if (station.CanBePlayedByNPCs)
+            npcStations.Add(stations.Count - 1, station);
+
         stationsChanged = true;
     }
 
     public void RemoveRadioStation(RadioStation station)
     {
+        npcStations.Remove(stations.IndexOf(station));
         stations.Remove(station);
         stationsChanged = true;
+    }
+
+    public int GetRandomNPCStationIndex()
+    {
+        int index = UnityEngine.Random.Range(0, npcStations.Count);
+        return npcStations.ElementAt(index).Key;
     }
 
     private void LateUpdate()
