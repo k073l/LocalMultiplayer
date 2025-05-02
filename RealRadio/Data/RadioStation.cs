@@ -20,6 +20,11 @@ public class RadioStation : ScriptableObject
     /// </summary>
     public string? DirectoryPath;
 
+    /// <summary>
+    /// Whether or not this radio station can be played by NPCs. This applies for vehicles driven by NPCs and random houses around the map.
+    /// </summary>
+    public bool CanBePlayedByNPCs = true;
+
     public override string ToString()
     {
         return $"{Name} ({Type}): {(Type == RadioType.InternetRadio ? Url : DirectoryPath)}";
