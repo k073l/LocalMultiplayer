@@ -1,10 +1,12 @@
 
 using System;
+using System.Collections;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using FishNet.Connection;
 using FishNet.Object;
 using FishNet.Object.Synchronizing;
+using NAudio.CoreAudioApi;
 using RealRadio.Components.Audio;
 using RealRadio.Components.Radio;
 using RealRadio.Data;
@@ -103,6 +105,12 @@ public class VehicleRadioProxy : NetworkBehaviour
         if (RadioStation?.Url == null)
             return;
 
+        if (IsClient && Vehicle == null)
+        {
+            StartCoroutine(WaitForReceiveVehicleThenInitAudioClient());
+            return;
+        }
+
         if (audioClientObject == null)
             throw new InvalidOperationException("AudioClientObject is null");
 
@@ -118,6 +126,15 @@ public class VehicleRadioProxy : NetworkBehaviour
         }
 
         UpdateAudioEffects();
+    }
+
+    private IEnumerator WaitForReceiveVehicleThenInitAudioClient()
+    {
+        if (IsServer)
+            throw new InvalidOperationException("This coroutine should only run on clients");
+
+        yield return new WaitUntil(() => Vehicle != null);
+        InitAudioClient();
     }
 
     private void UnbindAudioClient()
