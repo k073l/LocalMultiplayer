@@ -30,7 +30,7 @@ public class StreamAudioHost : MonoBehaviour
     private CancellationTokenSource? startStreamCts;
     private HashSet<StreamAudioClient> spawnedClients = [];
     private HashSet<StreamAudioClient> enabledClients = [];
-    private int clientIdCounter;
+    private int clientIdCounter = 1;
     private float? inactiveTimer;
     private bool startRequested;
     private bool stopRequested;
@@ -71,7 +71,6 @@ public class StreamAudioHost : MonoBehaviour
         var client = gameObject.GetComponent<StreamAudioClient>() ?? gameObject.AddComponent<StreamAudioClient>();
         client.Host = this;
         client.Id = clientIdCounter++;
-        audioSource.playOnAwake = false;
 
         if (createdAudioSource)
         {

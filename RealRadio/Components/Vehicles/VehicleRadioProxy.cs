@@ -144,7 +144,6 @@ public class VehicleRadioProxy : NetworkBehaviour
         if (audioClient == null)
         {
             audioClient = AudioStreamManager.Instance.GetOrCreateHost(RadioStation.Url).AddClient(audioClientObject);
-            audioClient.ConvertToMono = true;
         }
 
         UpdateAudioEffects();
