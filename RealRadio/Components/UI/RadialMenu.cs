@@ -216,12 +216,16 @@ public class RadialMenu : Singleton<RadialMenu>
         mouseDeltaSampleCount = 0;
     }
 
-    private void AimAtOption(InteractableOption selectedOption)
+    /// <summary>
+    /// Attempts to aim the arrow at the given option.
+    /// </summary>
+    /// <returns>True if the option was found.</returns>
+    public bool AimAtOption(InteractableOption option)
     {
-        var index = options.IndexOf(selectedOption);
+        var index = options.IndexOf(option);
 
         if (index == -1)
-            return;
+            return false;
 
         float sliceSize = 360f / options.Count;
         float angle = index * sliceSize;
@@ -235,6 +239,8 @@ public class RadialMenu : Singleton<RadialMenu>
         {
             mouseDeltaHistory[i] = direction;
         }
+
+        return true;
     }
 
     private void UpdateArrow()
