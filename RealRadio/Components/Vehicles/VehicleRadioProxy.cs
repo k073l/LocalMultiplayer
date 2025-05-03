@@ -257,20 +257,20 @@ public class VehicleRadioProxy : NetworkBehaviour
 
     private void OnEngineToggled(bool started)
     {
-        if (!IsServer)
-            return;
-
         Plugin.Logger.LogInfo($"Engine toggled: {started}");
 
-        if (started && HasNPCOccupants())
+        if (IsServer)
         {
-            if (UnityEngine.Random.Range(0f, 1f) <= 0.5f)
+            if (started && HasNPCOccupants())
             {
-                SetRadioStationIndex(RadioStationManager.Instance.GetRandomNPCStationIndex());
-            }
-            else
-            {
-                SetRadioStationIndex(-1);
+                if (UnityEngine.Random.Range(0f, 1f) <= 0.5f)
+                {
+                    SetRadioStationIndex(RadioStationManager.Instance.GetRandomNPCStationIndex());
+                }
+                else
+                {
+                    SetRadioStationIndex(-1);
+                }
             }
         }
 
