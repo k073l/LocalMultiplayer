@@ -79,3 +79,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _componentIndexCache: 255
   _networkObjectCache: {fileID: 0}
+  TurnOffIcon: {fileID: 21300000, guid: 7c0442cbc4791a74d95712a98173df9a, type: 3}

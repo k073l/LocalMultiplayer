@@ -25,6 +25,11 @@ public class RadioStation : ScriptableObject
     /// </summary>
     public bool CanBePlayedByNPCs = true;
 
+    /// <summary>
+    /// The icon to use for this radio station. Used in the radial menu. Should be a square texture, preferably minimum 128x128.
+    /// </summary>
+    public Sprite? Icon;
+
     public override string ToString()
     {
         return $"{Name} ({Type}): {(Type == RadioType.InternetRadio ? Url : DirectoryPath)}";

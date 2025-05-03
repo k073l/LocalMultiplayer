@@ -16,6 +16,8 @@ namespace RealRadio.Components.Radio;
 
 public class VehicleRadioManager : NetworkSingleton<VehicleRadioManager>
 {
+    public Sprite TurnOffIcon = null!;
+
     private bool radialMenuOpen;
 
     private InteractableOption[]? radialMenuOptions;
@@ -23,6 +25,9 @@ public class VehicleRadioManager : NetworkSingleton<VehicleRadioManager>
     public override void Awake()
     {
         base.Awake();
+
+        if (TurnOffIcon == null)
+            throw new InvalidOperationException("TurnOffIcon is null");
 
         // Call OnVehicleSpawned for pre-existing vehicles
         foreach (var vehicle in FindObjectsOfType<LandVehicle>())
@@ -45,7 +50,7 @@ public class VehicleRadioManager : NetworkSingleton<VehicleRadioManager>
         options[0] = InteractableOption.CreateOption(
             id: "-1",
             name: "Turn off",
-            sprite: null
+            sprite: TurnOffIcon
         );
 
         for (int i = 0; i < RadioStationManager.Instance.Stations.Count; ++i)
@@ -54,7 +59,7 @@ public class VehicleRadioManager : NetworkSingleton<VehicleRadioManager>
             options[i + 1] = InteractableOption.CreateOption(
                 id: i.ToString(CultureInfo.InvariantCulture),
                 name: station.Name!,
-                sprite: null
+                sprite: station.Icon
             );
         }
 
