@@ -345,8 +345,25 @@ public class RadialMenu : Singleton<RadialMenu>
 
             var root = uiOption.Query(name: "Root").First();
 
-            if (option.Sprite != null)
-                root.style.backgroundImage = new StyleBackground(option.Sprite);
+            root.style.backgroundImage = new StyleBackground(option.Sprite);
+
+            if (option.RoundedBackground)
+                root.AddToClassList("rounded");
+
+            var label = uiOption.Query<Label>(name: "Abbreviation").First();
+
+            if (!string.IsNullOrWhiteSpace(option.Abbreviation))
+            {
+                label.text = option.Abbreviation?.Trim();
+            }
+            else
+                label.style.display = DisplayStyle.None;
+
+            if (option.BackgroundColor is not null or { a: 0, r: 0, g: 0, b: 0 })
+                root.style.backgroundColor = option.BackgroundColor.Value;
+
+            if (option.TextColor is not null or { a: 0, r: 0, g: 0, b: 0 })
+                label.style.color = option.TextColor.Value;
 
             radialItemsContainer.Add(uiOption);
             optionElements.Add(option, uiOption);

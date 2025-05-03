@@ -11,7 +11,29 @@
     -unity-background-image-tint-color: #aaa;
 }
 
+#Root.rounded {
+    border-radius: 50%;
+}
+
 #Root.hovered {
     scale: 1.2;
     -unity-background-image-tint-color: #fff;
+}
+
+#AbbreviationContainer {
+    width: 100%;
+    height: 100%;
+    padding: 5px;
+}
+
+#Abbreviation {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    color: #fff;
+    -unity-text-align: middle-center;
+    text-overflow: ellipsis;
+    -unity-font-definition: url("project://database/Assets/RealRadio/Fonts/SairaStencilOne-Regular SDF.asset?fileID=11400000&;guid=514939fe32ad050458758fdc790fb34b&;type=2#SairaStencilOne-Regular SDF");
+    font-size: 20px;
 }

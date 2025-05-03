@@ -8,6 +8,12 @@ namespace RealRadio.Data;
 public class RadioStation : ScriptableObject
 {
     public string? Name;
+
+    /// <summary>
+    /// The abbreviation to use for this radio station. Used in the radial menu if there is no icon.
+    /// </summary>
+    public string? Abbreviation;
+
     public RadioType Type;
 
     /// <summary>
@@ -29,6 +35,21 @@ public class RadioStation : ScriptableObject
     /// The icon to use for this radio station. Used in the radial menu. Should be a square texture, preferably minimum 128x128.
     /// </summary>
     public Sprite? Icon;
+
+    /// <summary>
+    /// An optional background color to use for this radio station. The background is used in the radial menu.
+    /// </summary>
+    public Color BackgroundColor = Color.clear;
+
+    /// <summary>
+    /// Whether or not to make the background rounded. Used in the radial menu.
+    /// </summary>
+    public bool RoundedBackground = true;
+
+    /// <summary>
+    /// Text color to use for the abbreviation text. Used in the radial menu.
+    /// </summary>
+    public Color TextColor = Color.white;
 
     public override string ToString()
     {

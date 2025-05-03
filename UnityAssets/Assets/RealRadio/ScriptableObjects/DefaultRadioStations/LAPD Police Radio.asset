@@ -13,7 +13,12 @@ MonoBehaviour:
   m_Name: LAPD Police Radio
   m_EditorClassIdentifier: 
   Name: LAPD Police Radio
+  Abbreviation: LAPD
   Type: 0
   Url: https://broadcastify.cdnstream1.com/20296
   DirectoryPath: 
   CanBePlayedByNPCs: 0
+  Icon: {fileID: 0}
+  BackgroundColor: {r: 0.19335172, g: 0.21013081, b: 0.5188679, a: 1}
+  RoundedBackground: 1
+  TextColor: {r: 1, g: 1, b: 1, a: 1}

@@ -59,7 +59,11 @@ public class VehicleRadioManager : NetworkSingleton<VehicleRadioManager>
             options[i + 1] = InteractableOption.CreateOption(
                 id: i.ToString(CultureInfo.InvariantCulture),
                 name: station.Name!,
-                sprite: station.Icon
+                sprite: station.Icon,
+                abbreviation: station.Abbreviation,
+                backgroundColor: station.BackgroundColor,
+                textColor: station.TextColor,
+                roundedBackground: station.RoundedBackground
             );
         }
 
