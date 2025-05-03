@@ -16,3 +16,5 @@ MonoBehaviour:
   Type: 0
   Url: https://media-ice.musicradio.com/Heart90sMP3
   DirectoryPath: 
+  CanBePlayedByNPCs: 1
+  Icon: {fileID: 21300000, guid: a9ac8c09c292a3f46a0dfc137e451fae, type: 3}

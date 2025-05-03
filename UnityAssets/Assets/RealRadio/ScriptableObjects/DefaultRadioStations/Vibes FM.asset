@@ -16,3 +16,5 @@ MonoBehaviour:
   Type: 0
   Url: https://a10.asurahosting.com:9040/radio.mp3
   DirectoryPath: 
+  CanBePlayedByNPCs: 1
+  Icon: {fileID: 21300000, guid: c53ab8018c8a7d845a98a9e6058b7ee1, type: 3}

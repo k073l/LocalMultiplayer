@@ -16,3 +16,5 @@ MonoBehaviour:
   Type: 0
   Url: https://media-ice.musicradio.com/Heart00sMP3
   DirectoryPath: 
+  CanBePlayedByNPCs: 1
+  Icon: {fileID: 21300000, guid: 7c68bcb4250c4834db1daa1dac792591, type: 3}

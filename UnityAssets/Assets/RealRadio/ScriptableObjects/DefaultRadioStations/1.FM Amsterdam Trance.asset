@@ -16,3 +16,5 @@ MonoBehaviour:
   Type: 0
   Url: https://strm112.1.fm/atr_mobile_mp3
   DirectoryPath: 
+  CanBePlayedByNPCs: 1
+  Icon: {fileID: 21300000, guid: 044efc7c45de366448a8319d425dfe8c, type: 3}

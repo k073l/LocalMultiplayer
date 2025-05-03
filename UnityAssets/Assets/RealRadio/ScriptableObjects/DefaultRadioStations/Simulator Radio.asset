@@ -16,3 +16,5 @@ MonoBehaviour:
   Type: 0
   Url: https://stream.simulatorradio.com
   DirectoryPath: 
+  CanBePlayedByNPCs: 1
+  Icon: {fileID: 21300000, guid: 96c4559083a04704898d20b305a614d4, type: 3}

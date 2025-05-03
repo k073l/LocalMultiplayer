@@ -16,3 +16,5 @@ MonoBehaviour:
   Type: 0
   Url: https://live.truckers.fm
   DirectoryPath: 
+  CanBePlayedByNPCs: 1
+  Icon: {fileID: 21300000, guid: c185619007a124d4fad4095928ee983f, type: 3}

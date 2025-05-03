@@ -16,3 +16,5 @@ MonoBehaviour:
   Type: 0
   Url: https://media-ice.musicradio.com/Heart80sMP3
   DirectoryPath: 
+  CanBePlayedByNPCs: 1
+  Icon: {fileID: 21300000, guid: 2d85ffd3519dfae49882febec94aa6d2, type: 3}

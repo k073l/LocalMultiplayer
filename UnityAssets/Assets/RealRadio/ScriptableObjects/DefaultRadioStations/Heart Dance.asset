@@ -16,3 +16,5 @@ MonoBehaviour:
   Type: 0
   Url: https://media-ice.musicradio.com/HeartDanceMP3
   DirectoryPath: 
+  CanBePlayedByNPCs: 1
+  Icon: {fileID: 21300000, guid: 23c7dd81b7026ed4bae9d6ef91cc3f1f, type: 3}
