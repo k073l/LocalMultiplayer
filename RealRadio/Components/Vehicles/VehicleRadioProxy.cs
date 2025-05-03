@@ -97,13 +97,27 @@ public class VehicleRadioProxy : NetworkBehaviour
         RadioStation = nextStation;
 
         if (RadioStation != null)
+        {
             InitAudioClient();
+        }
     }
 
-    private void InitAudioClient()
+    private IEnumerator DelayedEnableAudioClientObject()
+    {
+        yield return new WaitForSeconds(0.23f);
+        audioClientObject?.SetActive(true);
+    }
+
+    private void InitAudioClient(bool delayStart = true)
     {
         if (RadioStation?.Url == null)
             return;
+
+        if (audioClient)
+        {
+            Plugin.Logger.LogWarning("AudioClient is already running");
+            return;
+        }
 
         if (IsClient && Vehicle == null)
         {
@@ -115,7 +129,15 @@ public class VehicleRadioProxy : NetworkBehaviour
             throw new InvalidOperationException("AudioClientObject is null");
 
         if (HasOccupants())
-            audioClientObject.SetActive(true);
+        {
+            if (delayStart)
+            {
+                audioClientObject.SetActive(false);
+                StartCoroutine(DelayedEnableAudioClientObject());
+            }
+            else
+                audioClientObject.SetActive(true);
+        }
         else
             audioClientObject.SetActive(false);
 
@@ -252,7 +274,15 @@ public class VehicleRadioProxy : NetworkBehaviour
             }
         }
 
-        InitAudioClient();
+        if (started)
+        {
+            if (!audioClient)
+                InitAudioClient();
+            else if (audioClientObject?.activeSelf == false)
+                StartCoroutine(DelayedEnableAudioClientObject());
+        }
+        else
+            audioClientObject?.SetActive(false);
     }
 
     private void OnPlayerEnterVehicle(Player player)
