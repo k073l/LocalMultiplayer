@@ -99,7 +99,7 @@ public class InteractableOptions : MonoBehaviour
 
     public virtual void OnShowOptions()
     {
-        if (RadialMenu.Instance.Show(Options, OnOptionSelected, OnUpdateInteractionText))
+        if (RadialMenu.Instance.Show(Options, onOptionSelected: OnOptionSelected, onUpdateInteractionText: OnUpdateInteractionText))
             showingOptions = true;
         else
         {

@@ -216,6 +216,27 @@ public class RadialMenu : Singleton<RadialMenu>
         mouseDeltaSampleCount = 0;
     }
 
+    private void AimAtOption(InteractableOption selectedOption)
+    {
+        var index = options.IndexOf(selectedOption);
+
+        if (index == -1)
+            return;
+
+        float sliceSize = 360f / options.Count;
+        float angle = index * sliceSize;
+        angle -= 90f;
+        angle = angle < 0 ? angle + 360f : angle;
+        angle = 360f - angle;
+        Vector2 direction = new Vector2(Mathf.Cos(angle * Mathf.Deg2Rad), Mathf.Sin(angle * Mathf.Deg2Rad));
+        direction.Normalize();
+
+        for (int i = 0; i < mouseDeltaHistory.Length; ++i)
+        {
+            mouseDeltaHistory[i] = direction;
+        }
+    }
+
     private void UpdateArrow()
     {
         float angle = GetMouseAngleFromMiddle();
@@ -258,6 +279,7 @@ public class RadialMenu : Singleton<RadialMenu>
     /// <returns>True if the menu was shown, false if it's already open.</returns>
     public bool Show(
         IEnumerable<InteractableOption> options,
+        InteractableOption? selectedOption = null,
         Action<InteractableOption>? onOptionSelected = null,
         Action<InteractableOption, EventRefData<string>>? onUpdateInteractionText = null
     )
@@ -267,6 +289,13 @@ public class RadialMenu : Singleton<RadialMenu>
 
         IsVisible = true;
         ResetMouseDeltaHistory();
+        hoveredOption = null;
+
+        if (selectedOption != null)
+        {
+            AimAtOption(selectedOption);
+        }
+
         LockInput();
         SetOptions(options);
         OnOptionSelected += OnSelected;

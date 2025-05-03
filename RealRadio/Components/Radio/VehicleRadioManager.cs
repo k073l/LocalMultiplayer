@@ -120,8 +120,11 @@ public class VehicleRadioManager : NetworkSingleton<VehicleRadioManager>
             return;
         }
 
+        // +1 because the first option is "turn off"
+        var selectedOption = radialMenuOptions[proxyRef.Proxy!.RadioStationIndex + 1];
+
         radialMenuOpen = true;
-        RadialMenu.Instance.Show(radialMenuOptions, onOptionSelected: OnRadialOptionSelected);
+        RadialMenu.Instance.Show(radialMenuOptions, onOptionSelected: OnRadialOptionSelected, selectedOption: selectedOption);
     }
 
     private void OnRadialOptionSelected(InteractableOption option)
