@@ -67,7 +67,7 @@ public class VehicleRadioProxy : NetworkBehaviour
     public override void OnStartClient()
     {
         base.OnStartClient();
-        RequestVehicleInfo(NetworkObject.LocalConnection);
+        RequestVehicleInfo();
     }
 
     [ServerRpc(RequireOwnership = false, RunLocally = true)]
@@ -153,7 +153,7 @@ public class VehicleRadioProxy : NetworkBehaviour
     }
 
     [ServerRpc(RequireOwnership = false)]
-    private void RequestVehicleInfo(NetworkConnection conn)
+    private void RequestVehicleInfo(NetworkConnection conn = null!)
     {
         ReceiveVehicleInfo(conn, Vehicle.gameObject);
     }
