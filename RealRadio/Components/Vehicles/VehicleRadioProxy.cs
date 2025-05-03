@@ -243,8 +243,8 @@ public class VehicleRadioProxy : NetworkBehaviour
         if (player == null || !player.IsLocalPlayer)
             return;
 
-        Plugin.Logger.LogInfo("Local player entered vehicle");
-        UpdateAudioEffects();
+        if (RadioStation != null)
+            UpdateAudioEffects();
     }
 
     private void OnPlayerExitVehicle(Player player)
@@ -252,8 +252,8 @@ public class VehicleRadioProxy : NetworkBehaviour
         if (player == null || !player.IsLocalPlayer)
             return;
 
-        Plugin.Logger.LogInfo("Local player exited vehicle");
-        UpdateAudioEffects();
+        if (RadioStation != null)
+            UpdateAudioEffects();
     }
 
     private void UpdateAudioEffects()
