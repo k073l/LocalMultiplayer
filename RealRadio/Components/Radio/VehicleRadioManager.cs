@@ -40,12 +40,18 @@ public class VehicleRadioManager : NetworkSingleton<VehicleRadioManager>
 
     private InteractableOption[] CreateRadialMenuOptions()
     {
-        var options = new InteractableOption[RadioStationManager.Instance.Stations.Count];
+        var options = new InteractableOption[RadioStationManager.Instance.Stations.Count + 1];
+
+        options[0] = InteractableOption.CreateOption(
+            id: "-1",
+            name: "Turn off",
+            sprite: null
+        );
 
         for (int i = 0; i < RadioStationManager.Instance.Stations.Count; ++i)
         {
             var station = RadioStationManager.Instance.Stations[i];
-            options[i] = InteractableOption.CreateOption(
+            options[i + 1] = InteractableOption.CreateOption(
                 id: i.ToString(CultureInfo.InvariantCulture),
                 name: station.Name!,
                 sprite: null
