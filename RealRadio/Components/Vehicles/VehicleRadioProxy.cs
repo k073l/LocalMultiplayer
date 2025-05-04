@@ -17,32 +17,13 @@ using UnityEngine;
 
 namespace RealRadio.Components.Vehicles;
 
-public class VehicleRadioProxy : NetworkBehaviour
+public class VehicleRadioProxy : RadioProxy
 {
-    [field: SerializeField]
-    public GameObject AudioClientPrefab { get; private set; } = null!;
-
-    public RadioStation? RadioStation { get; private set; }
-
-    [field: SyncVar(Channel = FishNet.Transporting.Channel.Reliable, ReadPermissions = ReadPermission.Observers, WritePermissions = WritePermission.ClientUnsynchronized, OnChange = nameof(OnStationChanged))]
-    public int RadioStationIndex { get; private set; } = -1;
-
     public LandVehicle Vehicle { get; set; } = null!;
 
-    private GameObject? audioClientObject;
-    private StreamAudioClient? audioClient;
-    private AudioSource? audioSource;
-
-    private void Awake()
+    protected override void OnDestroy()
     {
-        if (AudioClientPrefab == null)
-            throw new InvalidOperationException("AudioClientPrefab is null");
-    }
-
-    private void OnDestroy()
-    {
-        if (audioClientObject)
-            Destroy(audioClientObject);
+        base.OnDestroy();
 
         if (Vehicle)
         {
@@ -70,63 +51,18 @@ public class VehicleRadioProxy : NetworkBehaviour
         RequestVehicleInfo();
     }
 
-    [ServerRpc(RequireOwnership = false, RunLocally = true)]
-    public void SetRadioStationIndex(int index)
+    protected override void InitAudioClient(bool delayStart = true)
     {
-        if (index < -1 || index >= RadioStationManager.Instance.Stations.Count)
-        {
-            Plugin.Logger.LogWarning($"Invalid radio station index (out of range): {index}");
-            return;
-        }
-
-        RadioStationIndex = index;
-    }
-
-    private void OnStationChanged(int prev, int next, bool asServer)
-    {
-        if (asServer)
-            return;
-
-        RadioStation? nextStation = next == -1 ? null : RadioStationManager.Instance.Stations.ElementAtOrDefault(next);
-
-        Plugin.Logger.LogInfo($"New station: {nextStation?.Name} ({nextStation?.Url})");
-
-        if (RadioStation != null)
-            UnbindAudioClient();
-
-        RadioStation = nextStation;
-
-        if (RadioStation != null)
-        {
-            InitAudioClient();
-        }
-    }
-
-    private IEnumerator DelayedEnableAudioClientObject()
-    {
-        yield return new WaitForSeconds(0.23f);
-        audioClientObject?.SetActive(true);
-    }
-
-    private void InitAudioClient(bool delayStart = true)
-    {
-        if (RadioStation?.Url == null)
-            return;
-
-        if (audioClient)
-        {
-            Plugin.Logger.LogWarning("AudioClient is already running");
-            return;
-        }
-
         if (IsClient && Vehicle == null)
         {
             StartCoroutine(WaitForReceiveVehicleThenInitAudioClient());
             return;
         }
 
+        base.InitAudioClient(delayStart);
+
         if (audioClientObject == null)
-            throw new InvalidOperationException("AudioClientObject is null");
+            throw new InvalidOperationException("AudioClientObject is null after caliing InitAudioClient");
 
         if (HasOccupants())
         {
@@ -141,11 +77,6 @@ public class VehicleRadioProxy : NetworkBehaviour
         else
             audioClientObject.SetActive(false);
 
-        if (audioClient == null)
-        {
-            audioClient = AudioStreamManager.Instance.GetOrCreateHost(RadioStation.Url).AddClient(audioClientObject);
-        }
-
         UpdateAudioEffects();
     }
 
@@ -158,19 +89,10 @@ public class VehicleRadioProxy : NetworkBehaviour
         InitAudioClient();
     }
 
-    private void UnbindAudioClient()
+    private IEnumerator DelayedEnableAudioClientObject()
     {
-        if (RadioStation?.Url == null)
-            throw new InvalidOperationException("Can not unbind. RadioStation or RadioStation.Url is null");
-
-        if (audioClientObject == null)
-            throw new InvalidOperationException("AudioClientObject is null");
-
-        if (audioClient != null)
-        {
-            AudioStreamManager.Instance.GetOrCreateHost(RadioStation.Url).DetachClient(audioClientObject);
-            audioClient = null;
-        }
+        yield return new WaitForSeconds(0.23f);
+        audioClientObject?.SetActive(true);
     }
 
     [ServerRpc(RequireOwnership = false)]
