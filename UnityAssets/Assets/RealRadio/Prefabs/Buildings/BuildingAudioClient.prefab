@@ -14,6 +14,7 @@ GameObject:
   - component: {fileID: 5500823398731344022}
   - component: {fileID: 6536738378720190682}
   - component: {fileID: 5252961679346054325}
+  - component: {fileID: -6422110579001809216}
   m_Layer: 0
   m_Name: BuildingAudioClient
   m_TagString: Untagged
@@ -75,7 +76,7 @@ MonoBehaviour:
   DEBUG: 0
   AudioSource: {fileID: 6536738378720190682}
   AudioType: 0
-  DefaultVolume: 0.5
+  DefaultVolume: 0.4
   RandomizePitch: 0
   MinPitch: 1
   MaxPitch: 1
@@ -102,7 +103,7 @@ AudioSource:
   Priority: 128
   DopplerLevel: 1
   MinDistance: 1
-  MaxDistance: 25
+  MaxDistance: 30
   Pan2D: 0
   rolloffMode: 2
   BypassEffects: 0
@@ -219,7 +220,7 @@ AudioLowPassFilter:
     m_Curve:
     - serializedVersion: 3
       time: 0
-      value: 0.022282856
+      value: 0.026830377
       inSlope: 0
       outSlope: 0
       tangentMode: 0
@@ -229,3 +230,13 @@ AudioLowPassFilter:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+--- !u!165 &-6422110579001809216
+AudioHighPassFilter:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8340760668918485629}
+  m_Enabled: 1
+  m_CutoffFrequency: 100
+  m_HighpassResonanceQ: 1
