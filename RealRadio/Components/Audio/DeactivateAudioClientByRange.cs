@@ -28,6 +28,11 @@ public class DeactivateAudioClientByRange : MonoBehaviour
         audioSource = GetComponent<AudioSource>() ?? throw new InvalidOperationException("No AudioSource component found on game object");
     }
 
+    private void OnEnable()
+    {
+        client.enabled = IsInRange();
+    }
+
     private void Update()
     {
         bool isInRange = IsInRange();
