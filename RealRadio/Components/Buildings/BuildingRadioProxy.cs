@@ -52,7 +52,7 @@ public class BuildingRadioProxy : RadioProxy
     [TargetRpc]
     private void ReceiveBuildingInfo(NetworkConnection conn, int buildingHash)
     {
-        if (Building != null && !IsServer)
+        if (Building != null && IsClientOnly)
         {
             Plugin.Logger.LogWarning($"Received building again");
             return;
