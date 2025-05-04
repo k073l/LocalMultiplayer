@@ -73,6 +73,10 @@ public class BuildingRadioProxy : RadioProxy
         if (Building == null)
             throw new InvalidOperationException("Building is null");
 
+        name = $"{nameof(BuildingRadioProxy)} - {Building.name}";
+
+        BuildingRadioManager.Instance.AddProxy(this);
+
         var parent = Building.GetComponentInChildren<StaticDoor>(includeInactive: true)?.gameObject;
 
         if (parent == null)
@@ -81,5 +85,10 @@ public class BuildingRadioProxy : RadioProxy
         audioClientObject = Instantiate(AudioClientPrefab);
         audioClientObject.transform.SetParent(parent.transform, worldPositionStays: false);
         audioClientObject.SetActive(false);
+    }
+
+    private void Oestroy()
+    {
+        BuildingRadioManager.Instance.RemoveProxy(this);
     }
 }

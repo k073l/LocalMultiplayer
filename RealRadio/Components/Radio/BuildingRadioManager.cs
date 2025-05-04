@@ -16,6 +16,7 @@ public class BuildingRadioManager : NetworkSingleton<BuildingRadioManager>
     public GameObject RadioProxyPrefab { get; private set; } = null!;
 
     public Dictionary<int, NPCEnterableBuilding> Buildings { get; private set; } = null!;
+    public Dictionary<NPCEnterableBuilding, BuildingRadioProxy> Proxies { get; } = [];
     public Dictionary<NPCEnterableBuilding, HashSet<NPC>> Residents { get; } = [];
 
     private static readonly string[] blackListedBuildingWords =
@@ -152,9 +153,23 @@ public class BuildingRadioManager : NetworkSingleton<BuildingRadioManager>
     public void AddProxy(BuildingRadioProxy proxy)
     {
         if (proxy.Building == null)
-            throw new InvalidOperationException("Proxy building is null");
+            throw new InvalidOperationException("Building proxy is null");
 
-        Proxies.Add(proxy.Building, proxy);
+        if (!Proxies.TryAdd(proxy.Building, proxy))
+        {
+            Plugin.Logger.LogWarning($"Found duplicate proxy: {proxy.Building.GUID} - {proxy.Building.BuildingName}");
+        }
+    }
+
+    public void RemoveProxy(BuildingRadioProxy proxy)
+    {
+        if (proxy.Building == null)
+            throw new InvalidOperationException("Building proxy is null");
+
+        if (!Proxies.Remove(proxy.Building))
+        {
+            Plugin.Logger.LogWarning($"Tried to remove unknown building proxy: {proxy.Building.GUID} - {proxy.Building.BuildingName}");
+        }
     }
 
     public override void Start()
@@ -183,7 +198,6 @@ public class BuildingRadioManager : NetworkSingleton<BuildingRadioManager>
         foreach (var building in Buildings.Values)
         {
             var proxy = Instantiate(RadioProxyPrefab, parent: transform);
-            proxy.name = $"{proxy.name} - {building.name}";
             proxy.GetComponent<BuildingRadioProxy>().Building = building;
 
             Spawn(proxy);
