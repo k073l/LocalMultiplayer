@@ -5,6 +5,7 @@ using System.Linq;
 using FishNet.Connection;
 using FishNet.Object;
 using RealRadio.Components.Radio;
+using ScheduleOne.Audio;
 using ScheduleOne.Doors;
 using ScheduleOne.Map;
 using UnityEngine;
@@ -85,6 +86,19 @@ public class BuildingRadioProxy : RadioProxy
         audioClientObject = Instantiate(AudioClientPrefab);
         audioClientObject.transform.SetParent(parent.transform, worldPositionStays: false);
         audioClientObject.SetActive(false);
+
+        // Disable existing ambient loops in building
+        var ambientSounds = Building.GetComponentsInChildren<AmbientLoop>(includeInactive: true).Select(x => (MonoBehaviour)x).Concat(Building.GetComponentsInChildren<AmbientLoopJukebox>(includeInactive: true));
+        var ambientSounds = Building
+            .GetComponentsInChildren<AmbientLoop>(includeInactive: true)
+            .Select(x => (MonoBehaviour)x)
+            .Concat(Building.GetComponentsInChildren<AmbientLoopJukebox>(includeInactive: true));
+
+        foreach (var ambientSound in ambientSounds)
+        {
+            Plugin.Logger.LogInfo($"Muting ambient sound: {ambientSound.name}");
+            ambientSound.GetComponent<AudioSource>().mute = true;
+        }
     }
 
     protected override void OnDestroy()
