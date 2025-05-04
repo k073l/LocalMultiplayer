@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using RealRadio.Components.Buildings;
+using RealRadio.Components.NPCs;
 using ScheduleOne.DevUtilities;
 using ScheduleOne.Map;
 using ScheduleOne.NPCs;
@@ -66,8 +67,6 @@ public class BuildingRadioManager : NetworkSingleton<BuildingRadioManager>
             hash = building.GUID.GetHashCode() * 31 * building.BuildingName.GetHashCode();
         }
 
-        Plugin.Logger.LogInfo($"Building hash: {building.GUID} - {building.BuildingName} ({hash})");
-
         return hash;
     }
 
@@ -107,6 +106,12 @@ public class BuildingRadioManager : NetworkSingleton<BuildingRadioManager>
                 }
 
                 residents.Add(npc);
+            }
+
+            if (IsServer)
+            {
+                // Add building radio schedule component to npc
+                npc.gameObject.AddComponent<BuildingRadioSchedule>();
             }
         }
     }
@@ -170,6 +175,14 @@ public class BuildingRadioManager : NetworkSingleton<BuildingRadioManager>
         {
             Plugin.Logger.LogWarning($"Tried to remove unknown building proxy: {proxy.Building.GUID} - {proxy.Building.BuildingName}");
         }
+    }
+
+    public BuildingRadioProxy? GetProxy(NPCEnterableBuilding building)
+    {
+        if (!Proxies.TryGetValue(building, out var proxy))
+            return null;
+
+        return proxy;
     }
 
     public override void Start()

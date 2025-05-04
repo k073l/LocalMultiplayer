@@ -7,7 +7,10 @@ using FishNet.Object;
 using RealRadio.Components.Radio;
 using ScheduleOne.Audio;
 using ScheduleOne.Doors;
+using ScheduleOne.GameTime;
 using ScheduleOne.Map;
+using ScheduleOne.NPCs;
+using ScheduleOne.NPCs.Schedules;
 using UnityEngine;
 
 namespace RealRadio.Components.Buildings;
@@ -15,6 +18,60 @@ namespace RealRadio.Components.Buildings;
 public class BuildingRadioProxy : RadioProxy
 {
     public NPCEnterableBuilding? Building { get; set; }
+
+    public int StopTime { get; private set; }
+
+    protected override void Awake()
+    {
+        base.Awake();
+
+        ScheduleOne.GameTime.TimeManager.Instance.onMinutePass += OnMinutePass;
+        ScheduleOne.GameTime.TimeManager.Instance.onDayPass += OnDayPass;
+        ScheduleOne.GameTime.TimeManager.Instance._onSleepEnd.AddListener(OnSleepEnd);
+    }
+
+    public override void OnStartServer()
+    {
+        base.OnStartServer();
+        OnDayPass();
+    }
+
+    private void OnMinutePass()
+    {
+        if (IsClientOnly)
+            return;
+
+        if (ScheduleOne.GameTime.TimeManager.Instance.DailyMinTotal >= StopTime && RadioStationIndex != -1)
+        {
+            SetRadioStationIndex(-1);
+        }
+    }
+
+    private void OnSleepEnd()
+    {
+        if (IsClientOnly)
+            return;
+
+        if (UnityEngine.Random.Range(0f, 1f) <= 0.5f)
+        {
+            StartCoroutine(DelayStartRandomStation());
+        }
+    }
+
+    private IEnumerator DelayStartRandomStation()
+    {
+        yield return new WaitForSeconds(UnityEngine.Random.Range(30f, 120f));
+
+        if (Building?.OccupantCount is null or 0 || RadioStationIndex != -1)
+            yield break;
+
+        SetRadioStationIndex(RadioStationManager.Instance.GetRandomNPCStationIndex());
+    }
+
+    private void OnDayPass()
+    {
+        StopTime = 1440 - UnityEngine.Random.Range(1, 301);
+    }
 
     protected override void InitAudioClient(bool delayStart = true)
     {
@@ -27,6 +84,7 @@ public class BuildingRadioProxy : RadioProxy
         base.InitAudioClient(delayStart);
 
         audioClient!.ConvertToMono = true;
+        audioClientObject!.SetActive(true);
     }
 
     private IEnumerator WaitForReceiveBuildingThenInitAudioClient()

@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Linq;
 using FishNet.Object;
 using FishNet.Object.Synchronizing;
@@ -46,7 +47,19 @@ public abstract class RadioProxy : NetworkBehaviour
         RadioStationIndex = index;
     }
 
-    private void OnStationChanged(int prev, int next, bool asServer)
+    private IEnumerator WaitForAudioClientThenEnable()
+    {
+        if (audioClientObject != null)
+        {
+            audioClientObject.SetActive(true);
+            yield break;
+        }
+
+        yield return new WaitUntil(() => audioClientObject != null);
+        audioClientObject!.SetActive(true);
+    }
+
+    protected virtual void OnStationChanged(int prev, int next, bool asServer)
     {
         if (asServer)
             return;
