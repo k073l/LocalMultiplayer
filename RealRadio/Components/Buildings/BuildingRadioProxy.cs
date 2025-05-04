@@ -5,6 +5,7 @@ using System.Linq;
 using FishNet.Connection;
 using FishNet.Object;
 using RealRadio.Components.Radio;
+using ScheduleOne.Doors;
 using ScheduleOne.Map;
 using UnityEngine;
 
@@ -63,8 +64,13 @@ public class BuildingRadioProxy : RadioProxy
         if (Building == null)
             throw new InvalidOperationException("Building is null");
 
+        var parent = Building.GetComponentInChildren<StaticDoor>(includeInactive: true)?.gameObject;
+
+        if (parent == null)
+            parent = Building.gameObject;
+
         audioClientObject = Instantiate(AudioClientPrefab);
-        audioClientObject.transform.SetParent(Building.transform, worldPositionStays: false);
+        audioClientObject.transform.SetParent(parent.transform, worldPositionStays: false);
         audioClientObject.SetActive(false);
     }
 }
