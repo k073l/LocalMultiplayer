@@ -19,7 +19,7 @@ namespace RealRadio.Components.Vehicles;
 
 public class VehicleRadioProxy : RadioProxy
 {
-    public LandVehicle Vehicle { get; set; } = null!;
+    public LandVehicle? Vehicle { get; set; }
 
     protected override void OnDestroy()
     {
@@ -27,7 +27,7 @@ public class VehicleRadioProxy : RadioProxy
 
         if (Vehicle)
         {
-            var proxyRef = Vehicle.gameObject.GetComponent<VehicleRadioProxyReference>();
+            var proxyRef = Vehicle?.gameObject.GetComponent<VehicleRadioProxyReference>();
 
             if (proxyRef)
                 Destroy(proxyRef);
@@ -59,10 +59,10 @@ public class VehicleRadioProxy : RadioProxy
             return;
         }
 
-        base.InitAudioClient(delayStart);
-
         if (audioClientObject == null)
-            throw new InvalidOperationException("AudioClientObject is null after caliing InitAudioClient");
+            throw new InvalidOperationException("AudioClientObject is null after receiving vehicle info");
+
+        base.InitAudioClient(delayStart);
 
         if (HasOccupants())
         {
@@ -98,6 +98,9 @@ public class VehicleRadioProxy : RadioProxy
     [ServerRpc(RequireOwnership = false)]
     private void RequestVehicleInfo(NetworkConnection conn = null!)
     {
+        if (Vehicle == null)
+            throw new InvalidOperationException("Vehicle is null");
+
         ReceiveVehicleInfo(conn, Vehicle.gameObject);
     }
 
@@ -110,6 +113,9 @@ public class VehicleRadioProxy : RadioProxy
 
     private void OnVehicleSet()
     {
+        if (Vehicle == null)
+            throw new InvalidOperationException("Vehicle is null");
+
         name = $"{name} ({Vehicle.name})";
 
         audioClientObject = Instantiate(AudioClientPrefab);
@@ -153,13 +159,13 @@ public class VehicleRadioProxy : RadioProxy
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private bool HasPlayerOccupants()
     {
-        return Vehicle.OccupantPlayers.Count > 0;
+        return Vehicle?.OccupantPlayers.Count > 0;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private bool HasNPCOccupants()
     {
-        return Vehicle.OccupantNPCs.Any(x => x != null);
+        return Vehicle?.OccupantNPCs.Any(x => x != null) == true;
     }
 
     private void OnVehicleStart()
@@ -232,7 +238,7 @@ public class VehicleRadioProxy : RadioProxy
             return;
         }
 
-        bool isInVehicle = Vehicle.OccupantPlayers.Contains(Player.Local);
+        bool isInVehicle = Vehicle?.OccupantPlayers.Contains(Player.Local) ?? false;
         var source = audioClient.AudioSource;
 
         source.spatialBlend = isInVehicle ? 0 : 1;
