@@ -96,7 +96,6 @@ public class BuildingRadioProxy : RadioProxy
 
         foreach (var ambientSound in ambientSounds)
         {
-            Plugin.Logger.LogInfo($"Muting ambient sound: {ambientSound.name}");
             ambientSound.GetComponent<AudioSource>().mute = true;
         }
     }
