@@ -87,8 +87,9 @@ public class BuildingRadioProxy : RadioProxy
         audioClientObject.SetActive(false);
     }
 
-    private void Oestroy()
+    protected override void OnDestroy()
     {
+        base.OnDestroy();
         BuildingRadioManager.Instance.RemoveProxy(this);
     }
 }
