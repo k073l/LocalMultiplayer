@@ -111,8 +111,6 @@ public class BuildingRadioSchedule : MonoBehaviour
 
     private void OnEnterBuilding(NPCEnterableBuilding building, bool returningFromSummon)
     {
-        Plugin.Logger.LogInfo($"{npc.name} entered building: {building.name} (returning from summon: {returningFromSummon})");
-
         summoned = false;
 
         if (building.OccupantCount == 1)
@@ -129,8 +127,6 @@ public class BuildingRadioSchedule : MonoBehaviour
 
     private void OnExitBuilding(NPCEnterableBuilding building, bool summoned)
     {
-        Plugin.Logger.LogInfo($"{npc.name} exited building: {building.name} (summoned: {summoned})");
-
         this.summoned = summoned;
 
         if (building.OccupantCount == 0)
