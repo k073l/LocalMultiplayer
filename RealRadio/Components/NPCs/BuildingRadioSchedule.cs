@@ -27,8 +27,8 @@ public class BuildingRadioSchedule : MonoBehaviour
 
     private void Awake()
     {
-        npc = GetComponent<NPC>() ?? throw new System.Exception("Could not find NPC component");
-        schedule = npc.GetComponentInChildren<NPCScheduleManager>() ?? throw new System.Exception("Could not find NPCScheduleManager component");
+        npc = GetComponent<NPC>() ?? throw new InvalidOperationException("Could not find NPC component");
+        schedule = npc.GetComponentInChildren<NPCScheduleManager>() ?? throw new InvalidOperationException("Could not find NPCScheduleManager component");
     }
 
     private void LateUpdate()
