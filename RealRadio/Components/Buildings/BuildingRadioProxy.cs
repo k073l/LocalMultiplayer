@@ -17,7 +17,7 @@ public class BuildingRadioProxy : RadioProxy
 
     protected override void InitAudioClient(bool delayStart = true)
     {
-        if (IsClient && Building == null)
+        if (IsClientOnly && Building == null)
         {
             StartCoroutine(WaitForReceiveBuildingThenInitAudioClient());
             return;
@@ -52,8 +52,17 @@ public class BuildingRadioProxy : RadioProxy
     [TargetRpc]
     private void ReceiveBuildingInfo(NetworkConnection conn, int buildingHash)
     {
+        if (Building != null && !IsServer)
+        {
+            Plugin.Logger.LogWarning($"Received building again");
+            return;
+        }
+
         if (!BuildingRadioManager.Instance.Buildings.TryGetValue(buildingHash, out var building))
-            throw new InvalidOperationException($"Building not found: {buildingHash}");
+        {
+            Plugin.Logger.LogError($"Building not found: {buildingHash}");
+            return;
+        }
 
         Building = building;
         OnBuildingSet();

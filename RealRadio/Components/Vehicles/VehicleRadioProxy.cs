@@ -53,7 +53,7 @@ public class VehicleRadioProxy : RadioProxy
 
     protected override void InitAudioClient(bool delayStart = true)
     {
-        if (IsClient && Vehicle == null)
+        if (IsClientOnly && Vehicle == null)
         {
             StartCoroutine(WaitForReceiveVehicleThenInitAudioClient());
             return;
@@ -107,6 +107,12 @@ public class VehicleRadioProxy : RadioProxy
     [TargetRpc]
     private void ReceiveVehicleInfo(NetworkConnection conn, GameObject vehicleObject)
     {
+        if (Vehicle != null && IsClientOnly)
+        {
+            Plugin.Logger.LogWarning($"Received vehicle again");
+            return;
+        }
+
         Vehicle = vehicleObject.GetComponent<LandVehicle>() ?? throw new InvalidOperationException($"Could not find LandVehicle component on received vehicle object ({vehicleObject?.name})");
         OnVehicleSet();
     }
