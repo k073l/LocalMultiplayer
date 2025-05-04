@@ -54,6 +54,9 @@ public class AssetRegistry : ScriptableObject
         if (result.Singletons.VehicleRadioManager == null)
             throw new AssetRegistryLoadException("Singletons.VehicleRadioManager is null");
 
+        if (result.Singletons.BuildingRadioManager == null)
+            throw new AssetRegistryLoadException("Singletons.BuildingRadioManager is null");
+
         if (result.Singletons.RadialMenu == null)
             throw new AssetRegistryLoadException("Singletons.RadialMenu is null");
 
@@ -130,6 +133,7 @@ public class SingletonPrefabs : ScriptableObject
     public GameObject RadioStationManager;
     public GameObject RadioSyncManager;
     public GameObject VehicleRadioManager;
+    public GameObject BuildingRadioManager;
     public GameObject RadialMenu;
 #nullable enable
 }
