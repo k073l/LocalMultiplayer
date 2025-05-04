@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1 &7566014837715925360
+--- !u!1 &2604571879006408286
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -8,23 +8,23 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 3762614413440193762}
-  - component: {fileID: 3170893233683850119}
-  - component: {fileID: -8122608254573692823}
+  - component: {fileID: 536019618415394312}
+  - component: {fileID: 8835818530810298884}
+  - component: {fileID: 3489085075623988509}
   m_Layer: 0
-  m_Name: '@BuildingRadioManager'
+  m_Name: BuildingRadioProxy
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &3762614413440193762
+--- !u!4 &536019618415394312
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7566014837715925360}
+  m_GameObject: {fileID: 2604571879006408286}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
@@ -33,13 +33,13 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &3170893233683850119
+--- !u!114 &8835818530810298884
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7566014837715925360}
+  m_GameObject: {fileID: 2604571879006408286}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 1201363339, guid: 03534c54b8bf06c4582c469513b5492d, type: 3}
@@ -65,18 +65,19 @@ MonoBehaviour:
   _scenePathHash: 0
   <SceneId>k__BackingField: 0
   <AssetPathHash>k__BackingField: 0
---- !u!114 &-8122608254573692823
+--- !u!114 &3489085075623988509
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7566014837715925360}
+  m_GameObject: {fileID: 2604571879006408286}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 948233057, guid: 06549ed6e3aa5624283039434632ccf8, type: 3}
+  m_Script: {fileID: -1955325926, guid: 06549ed6e3aa5624283039434632ccf8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   _componentIndexCache: 255
   _networkObjectCache: {fileID: 0}
-  <RadioProxyPrefab>k__BackingField: {fileID: 2604571879006408286, guid: 3de52ab47e50e6b4d88240e45e31eba8, type: 3}
+  <AudioClientPrefab>k__BackingField: {fileID: 8340760668918485629, guid: 75c2571ffcbb876409647e20ce98cbdc, type: 3}
+  <RadioStationIndex>k__BackingField: -1
