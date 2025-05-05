@@ -60,6 +60,9 @@ public class BuildingRadioProxy : RadioProxy
 
     private void OnDayPass()
     {
+        if (IsClientOnly)
+            return;
+
         StopTime = 1440 - UnityEngine.Random.Range(1, 301);
         StartTime = UnityEngine.Random.Range(30, StopTime - 120);
         startedOnceToday = false;
