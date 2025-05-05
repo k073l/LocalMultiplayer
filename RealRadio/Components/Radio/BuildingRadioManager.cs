@@ -49,6 +49,7 @@ public class BuildingRadioManager : NetworkSingleton<BuildingRadioManager>
         "caravan",
         "courthouse",
         "townhall",
+        "benji", // lives right next to player's motel room, which can get annoying
     ];
 
     public override void Awake()
