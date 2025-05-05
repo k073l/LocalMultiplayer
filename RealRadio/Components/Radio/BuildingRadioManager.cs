@@ -26,6 +26,7 @@ public class BuildingRadioManager : NetworkSingleton<BuildingRadioManager>
         "office",
         "pharmacy",
         "store",
+        "shop",
         "warehouse",
         "chemical",
         "industrial",
