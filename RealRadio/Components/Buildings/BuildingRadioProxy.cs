@@ -19,7 +19,10 @@ public class BuildingRadioProxy : RadioProxy
 {
     public NPCEnterableBuilding? Building { get; set; }
 
+    public int StartTime { get; private set; }
     public int StopTime { get; private set; }
+
+    private bool startedOnceToday;
 
     protected override void Awake()
     {
@@ -27,7 +30,6 @@ public class BuildingRadioProxy : RadioProxy
 
         ScheduleOne.GameTime.TimeManager.Instance.onMinutePass += OnMinutePass;
         ScheduleOne.GameTime.TimeManager.Instance.onDayPass += OnDayPass;
-        ScheduleOne.GameTime.TimeManager.Instance._onSleepEnd.AddListener(OnSleepEnd);
     }
 
     public override void OnStartServer()
@@ -45,32 +47,22 @@ public class BuildingRadioProxy : RadioProxy
         {
             SetRadioStationIndex(-1);
         }
-    }
 
-    private void OnSleepEnd()
-    {
-        if (IsClientOnly)
-            return;
-
-        if (UnityEngine.Random.Range(0f, 1f) <= 0.5f)
+        if (!startedOnceToday && ScheduleOne.GameTime.TimeManager.Instance.DailyMinTotal >= StartTime && ScheduleOne.GameTime.TimeManager.Instance.DailyMinTotal < StopTime && RadioStationIndex == -1)
         {
-            StartCoroutine(DelayStartRandomStation());
+            startedOnceToday = true;
+
+            if (Building?.OccupantCount > 0 && UnityEngine.Random.Range(0f, 1f) <= 0.5f)
+                SetRadioStationIndex(RadioStationManager.Instance.GetRandomNPCStationIndex());
         }
     }
 
-    private IEnumerator DelayStartRandomStation()
-    {
-        yield return new WaitForSeconds(UnityEngine.Random.Range(30f, 120f));
-
-        if (Building?.OccupantCount is null or 0 || RadioStationIndex != -1)
-            yield break;
-
-        SetRadioStationIndex(RadioStationManager.Instance.GetRandomNPCStationIndex());
-    }
 
     private void OnDayPass()
     {
         StopTime = 1440 - UnityEngine.Random.Range(1, 301);
+        StartTime = UnityEngine.Random.Range(30, StopTime - 120);
+        startedOnceToday = false;
     }
 
     protected override void InitAudioClient(bool delayStart = true)

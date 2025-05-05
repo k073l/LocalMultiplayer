@@ -120,7 +120,7 @@ public class BuildingRadioSchedule : MonoBehaviour
             if (proxy == null)
                 return;
 
-            if ((!returningFromSummon || proxy.RadioStationIndex == -1) && proxy.StopTime > TimeManager.Instance.DailyMinTotal && UnityEngine.Random.Range(0f, 1f) <= 0.5f)
+            if ((!returningFromSummon || proxy.RadioStationIndex == -1) && proxy.StartTime <= TimeManager.Instance.DailyMinTotal && proxy.StopTime > TimeManager.Instance.DailyMinTotal && UnityEngine.Random.Range(0f, 1f) <= 0.5f)
                 proxy.SetRadioStationIndex(RadioStationManager.Instance.GetRandomNPCStationIndex());
         }
     }
