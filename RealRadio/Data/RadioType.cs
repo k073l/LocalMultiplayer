@@ -4,5 +4,4 @@ using System;
 public enum RadioType
 {
     InternetRadio,
-    LocalDirectory,
 }

@@ -22,11 +22,6 @@ public class RadioStation : ScriptableObject
     public string? Url;
 
     /// <summary>
-    /// If <see cref="Type"/> is <see cref="RadioType.LocalDirectory"/>, this is the path to the folder containing the audio files.
-    /// </summary>
-    public string? DirectoryPath;
-
-    /// <summary>
     /// Whether or not this radio station can be played by NPCs. This applies for vehicles driven by NPCs and random houses around the map.
     /// </summary>
     public bool CanBePlayedByNPCs = true;
@@ -53,6 +48,15 @@ public class RadioStation : ScriptableObject
 
     public override string ToString()
     {
-        return $"{Name} ({Type}): {(Type == RadioType.InternetRadio ? Url : DirectoryPath)}";
+        return $"{Name} ({Type}): {TypeDataToString()}";
+    }
+
+    private string TypeDataToString()
+    {
+        return Type switch
+        {
+            RadioType.InternetRadio => Url ?? string.Empty,
+            _ => throw new NotImplementedException($"Unknown type: {Type}"),
+        };
     }
 }
