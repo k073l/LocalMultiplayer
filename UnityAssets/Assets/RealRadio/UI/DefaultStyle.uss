@@ -1,5 +1,0 @@
-Label {
-    font-size: 24px;
-    color: #fff;
-    -unity-font-definition: url("/Assets/RealRadio/Fonts/OpenSans-VariableFont_wdth,wght SDF.asset");
-}
