@@ -1,0 +1,42 @@
+﻿<Project>
+    <PropertyGroup>
+        <PostWaitSeconds Condition="'$(TestMultiplayer)' == 'true'">5</PostWaitSeconds>
+        <PostWaitSeconds Condition="'$(TestMultiplayer)' != 'true'">1</PostWaitSeconds>
+    </PropertyGroup>
+
+    <Target Name="Kill running S1 instances" AfterTargets="PostBuildEvent" Condition="'$(RunPostBuildEvent)' == 'OnBuildSuccess'">
+        <Message Text="Checking for running S1 instances..." Importance="high" />
+        <Exec Command='(tasklist | findstr /I "Schedule.*I.exe" &gt;nul || exit 0) &amp;&amp; taskkill /F /IM "$(S1ExeName)"' />
+        <Message Text="Waiting for S1 processes to terminate..." Importance="normal" />
+        <Exec Command='powershell -Command "while (Get-Process -Name \"$(S1ExeName)\" -ErrorAction SilentlyContinue) { Start-Sleep -Milliseconds 200 }; Start-Sleep -Seconds $(PostWaitSeconds)"' />
+    </Target>
+
+    <Target Name="Clean mod folder and copy requested mods" AfterTargets="PostBuildEvent" Condition="'$(RunPostBuildEvent)' == 'OnBuildSuccess'">
+        <Message Text="Cleaning mods directory: $(S1ModsDir)" Importance="high" />
+        <Exec Command='powershell -Command "Remove-Item \"$(S1ModsDir)\*\" -Recurse -Force"' />
+
+        <Message Condition="'@(ModList)' != ''" Text="Checking if mods in ModList exist..." Importance="high" />
+        <Message Condition="'@(ModList)' == ''" Text="No mods defined in ModList; skipping mod copy." Importance="normal" />
+        <Exec Condition="'@(ModList)' != ''" WorkingDirectory="$(ProjectDir)"
+              Command="powershell -Command &quot;&amp; { if (Test-Path '%(ModList.Identity)') { Copy-Item '%(ModList.Identity)' '$(S1ModsDir)' } else { Write-Host 'Mod not found: %(ModList.Identity)' } }&quot;" />
+        
+        <Message Condition="'$(IsMultiplayerTest)' == 'true'" Text="Multiplayer testing. Copying LocalMultiplayer mod and starter" Importance="high" />
+        <Exec Condition="'$(IsMultiplayerTest)' == 'true'" Command='powershell -Command "Copy-Item \"$(MultiplayerMod)\" \"$(S1ModsDir)\""' />
+        <Exec Condition="'$(IsMultiplayerTest)' == 'true'" Command='powershell -Command "Copy-Item \"$(MultiplayerModStarter)\" \"$(S1Dir)\""' />
+
+        <Message Condition="'$(IsUnityExplorer)' == 'true'" Text="UnityExplorer enabled. Copying UnityExplorer mod..." Importance="high" />
+        <Exec Condition="'$(IsUnityExplorer)' == 'true'" Command='powershell -Command "Copy-Item \"$(UnityExplorer)\" \"$(S1ModsDir)\""' />
+    </Target>
+
+    <Target Name="Copy built mod and run the game" AfterTargets="PostBuildEvent" Condition="'$(RunPostBuildEvent)' == 'OnBuildSuccess'">
+        <Message Text="Copying built mod to mods directory..." Importance="high" />
+        <Exec Command='copy "$(TargetPath)" "$(S1ModsDir)"'/>
+
+        <Message Condition="'$(IsMultiplayerTest)' != 'true'" Text="Launching game: $(S1ExePath)" Importance="high" />
+        <Exec Condition="'$(IsMultiplayerTest)' != 'true'" Command='powershell -Command "Start-Process -FilePath \"$(S1ExePath)\""' />
+
+        <Message Condition="'$(IsMultiplayerTest)' == 'true'" Text="Multiplayer mode: launching mod starter..." Importance="high" />
+        <Exec Condition="'$(IsMultiplayerTest)' == 'true'"
+              Command='powershell -Command "Start-Process -FilePath \"$(MultiplayerModStarter)\" -WorkingDirectory \"$(S1Dir)\""' />
+    </Target>
+</Project>

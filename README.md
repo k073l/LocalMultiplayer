@@ -1,21 +1,33 @@
-# Real Radio
+# Local Multiplayer
 
-> A radio plugin for Schedule I using BepInEx
+> MelonLoader mod for testing multiplayer functionality
 
-**Note: Requires alternate branch on Steam.**
+## Credits
+- [Skippy](https://github.com/Skippeh/Schedule1RealRadioMod/tree/main/LocalMultiplayer) - Author of the mod for BepInEx Mono
 
-Currently in development.
+## Installation
+1. Install MelonLoader
+2. Extract the zip file
+3. Place the dll file into the Mods directory for your branch
+    - For none/beta use IL2CPP
+    - For alternate/alternate beta use Mono
+4. Launch the game
 
-## Existing features
-- Play remote audio streams (from urls). Supports all file formats that Media Foundation supports
-- A remote stream can be played through multiple AudioSources in Unity (using AudioStreamHost and AudioStreamClient, managed through the AudioStreamManager singleton)
-- Placeable radio object that you can put in your properties. This uses custom placement logic which allows placing the radio object on almost any surface. Persistance (saving/loading) for these are not implemented yet. Multiplayer functionality is fully working.
-- A generic radial menu singleton, currently used in vehicles (radio station selection) and placeable radio objects
-- All game objects with a LandVehicle component have an associated VehicleRadioProxy networked object which controls playing audio from the vehicle. Players can change radio station by holding the reload button and selecting a station in the radial menu. Audio effects are changed depending on if the player is inside the vehicle or not. When inside the vehicle the audio is not spatialized and has no audio filters. When the player is not in the vehicle the audio is spatialized and a low pass filter is applied to simulate the audio being muffled from inside the car.
-- Residential buildings where NPCs live have a chance (50% atm) to play music when the building has NPCs inside. The time when music starts and stops in a day is randomized at the end of each day. This logic only runs on the server but the playing radio station is synced to all clients
-- Radio stations played by NPCs are randomized. Radio stations can be excluded from being played by NPCs
+## Usage
+For automated usage you can use a batch file to launch two instances of the game with the mod (in this example file is located in game directory).
+```batch
+start "" "Schedule I.exe" --host --adjust-window --left-offset 0
+timeout /t 1
+start "" "Schedule I.exe" --join --adjust-window --left-offset 20
+```
+For manual usage launch the game and follow instructions on screen.
 
-## General project goals
-- Immersion is important, but if something feels better even if it's less realistic that should be preferred
-- Generally speaking the mod should be highly polished to the best of your ability, as if it was part of the base game.
-- Custom assets should fit the art style of the base game
+Ensure that port `7777` is not in use by another application.
+When hosting, mod will automatically pick last played save or first one in the list.
+When joining, mod will automatically join hosted game when available.
+
+### Flags
+- `--host`, `-h` - Host a game
+- `--join`, `-j` - Join a game
+- `--adjust-window`, `-s` - Adjust the window size and position
+- `--left-offset`, `-o` - Gap between the two windows

@@ -1,7 +1,9 @@
+using MelonLoader;
 using UnityEngine;
 
 namespace LocalMultiplayer;
 
+[RegisterTypeInIl2Cpp]
 public class AudioComponent : MonoBehaviour
 {
     private void Update()

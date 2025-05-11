@@ -1,66 +1,54 @@
 <Project Sdk="Microsoft.NET.Sdk">
+    <Import Project="../build/paths.props"/>
 
-  <PropertyGroup>
-    <TargetFramework>netstandard2.1</TargetFramework>
-    <AssemblyName>LocalMultiplayer</AssemblyName>
-    <Product>Local Multiplayer</Product>
-    <Version>1.0.0</Version>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <LangVersion>latest</LangVersion>
-    <Nullable>enable</Nullable>
-    <RestoreAdditionalProjectSources>
-      https://api.nuget.org/v3/index.json;
-      https://nuget.bepinex.dev/v3/index.json;
-      https://nuget.samboy.dev/v3/index.json
-    </RestoreAdditionalProjectSources>
-    <RootNamespace>LocalMultiplayer</RootNamespace>
-  </PropertyGroup>
-
-  <Import Project="$(SolutionDir)DevVars.targets" />
-
-  <ItemGroup>
-    <PackageReference Include="BepInEx.Analyzers" Version="1.*" PrivateAssets="all" />
-    <PackageReference Include="BepInEx.Core" Version="5.*" />
-    <PackageReference Include="BepInEx.PluginInfoProps" Version="2.*" />
-    <PackageReference Include="UnityEngine.Modules" Version="2022.3.32" IncludeAssets="compile" />
-    <PackageReference Include="BepInEx.AssemblyPublicizer.MSBuild" Version="0.4.3">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
-    </PackageReference>
-    <PackageReference Include="CommandLineParser" Version="2.9.1" />
-    <PackageReference Include="Fody" Version="6.9.2">
-      <PrivateAssets>all</PrivateAssets>
-    </PackageReference>
-    <PackageReference Include="Costura.Fody" Version="6.0.0">
-      <PrivateAssets>all</PrivateAssets>
-    </PackageReference>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Reference Include="$(ManagedFolder)\Assembly-CSharp.dll" Publicize="true">
-      <Private>false</Private>
-    </Reference>
-    <Reference Include="$(ManagedFolder)\FishNet.Runtime.dll" Publicize="true">
-      <Private>false</Private>
-    </Reference>
-    <Reference Include="$(ManagedFolder)\Unity*.dll">
-      <Private>false</Private>
-    </Reference>
-  </ItemGroup>
-
-  <ItemGroup Condition="'$(TargetFramework.TrimEnd(`0123456789`))' == 'net'">
-    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.2" PrivateAssets="all" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <CopyToPluginFolder Include="$(TargetDir)\LocalMultiplayer.dll" />
-  </ItemGroup>
-
-  <Target Name="CopyToPluginFolder" AfterTargets="PostBuildEvent" Condition="'$(CI)' == ''" Outputs="%(PluginFolder.Identity)">
     <PropertyGroup>
-      <Destination>%(PluginFolder.Identity)</Destination>
+        <!-- Testing props -->
+        <!--<DefineConstants>$(DefineConstants);TestMultiplayer</DefineConstants>-->
+        <!--<DefineConstants>$(DefineConstants);UnityExplorer</DefineConstants>-->
+
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>disable</Nullable>
+        <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+        <LangVersion>latest</LangVersion>
+        <ImplicitUsings>enable</ImplicitUsings>
+
+        <RootNamespace>LocalMultiplayer</RootNamespace>
+
+        <Configurations>Debug Mono;Release Mono;Debug IL2CPP;Release IL2CPP</Configurations>
     </PropertyGroup>
-    <Message Importance="high" Text="Copying files to plugin folder: $(Destination)" />
-    <Copy SourceFiles="@(CopyToPluginFolder)" DestinationFiles="@(CopyToPluginFolder->'$(Destination)\..\LocalMultiplayer\%(RecursiveDir)%(Filename)%(Extension)')" />
-  </Target>
+
+    <PropertyGroup Condition="'$(Configuration)' == 'Debug Mono'">
+        <DefineConstants>$(DefineConstants);MONO</DefineConstants>
+    </PropertyGroup>
+
+    <PropertyGroup Condition="'$(Configuration)' == 'Release Mono'">
+        <DefineConstants>$(DefineConstants);MONO;RELEASE</DefineConstants>
+    </PropertyGroup>
+
+    <PropertyGroup Condition="'$(Configuration)' == 'Debug IL2CPP'">
+        <DefineConstants>$(DefineConstants)</DefineConstants>
+    </PropertyGroup>
+
+    <PropertyGroup Condition="'$(Configuration)' == 'Release IL2CPP'">
+        <DefineConstants>$(DefineConstants);RELEASE</DefineConstants>
+    </PropertyGroup>
+    
+
+    <Import Project="../build/conditions.props"/>
+
+    <ItemGroup Label="Publicizer" Condition="'$(IsMono)' == 'true'">
+        <PackageReference Include="BepInEx.AssemblyPublicizer.MSBuild" Version="0.5.0-beta.1">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+    </ItemGroup>
+
+    <!-- MelonLoader References -->
+    <Import Project="..\build\references\MelonMono.targets"/>
+    <Import Project="..\build\references\MelonIL2CPP.targets"/>
+
+    <!-- Events -->
+    <Import Project="..\build\events\preBuild.targets"/>
+    <Import Project="..\build\events\postBuild.targets"/>
+
 </Project>

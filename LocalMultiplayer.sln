@@ -1,0 +1,30 @@
+﻿Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LocalMultiplayer", "LocalMultiplayer/LocalMultiplayer.csproj", "{8352B867-0BEC-4D6C-B93C-EFA516BEE616}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug IL2CPP|Any CPU = Debug IL2CPP|Any CPU
+		Debug Mono|Any CPU = Debug Mono|Any CPU
+		Release IL2CPP|Any CPU = Release IL2CPP|Any CPU
+		Release Mono|Any CPU = Release Mono|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{8352B867-0BEC-4D6C-B93C-EFA516BEE616}.Debug IL2CPP|Any CPU.ActiveCfg = Debug IL2CPP|Any CPU
+		{8352B867-0BEC-4D6C-B93C-EFA516BEE616}.Debug IL2CPP|Any CPU.Build.0 = Debug IL2CPP|Any CPU
+		{8352B867-0BEC-4D6C-B93C-EFA516BEE616}.Debug Mono|Any CPU.ActiveCfg = Debug Mono|Any CPU
+		{8352B867-0BEC-4D6C-B93C-EFA516BEE616}.Debug Mono|Any CPU.Build.0 = Debug Mono|Any CPU
+		{8352B867-0BEC-4D6C-B93C-EFA516BEE616}.Release IL2CPP|Any CPU.ActiveCfg = Release IL2CPP|Any CPU
+		{8352B867-0BEC-4D6C-B93C-EFA516BEE616}.Release IL2CPP|Any CPU.Build.0 = Release IL2CPP|Any CPU
+		{8352B867-0BEC-4D6C-B93C-EFA516BEE616}.Release Mono|Any CPU.ActiveCfg = Release Mono|Any CPU
+		{8352B867-0BEC-4D6C-B93C-EFA516BEE616}.Release Mono|Any CPU.Build.0 = Release Mono|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {53F2A6F9-8C8F-4C2E-9388-AABC4B5D6F7E}
+	EndGlobalSection
+EndGlobal

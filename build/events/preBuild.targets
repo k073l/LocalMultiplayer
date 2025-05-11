@@ -1,0 +1,25 @@
+﻿<Project>
+    <Target Name="PrintBuildVariables" BeforeTargets="BeforeBuild">
+        <Message Text="---------- Printing Build Variables ----------" Importance="high" />
+        <Message Text="ProjectDir: $(ProjectDir)" Importance="high" />
+        <Message Text="DefineConstants: $(DefineConstants)" Importance="high" />
+        <Message Text="IsMono: $(IsMono)" Importance="high" />
+        <Message Text="IsMultiplayerTest: $(IsMultiplayerTest)" Importance="high" />
+        <Message Text="IsUnityExplorer: $(IsUnityExplorer)" Importance="high" />
+        <Message Text="TargetFramework: $(TargetFramework)" Importance="high" />
+        <Message Text="TargetPath: $(TargetPath)" Importance="high" />
+        <Message Text="S1Dir: $(S1Dir)" Importance="high" />
+        <Message Text="S1ExeName: $(S1ExeName)" Importance="high" />
+        <Message Text="S1ExePath: $(S1ExePath)" Importance="high" />
+        <Message Text="S1ModsDir: $(S1ModsDir)" Importance="high" />
+        <Message Text="UnityExplorer: $(UnityExplorer)" Importance="high" />
+        <Message Text="MultiplayerMod: $(MultiplayerMod)" Importance="high" />
+        <Message Text="MultiplayerModStarter: $(MultiplayerModStarter)" Importance="high" />
+        <Message Text="PostWaitSeconds: $(PostWaitSeconds)" Importance="high" />
+
+        <Message Text="ModList items:" Importance="high" Condition="'@(ModList)' != ''" />
+        <Message Text="  → %(ModList.Identity)" Importance="high" Condition="'@(ModList)' != ''" />
+
+        <Message Text="---------------------------------------------" Importance="high" />
+    </Target>
+</Project>

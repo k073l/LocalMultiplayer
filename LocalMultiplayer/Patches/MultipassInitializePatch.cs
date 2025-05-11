@@ -23,7 +23,11 @@ public static class NetworkManagerAwakePatch
         tugboat.SetClientAddress("127.0.0.1");
         tugboat.SetPort(7777);
 
+#if !MONO
+        __instance._transports.Add(tugboat);
+#else
         var transportsField = AccessTools.FieldRefAccess<List<Transport>>(typeof(Multipass), "_transports");
         transportsField(__instance).Add(tugboat);
+#endif
     }
 }
