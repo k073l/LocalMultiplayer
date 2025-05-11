@@ -1,8 +1,14 @@
-using FishNet.Managing;
+using HarmonyLib;
+
+#if MONO
 using FishNet.Transporting;
 using FishNet.Transporting.Multipass;
 using FishNet.Transporting.Tugboat;
-using HarmonyLib;
+#else
+using Il2CppFishNet.Transporting;
+using Il2CppFishNet.Transporting.Multipass;
+using Il2CppFishNet.Transporting.Tugboat;
+#endif
 
 namespace LocalMultiplayer.Patches;
 
@@ -17,6 +23,7 @@ public static class NetworkManagerAwakePatch
         tugboat.SetClientAddress("127.0.0.1");
         tugboat.SetPort(7777);
 
-        __instance._transports.Add(tugboat);
+        var transportsField = AccessTools.FieldRefAccess<List<Transport>>(typeof(Multipass), "_transports");
+        transportsField(__instance).Add(tugboat);
     }
 }

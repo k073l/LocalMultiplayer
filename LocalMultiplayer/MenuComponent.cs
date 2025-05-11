@@ -1,25 +1,32 @@
-using System;
 using System.Collections;
-using System.IO;
-using System.Linq;
+using UnityEngine;
 using System.Text;
+
+#if MONO
 using FishNet;
 using FishNet.Component.Scenes;
-using FishNet.Managing.Scened;
 using FishNet.Transporting;
 using FishNet.Transporting.Multipass;
 using FishNet.Transporting.Tugboat;
-using FishNet.Transporting.Yak;
 using ScheduleOne.Audio;
-using ScheduleOne.DevUtilities;
 using ScheduleOne.Networking;
 using ScheduleOne.Persistence;
 using ScheduleOne.PlayerScripts;
 using ScheduleOne.UI;
 using TMPro;
-using UnityEngine;
-using UnityEngine.Rendering;
-using UnityEngine.SceneManagement;
+#else
+using Il2CppInterop.Runtime;
+using Il2CppFishNet;
+using Il2CppFishNet.Component.Scenes;
+using Il2CppFishNet.Transporting;
+using Il2CppFishNet.Transporting.Multipass;
+using Il2CppFishNet.Transporting.Tugboat;
+using Il2CppScheduleOne.Audio;
+using Il2CppScheduleOne.Networking;
+using Il2CppScheduleOne.Persistence;
+using Il2CppScheduleOne.UI;
+using Il2CppTMPro;
+#endif
 
 namespace LocalMultiplayer;
 
@@ -47,8 +54,12 @@ public class MenuComponent : MonoBehaviour
     private void CreateMainMenuUi()
     {
         var mainMenu = GameObject.Find("MainMenu");
-
+        
+#if MONO
         instructionsUi = new GameObject("LocalMultiplayerInstructions", typeof(RectTransform), typeof(CanvasRenderer), typeof(TextMeshProUGUI));
+#else
+        instructionsUi = new GameObject("LocalMultiplayerInstructions", Il2CppType.Of<RectTransform>(), Il2CppType.Of<CanvasRenderer>(), Il2CppType.Of<TextMeshProUGUI>());
+#endif
         instructionsUi.transform.SetParent(mainMenu.transform);
         text = instructionsUi.GetComponent<TextMeshProUGUI>();
         text.autoSizeTextContainer = true;
@@ -59,11 +70,11 @@ public class MenuComponent : MonoBehaviour
 
     private void Start()
     {
-        if (Plugin.LaunchArguments?.Host == true)
+        if (LocalMultiplayer.LaunchArguments?.Host == true)
         {
             launchMode = LaunchMode.Server;
         }
-        else if (Plugin.LaunchArguments?.Join == true)
+        else if (LocalMultiplayer.LaunchArguments?.Join == true)
         {
             launchMode = LaunchMode.Client;
         }
@@ -143,40 +154,55 @@ public class MenuComponent : MonoBehaviour
 
     private bool StartHosting()
     {
-        Plugin.Logger.LogInfo("Starting server...");
+        LocalMultiplayer.Logger.Msg("Starting server...");
         PreChecks();
 
         var save = GetLastSave();
 
         if (save == null)
         {
-            Plugin.Logger.LogError("No save game found (finish tutorial if it's not completed)");
+            LocalMultiplayer.Logger.Msg("No save game found (finish tutorial if it's not completed)");
             return false;
         }
 
         if (currentCoroutine != null)
             StopCoroutine(currentCoroutine);
 
+#if MONO
         currentCoroutine = StartCoroutine(HostOrJoinServer(save, host: true));
+#else
+        var startCoroutineMethod = typeof(MonoBehaviour).GetMethod("StartCoroutine", new[] { typeof(IEnumerator) });
+        if (startCoroutineMethod != null)
+        {
+            startCoroutineMethod.Invoke(this, new object[] { HostOrJoinServer(save, host: true) });
+        }
+#endif
         return true;
     }
 
     private void ConnectToLocalhost()
     {
-        Plugin.Logger.LogInfo("Connecting to localhost...");
+        LocalMultiplayer.Logger.Msg("Connecting to localhost...");
         PreChecks();
 
         if (currentCoroutine != null)
             StopCoroutine(currentCoroutine);
-
+#if MONO
         currentCoroutine = StartCoroutine(HostOrJoinServer(save: null, host: false));
+#else
+        var startCoroutineMethod = typeof(MonoBehaviour).GetMethod("StartCoroutine", new[] { typeof(IEnumerator) });
+        if (startCoroutineMethod != null)
+        {
+            startCoroutineMethod.Invoke(this, new object[] { HostOrJoinServer(save: null, host: true) });
+        }
+#endif
     }
 
     private void PreChecks()
     {
         if (Lobby.Instance.IsInLobby)
         {
-            Plugin.Logger.LogInfo("Leaving current lobby");
+            LocalMultiplayer.Logger.Msg("Leaving current lobby");
             Lobby.Instance.LeaveLobby();
         }
 
@@ -231,12 +257,12 @@ public class MenuComponent : MonoBehaviour
                 yield return new WaitForEndOfFrame();
             }
 
-            Plugin.Logger.LogInfo("Main scene loaded");
+            LocalMultiplayer.Logger.Msg("Main scene loaded");
         }
         else
         {
             InstanceFinder.TransportManager.GetTransport<Multipass>().SetClientTransport<Tugboat>();
-            InstanceFinder.NetworkManager.ClientManager.OnClientConnectionState += ClientDone;
+            InstanceFinder.NetworkManager.ClientManager.OnClientConnectionState += new Action<ClientConnectionStateArgs>(ClientDone);
             InstanceFinder.NetworkManager.ClientManager.StartConnection();
 
             void ClientDone(ClientConnectionStateArgs args)
@@ -245,27 +271,27 @@ public class MenuComponent : MonoBehaviour
                 {
                     if (args.ConnectionState == LocalConnectionState.Stopped)
                     {
-                        Plugin.Logger.LogError($"Failed to connect client: {args.ConnectionState}");
+                        LocalMultiplayer.Logger.Error($"Failed to connect client: {args.ConnectionState}");
                         LoadingScreen.Instance.Close();
                         LoadManager.Instance.ExitToMenu();
                         ApplyLaunchMode();
                     }
                     else
                     {
-                        Plugin.Logger.LogInfo($"Client status: {args.ConnectionState}");
+                        LocalMultiplayer.Logger.Msg($"Client status: {args.ConnectionState}");
                     }
 
                     return;
                 }
-
-                InstanceFinder.NetworkManager.ClientManager.OnClientConnectionState -= ClientDone;
-                Plugin.Logger.LogInfo("Client connected");
+                
+                InstanceFinder.NetworkManager.ClientManager.OnClientConnectionState -= new Action<ClientConnectionStateArgs>(ClientDone);
+                LocalMultiplayer.Logger.Msg("Client connected");
             }
 
 
-            Plugin.Logger.LogInfo("Waiting for main scene to load...");
-            yield return new WaitUntil(() => UnityEngine.SceneManagement.SceneManager.GetActiveScene().name == "Main");
-            Plugin.Logger.LogInfo("Main scene loaded");
+            LocalMultiplayer.Logger.Msg("Waiting for main scene to load...");
+            yield return new WaitUntil(new Func<bool>(() => UnityEngine.SceneManagement.SceneManager.GetActiveScene().name == "Main"));
+            LocalMultiplayer.Logger.Msg("Main scene loaded");
         }
 
         LoadManager.Instance.LoadStatus = LoadManager.ELoadStatus.Initializing;
@@ -273,7 +299,7 @@ public class MenuComponent : MonoBehaviour
 
         if (host)
         {
-            Plugin.Logger.LogInfo("Starting server...");
+            LocalMultiplayer.Logger.Msg("Starting server...");
 
             InstanceFinder.ServerManager.OnServerConnectionState += ServerDone;
             InstanceFinder.ServerManager.StartConnection();
@@ -284,7 +310,7 @@ public class MenuComponent : MonoBehaviour
                 {
                     if (args.ConnectionState == LocalConnectionState.Stopped)
                     {
-                        Plugin.Logger.LogError($"Failed to start server: {args.ConnectionState}");
+                        LocalMultiplayer.Logger.Error($"Failed to start server: {args.ConnectionState}");
                         InstanceFinder.ServerManager.OnServerConnectionState -= ServerDone;
                         LoadingScreen.Instance.Close();
                         LoadManager.Instance.ExitToMenu();
@@ -292,13 +318,13 @@ public class MenuComponent : MonoBehaviour
                     }
                     else
                     {
-                        Plugin.Logger.LogInfo($"Server status: {args.ConnectionState}");
+                        LocalMultiplayer.Logger.Msg($"Server status: {args.ConnectionState}");
                     }
 
                     return;
                 }
 
-                Plugin.Logger.LogInfo("Server started");
+                LocalMultiplayer.Logger.Msg("Server started");
                 InstanceFinder.ServerManager.OnServerConnectionState -= ServerDone;
 
                 // Connect client
@@ -310,12 +336,12 @@ public class MenuComponent : MonoBehaviour
                 {
                     if (args.ConnectionState != LocalConnectionState.Started)
                     {
-                        Plugin.Logger.LogInfo($"Client connection state: {args.ConnectionState}");
+                        LocalMultiplayer.Logger.Msg($"Client connection state: {args.ConnectionState}");
 
                         if (args.ConnectionState == LocalConnectionState.Stopped)
                         {
                             InstanceFinder.NetworkManager.ClientManager.OnClientConnectionState -= ClientDone;
-                            Plugin.Logger.LogError($"Failed to connect client");
+                            LocalMultiplayer.Logger.Error($"Failed to connect client");
                             LoadingScreen.Instance.Close();
                             LoadManager.Instance.ExitToMenu();
                             ApplyLaunchMode();
@@ -324,7 +350,7 @@ public class MenuComponent : MonoBehaviour
                         return;
                     }
 
-                    Plugin.Logger.LogInfo("Client connected");
+                    LocalMultiplayer.Logger.Msg("Client connected");
                     InstanceFinder.NetworkManager.ClientManager.OnClientConnectionState -= ClientDone;
                 }
             }
@@ -332,14 +358,14 @@ public class MenuComponent : MonoBehaviour
             yield return new WaitUntil(() => InstanceFinder.IsServer && InstanceFinder.IsClient);
         }
 
-        Plugin.Logger.LogInfo("Waiting for client to initialize...");
+        LocalMultiplayer.Logger.Msg("Waiting for client to initialize...");
         yield return new WaitUntil(() => InstanceFinder.IsClient && InstanceFinder.ClientManager.Connection.IsValid);
-        Plugin.Logger.LogInfo($"Client network initialized (connected to {InstanceFinder.ClientManager.Connection} with client id {InstanceFinder.ClientManager.Connection.ClientId})");
+        LocalMultiplayer.Logger.Msg($"Client network initialized (connected to {InstanceFinder.ClientManager.Connection} with client id {InstanceFinder.ClientManager.Connection.ClientId})");
 
-        Plugin.Logger.LogInfo("Waiting for local player to spawn...");
+        LocalMultiplayer.Logger.Msg("Waiting for local player to spawn...");
         LoadManager.Instance.LoadStatus = LoadManager.ELoadStatus.SpawningPlayer;
         yield return new WaitUntil(() => Player.Local != null);
-        Plugin.Logger.LogInfo("Local player spawned");
+        LocalMultiplayer.Logger.Msg("Local player spawned");
 
         if (host)
         {
@@ -348,7 +374,7 @@ public class MenuComponent : MonoBehaviour
 
             IEnumerator LoadSave(SaveInfo save)
             {
-                Plugin.Logger.LogInfo("Loading save...");
+                LocalMultiplayer.Logger.Msg("Loading save...");
 
                 foreach (IBaseSaveable saveable in SaveManager.Instance.BaseSaveables)
                 {
@@ -365,7 +391,7 @@ public class MenuComponent : MonoBehaviour
                         }
                         catch (Exception ex)
                         {
-                            Plugin.Logger.LogError($"LOAD ERROR for load request: {loadRequest.Path} : {ex.Message}\nSite: {ex.TargetSite?.ToString()}");
+                            LocalMultiplayer.Logger.Error($"LOAD ERROR for load request: {loadRequest.Path} : {ex.Message}\nSite: {ex.TargetSite?.ToString()}");
 
                             if (LoadManager.Instance.loadRequests.FirstOrDefault() == loadRequest)
                             {
@@ -383,7 +409,7 @@ public class MenuComponent : MonoBehaviour
                 }
 
                 LoadManager.Instance.onLoadComplete?.Invoke();
-                Plugin.Logger.LogInfo("Save loaded");
+                LocalMultiplayer.Logger.Msg("Save loaded");
             }
         }
         else

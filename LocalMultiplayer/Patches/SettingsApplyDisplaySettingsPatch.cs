@@ -1,5 +1,10 @@
 using HarmonyLib;
+
+#if MONO
 using ScheduleOne.DevUtilities;
+#else
+using Il2CppScheduleOne.DevUtilities;
+#endif
 
 namespace LocalMultiplayer.Patches;
 
@@ -8,10 +13,10 @@ public static class SettingsApplyDisplaySettingsPatch
 {
     public static bool Prefix(Settings __instance)
     {
-        if (Plugin.LaunchArguments == null || !Plugin.LaunchArguments.SetWindowPositionSize)
+        if (LocalMultiplayer.LaunchArguments == null || !LocalMultiplayer.LaunchArguments.SetWindowPositionSize)
             return true;
 
-        Plugin.SetWindowPositionSize();
+        LocalMultiplayer.SetWindowPositionSize();
         return false;
     }
 }
