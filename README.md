@@ -4,6 +4,7 @@
 
 ## Credits
 - [Skippy](https://github.com/Skippeh/Schedule1RealRadioMod/tree/main/LocalMultiplayer) - Author of the mod for BepInEx Mono
+
 Really, all credits to Skippy, I only ported the mod to MelonLoader for both branches of the game :p
 
 ## Installation
