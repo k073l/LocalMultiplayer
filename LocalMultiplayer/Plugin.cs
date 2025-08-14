@@ -41,7 +41,7 @@ public static class BuildInfo
 {
     public const string Name = "LocalMultiplayer";
     public const string Author = "Skippeh (ported by k073l)";
-    public const string Version = "1.0";
+    public const string Version = "1.0.1";
     public const string DownloadLink = null;
 }
 
